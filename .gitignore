@@ -1,0 +1,13 @@
+# Build results
+bin/
+obj/
+
+# VS Code / VS stuff
+.vs/
+*.user
+*.suo
+
+# Others
+*.log
+*.DS_Store
+*.env

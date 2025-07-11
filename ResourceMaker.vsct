@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable">
+  <!-- 必須の外部定義 -->
+  <Extern href="stdidcmd.h" />
+  <Extern href="vsshlids.h" />
+  <!-- GUID と ID の名前定義 -->
+  <Symbols>
+    <GuidSymbol name="guidPackage" value="{0bc0d3e7-132c-42da-9df0-b0641d1699a0}" />
+    <GuidSymbol name="guidSHLMainMenu" value="{D309F791-903F-11D0-9EFC-00A0C911004F}" />
+    <GuidSymbol name="guidResourceMakerCmdSet" value="{1c689cc2-75d2-4e55-a12b-2d7d30c2c8e3}">
+      <IDSymbol name="cmdidResourceize" value="0x0100" />
+      <IDSymbol name="MyMenuGroup" value="0x1000" />
+    </GuidSymbol>
+  </Symbols>
+
+  <!-- 配置の定義（CommandPlacements は Commands より先） -->
+  <CommandPlacements>
+    <CommandPlacement guid="guidResourceMakerCmdSet" id="cmdidResourceize" priority="0x0100">
+      <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN" />
+    </CommandPlacement>
+  </CommandPlacements>
+
+  <!-- コマンド本体 -->
+  <Commands package="guidPackage">
+    <Groups>
+      <Group guid="guidResourceMakerCmdSet" id="MyMenuGroup" priority="0x0600">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN" />
+      </Group>
+    </Groups>
+
+    <Buttons>
+      <Button guid="guidResourceMakerCmdSet" id="cmdidResourceize" priority="0x0100" type="Button">
+        <Parent guid="guidResourceMakerCmdSet" id="MyMenuGroup" />
+        <Strings>
+          <ButtonText>リソース化</ButtonText>
+        </Strings>
+      </Button>
+    </Buttons>
+  </Commands>
+</CommandTable>
