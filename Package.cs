@@ -1,4 +1,6 @@
-﻿using Microsoft.VisualStudio.Shell;
+﻿using EnvDTE;
+using EnvDTE80;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using System;
 using System.ComponentModel.Design;
@@ -78,14 +80,13 @@ namespace ResourceMaker
 
         private void ExecuteResourceize(object sender, EventArgs e)
         {
-            VsShellUtilities.ShowMessageBox(
-                this,
-                "XAMLリソース化コマンドが実行されました！",
-                "ResourceMaker",
-                OLEMSGICON.OLEMSGICON_INFO,
-                OLEMSGBUTTON.OLEMSGBUTTON_OK,
-                OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
-        }
+            ThreadHelper.JoinableTaskFactory.Run(async () =>
+            {
+                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+                var dte = (DTE2)await GetServiceAsync(typeof(DTE));
+                ResourceizeProcessor.Run(dte);
+            });
+        } 
         #endregion
     }
 }

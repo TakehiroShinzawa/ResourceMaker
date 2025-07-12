@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable">
-  <!-- 必須の外部定義 -->
+
+  <!-- 外部参照 -->
   <Extern href="stdidcmd.h" />
   <Extern href="vsshlids.h" />
-  <!-- GUID と ID の名前定義 -->
+
+  <!-- シンボル定義 -->
   <Symbols>
     <GuidSymbol name="guidPackage" value="{0bc0d3e7-132c-42da-9df0-b0641d1699a0}" />
     <GuidSymbol name="guidSHLMainMenu" value="{D309F791-903F-11D0-9EFC-00A0C911004F}" />
@@ -11,20 +13,32 @@
       <IDSymbol name="cmdidResourceize" value="0x0100" />
       <IDSymbol name="MyMenuGroup" value="0x1000" />
     </GuidSymbol>
+    <GuidSymbol name="guidXamlUiCmds" value="{4c87b692-1202-46aa-b64c-ef01faec53da}">
+      <IDSymbol name="IDM_XAML_EDITOR" value="0x0103" />
+    </GuidSymbol>
   </Symbols>
 
-  <!-- 配置の定義（CommandPlacements は Commands より先） -->
+  <!-- コマンド配置：複数のコンテキストメニューに対応 -->
   <CommandPlacements>
+    <!-- C#コードウィンドウ向け -->
     <CommandPlacement guid="guidResourceMakerCmdSet" id="cmdidResourceize" priority="0x0100">
       <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN" />
     </CommandPlacement>
+
+    <!-- XAMLコードエディタ向け（仮に XML を適用）-->
+    <CommandPlacement guid="guidResourceMakerCmdSet" id="cmdidResourceize" priority="0x0200">
+      <Parent guid="guidXamlUiCmds" id="IDM_XAML_EDITOR" />
+    </CommandPlacement>
   </CommandPlacements>
 
-  <!-- コマンド本体 -->
+  <!-- コマンド定義 -->
   <Commands package="guidPackage">
     <Groups>
       <Group guid="guidResourceMakerCmdSet" id="MyMenuGroup" priority="0x0600">
         <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN" />
+      </Group>
+      <Group guid="guidResourceMakerCmdSet" id="MyMenuGroup" priority="0x0600">
+        <Parent guid="guidXamlUiCmds" id="IDM_XAML_EDITOR" />
       </Group>
     </Groups>
 
