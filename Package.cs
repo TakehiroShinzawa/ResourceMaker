@@ -1,7 +1,6 @@
 ﻿using EnvDTE;
 using EnvDTE80;
 using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
 using System;
 using System.ComponentModel.Design;
 using System.Diagnostics.CodeAnalysis;
@@ -84,9 +83,9 @@ namespace ResourceMaker
             {
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
                 var dte = (DTE2)await GetServiceAsync(typeof(DTE));
-                ResourceizeProcessor.Run(dte);
+                await ResourceizeProcessor.RunAsync(dte); // ← 非同期呼び出しに変更
             });
-        } 
+        }
         #endregion
     }
 }

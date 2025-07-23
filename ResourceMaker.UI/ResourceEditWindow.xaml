@@ -1,0 +1,23 @@
+﻿<Window x:Class="ResourceMaker.UI.ResourceEditWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ResourceMaker.UI"
+        mc:Ignorable="d"
+        Title="ResourceEditWindow" Height="450" Width="800">
+    <Grid>
+        <StackPanel Margin="20">
+            <TextBlock Text="リソース名を入力" FontSize="14"/>
+            <TextBox Name="ResourceKeyBox" Width="200" Margin="0,5,0,15"/>
+
+            <TextBlock Text="ja-JP 用の値"/>
+            <TextBox Name="Text_ja" Width="250" Margin="0,5,0,10"/>
+
+            <TextBlock Text="en-US 用の値"/>
+            <TextBox Name="Text_en" Width="250" Margin="0,5,0,10"/>
+
+            <Button Content="保存" Click="SaveResource_Click" Margin="0,20,0,0"/>
+        </StackPanel>
+    </Grid>
+</Window>
