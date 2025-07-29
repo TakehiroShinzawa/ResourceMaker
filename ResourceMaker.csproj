@@ -52,7 +52,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="LanguageSelectionWindow.xaml.cs">
+    <Compile Include="Views\LanguageSelectionWindow.xaml.cs">
       <DependentUpon>LanguageSelectionWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Package.cs" />
@@ -105,7 +105,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="LanguageSelectionWindow.xaml">
+    <Page Include="Views\LanguageSelectionWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

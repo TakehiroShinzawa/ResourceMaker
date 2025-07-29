@@ -8,16 +8,29 @@
         Title="ResourceEditWindow" Height="450" Width="800">
     <Grid>
         <StackPanel Margin="20">
-            <TextBlock Text="リソース名を入力" FontSize="14"/>
-            <TextBox Name="ResourceKeyBox" Width="200" Margin="0,5,0,15"/>
-
-            <TextBlock Text="ja-JP 用の値"/>
-            <TextBox Name="Text_ja" Width="250" Margin="0,5,0,10"/>
-
-            <TextBlock Text="en-US 用の値"/>
-            <TextBox Name="Text_en" Width="250" Margin="0,5,0,10"/>
-
-            <Button Content="保存" Click="SaveResource_Click" Margin="0,20,0,0"/>
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="選択テキスト" FontSize="14"/>
+                <TextBox x:Uid="SelectedText" x:Name="SelectedTextname" FontSize="14"
+                         IsReadOnly="True" TextWrapping="Wrap"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="リソース名を入力" VerticalAlignment="Center" Margin="0,5,0,5"/>
+                <TextBox Name="ResourceKeyBox" Width="200" Margin="5,5,0,5"/>
+            </StackPanel>
+            <ItemsControl ItemsSource="{Binding LanguageEntries}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal" Margin="0,5,0,10">
+                            <TextBlock Text="{Binding Code}" VerticalAlignment="Center"/>
+                            <TextBox Width="250" Margin="5,0,0,0"
+                         Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <StackPanel>
+                <Button Content="保存" Click="SaveResource_Click"/>
+            </StackPanel>
         </StackPanel>
     </Grid>
 </Window>

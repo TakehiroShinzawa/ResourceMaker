@@ -24,9 +24,9 @@ namespace ResourceMaker
             string editorType = "Unknown";
 
             if (language == "CSharp")
-                editorType = "Code";
+                editorType = "code";
             else if (fileName?.EndsWith(".xaml", StringComparison.OrdinalIgnoreCase) == true)
-                editorType = "XAML";
+                editorType = "xaml";
 
             Debug.WriteLine($"Called from: {editorType}");
 

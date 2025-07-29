@@ -22,11 +22,23 @@ namespace ResourceMaker.UI
         }
         private void OpenLanguageWindow_Click(object sender, RoutedEventArgs e)
         {
-            new LanguageSelectionWindow().ShowDialog();
+            var langWindow = new LanguageSelectionWindow();
+            langWindow.BaseFolderPath = @"C:\temp\conB2WebApiSimulator\conB2WebApiSimulator\conB2WebApiSimulator";
+            langWindow.EditorType = "code";
+            langWindow.LineText = "await CreateLanguageCodeFoldersAsync(Path.Combine(BaseFolderPath, \"Strings\"));";
+            var result = langWindow.ShowDialog();
+            if (result == true)
+            {
+
+            }
         }
         private void OpenResourceWindow_Click(object sender, RoutedEventArgs e)
         {
-            new ResourceEditWindow().ShowDialog();
+            var resWindow =  new ResourceEditWindow();
+            resWindow.LineText = "await CreateLanguageCodeFoldersAsync(Path.Combine(BaseFolderPath, \"Strings\"));";
+            resWindow.BaseFolderPath = @"C:\temp\conB2WebApiSimulator\conB2WebApiSimulator\conB2WebApiSimulator";
+            resWindow.ShowDialog();
         }
     }
+
 }
