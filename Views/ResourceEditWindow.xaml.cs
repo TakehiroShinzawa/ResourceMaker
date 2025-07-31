@@ -1,5 +1,4 @@
-﻿using GalaSoft.MvvmLight.Command;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -22,7 +21,7 @@ namespace ResourceMaker.UI
         private static readonly Regex MyRegex = new Regex(@"^[a-z]{2}(-[A-Z]{2})?$", RegexOptions.Compiled);
         public string LineText { get; set; } = string.Empty;
         public string EditorType { get; set; } = string.Empty;
-        public List<string> allCodes = new();
+        public List<string> allCodes = new List<string>();
 
         private string baseFolderPath = string.Empty;
 
@@ -46,7 +45,7 @@ namespace ResourceMaker.UI
             }
         }
 
-        public ObservableCollection<LanguageEntry> LanguageEntries { get; } = new();
+        public ObservableCollection<LanguageEntry> LanguageEntries { get; } = new ObservableCollection<LanguageEntry>();
 
         public ResourceEditWindow()
         {
@@ -99,7 +98,6 @@ namespace ResourceMaker.UI
                 Debug.WriteLine(targetName); // → Strings
 
             }
-
 
 
 

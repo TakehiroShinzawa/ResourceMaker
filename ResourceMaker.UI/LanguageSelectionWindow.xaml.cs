@@ -1,8 +1,11 @@
 ﻿using GalaSoft.MvvmLight.Command;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -15,7 +18,7 @@ namespace ResourceMaker.UI
     /// </summary>
     public partial class LanguageSelectionWindow : Window, INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler? PropertyChanged;
+        public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -25,7 +28,7 @@ namespace ResourceMaker.UI
         public string EditorType { get; set; } = string.Empty;
         private string baseFolderPath = string.Empty;
 
-        public List<string> allCodes = new();
+        public List<string> allCodes = new List<string>();
 
         public string BaseFolderPath
         {
@@ -55,22 +58,26 @@ namespace ResourceMaker.UI
 
         public void LoadLanguageOptionsFromFolder(string basePath)
         {
-            List<string?>? folders = null;
+            List<string> folders = new List<string>();
             var stringsRoot = Path.Combine(BaseFolderPath, "Strings");
             if (Directory.Exists(stringsRoot))
             {
                 // フォルダが存在している
-                folders = Directory.GetDirectories(stringsRoot)
-                    .Select(Path.GetFileName)
-                   .Where(name => MyRegex.IsMatch(name ?? string.Empty))
-                   .Distinct()
-                   .ToList();
+                var directories = Directory.GetDirectories(stringsRoot);
+
+                foreach (var dir in directories)
+                {
+                    var name = Path.GetFileName(dir);
+                    if (MyRegex.IsMatch(name))
+                        folders.Add(name);
+
+                }
             }
             else
             {
                 // フォルダが存在していない
                 Directory.CreateDirectory(stringsRoot);
-                folders = new List<string?>();
+                folders = new List<string>();
             }
 
             LanguageOptions.Clear();
@@ -217,7 +224,7 @@ namespace ResourceMaker.UI
             }
         }
 
-        public event PropertyChangedEventHandler? PropertyChanged;
+        public event PropertyChangedEventHandler PropertyChanged;
     }
     public class LanguageOption
     {

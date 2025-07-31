@@ -2,6 +2,7 @@
 using EnvDTE80;
 using Microsoft.VisualStudio.Shell;
 using ResourceMaker;
+using ResourceMaker.UI;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -47,7 +48,7 @@ namespace ResourceMaker
             Project project = ((Array)dte.ActiveSolutionProjects).GetValue(0) as Project;
             string folder = Path.GetDirectoryName(project.FullName);
 
-            await ControlResourceAsync(dte,folder,lineText,editorType);
+            ControlResource(dte,folder,lineText,editorType);
 
             //var selection = dte?.ActiveDocument?.Selection as TextSelection;
             //if (selection == null)
@@ -61,20 +62,17 @@ namespace ResourceMaker
             //selection.Insert(message);
         }
 
-        private static async Task ControlResourceAsync(DTE2 dte, string baseFolderPath, string lineText, string editorType)
+        private static void ControlResource(DTE2 dte, string baseFolderPath, string lineText, string editorType)
         {
-            string stringsFolderPath = Path.Combine(baseFolderPath, "Strings");
-
-            await Task.Run(() =>
-            {
-                if (!Directory.Exists(stringsFolderPath))
-                {
-                    Directory.CreateDirectory(stringsFolderPath);
-                    // ログ出力や初期ファイル生成などもここに追加可能
-                }
-            });
-            var window = new LanguageSelectionWindow();
-            window.ShowDialog(); // または Show() でも可
+            //var langWindow = new LanguageSelectionWindow();
+            //langWindow.BaseFolderPath = @"C:\temp\conB2WebApiSimulator\conB2WebApiSimulator\conB2WebApiSimulator";
+            //langWindow.EditorType = "code";
+            //langWindow.LineText = "await CreateLanguageCodeFoldersAsync(Path.Combine(BaseFolderPath, \"Strings\"));";
+            //var result = langWindow.ShowDialog();
+            var resWindow = new ResourceEditWindow();
+            resWindow.LineText = "await CreateLanguageCodeFoldersAsync(Path.Combine(BaseFolderPath, \"保存\"));";
+            resWindow.BaseFolderPath = @"C:\temp\conB2WebApiSimulator\conB2WebApiSimulator\conB2WebApiSimulator";
+            resWindow.ShowDialog();
 
         }
     }

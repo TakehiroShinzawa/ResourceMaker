@@ -1,4 +1,7 @@
-﻿using System.Text;
+﻿using Microsoft.International.Converters;
+using System.Diagnostics;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -8,6 +11,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using static System.Net.Mime.MediaTypeNames;
+
 
 namespace ResourceMaker.UI
 {
@@ -32,13 +37,18 @@ namespace ResourceMaker.UI
 
             }
         }
+
+
         private void OpenResourceWindow_Click(object sender, RoutedEventArgs e)
         {
             var resWindow =  new ResourceEditWindow();
-            resWindow.LineText = "await CreateLanguageCodeFoldersAsync(Path.Combine(BaseFolderPath, \"Strings\"));";
+            resWindow.LineText = "await CreateLanguageCodeFoldersAsync(Path.Combine(BaseFolderPath, \"保存\"));";
             resWindow.BaseFolderPath = @"C:\temp\conB2WebApiSimulator\conB2WebApiSimulator\conB2WebApiSimulator";
             resWindow.ShowDialog();
         }
+
+
+
     }
 
 }
