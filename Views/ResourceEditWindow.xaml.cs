@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using CommunityToolkit.Mvvm.Input;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -73,7 +74,6 @@ namespace ResourceMaker.UI
                 allCodes = Directory.GetDirectories(stringsRoot)
                     .Select(path => Path.GetFileName(path) ?? string.Empty)
                     .Where(name => MyRegex.IsMatch(name ?? string.Empty))
-                    .Distinct()
                     .ToList();
                 if (allCodes.Count == 0)
                 {
@@ -143,5 +143,48 @@ namespace ResourceMaker.UI
 
             public event PropertyChangedEventHandler PropertyChanged;
         }
+
+        private void ResourceClearButton_Click(object sender, RoutedEventArgs e)
+        {
+            ResourceKeyBox.Clear();
+            ClearButton.Visibility = Visibility.Collapsed;
+        }
+
+        private void ResourceKeyBox_MouseEnter(object sender, MouseEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(ResourceKeyBox.Text))
+                ClearButton.Visibility = Visibility.Visible;
+
+        }
+
+        private void ResourceKeyBox_MouseLeave(object sender, MouseEventArgs e)
+        {
+            ClearButton.Visibility = Visibility.Collapsed;
+        }
+
+        private void ResourceKeyBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            ClearButton.Visibility = string.IsNullOrEmpty(ResourceKeyBox.Text)
+                    ? Visibility.Collapsed
+                    : Visibility.Visible;
+
+        }
+        private void TextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                e.Handled = true;
+
+                // 次のフォーカス可能な要素に移動
+                TraversalRequest request = new TraversalRequest(FocusNavigationDirection.Next);
+                UIElement focusedElement = Keyboard.FocusedElement as UIElement;
+                if (focusedElement != null)
+                    focusedElement.MoveFocus(request);
+            }
+        }
+        public ICommand ClearCommand => new RelayCommand<LanguageEntry>(entry =>
+        {
+            if (entry != null) entry.Value = string.Empty;
+        });
     }
 }

@@ -42,11 +42,13 @@ namespace ResourceMaker
             EditPoint end = selection.ActivePoint.CreateEditPoint();
             end.EndOfLine(); // 行末に移動
 
-            string lineText = start.GetText(end);
+            string lineText = start.GetText(end).TrimStart();
 
             //フォルダ関係
-            Project project = ((Array)dte.ActiveSolutionProjects).GetValue(0) as Project;
-            string folder = Path.GetDirectoryName(project.FullName);
+            Document activeDoc = dte.ActiveDocument;
+            ProjectItem item = activeDoc?.ProjectItem;
+            Project owningProject = item?.ContainingProject;
+            string folder = Path.GetDirectoryName(owningProject.FullName);
 
             ControlResource(dte,folder,lineText,editorType);
 
@@ -70,8 +72,8 @@ namespace ResourceMaker
             //langWindow.LineText = "await CreateLanguageCodeFoldersAsync(Path.Combine(BaseFolderPath, \"Strings\"));";
             //var result = langWindow.ShowDialog();
             var resWindow = new ResourceEditWindow();
-            resWindow.LineText = "await CreateLanguageCodeFoldersAsync(Path.Combine(BaseFolderPath, \"保存\"));";
-            resWindow.BaseFolderPath = @"C:\temp\conB2WebApiSimulator\conB2WebApiSimulator\conB2WebApiSimulator";
+            resWindow.LineText = lineText;
+            resWindow.BaseFolderPath = baseFolderPath;
             resWindow.ShowDialog();
 
         }
