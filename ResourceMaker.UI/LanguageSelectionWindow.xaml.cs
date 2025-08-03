@@ -1,4 +1,4 @@
-﻿using GalaSoft.MvvmLight.Command;
+﻿using CommunityToolkit.Mvvm.Input;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -46,8 +46,8 @@ namespace ResourceMaker.UI
 
         private static readonly Regex MyRegex = new Regex(@"^[a-z]{2}(-[A-Z]{2})?$", RegexOptions.Compiled);
 
-        public ObservableCollection<LanguageOption> LanguageOptions { get; set; } = new();
-        public ObservableCollection<LanguageEntry> CustomLanguages { get; } = new();
+        public ObservableCollection<LanguageOption> LanguageOptions { get; set; } = new ObservableCollection<LanguageOption>();
+        public ObservableCollection<LanguageEntry> CustomLanguages { get; } = new ObservableCollection<LanguageEntry>();
 
         public LanguageSelectionWindow()
         {
@@ -58,20 +58,16 @@ namespace ResourceMaker.UI
 
         public void LoadLanguageOptionsFromFolder(string basePath)
         {
-            List<string> folders = new List<string>();
+            List<string> folders = null;
             var stringsRoot = Path.Combine(BaseFolderPath, "Strings");
             if (Directory.Exists(stringsRoot))
             {
                 // フォルダが存在している
-                var directories = Directory.GetDirectories(stringsRoot);
-
-                foreach (var dir in directories)
-                {
-                    var name = Path.GetFileName(dir);
-                    if (MyRegex.IsMatch(name))
-                        folders.Add(name);
-
-                }
+                folders = Directory.GetDirectories(stringsRoot)
+                    .Select(Path.GetFileName)
+                   .Where(name => MyRegex.IsMatch(name ?? string.Empty))
+                   .Distinct()
+                   .ToList();
             }
             else
             {
@@ -145,19 +141,13 @@ namespace ResourceMaker.UI
             }
         }
 
-        private async void MakeFolders_Click(object sender, RoutedEventArgs e)
-        {
-            await CreateLanguageCodeFoldersAsync(Path.Combine(BaseFolderPath, "Strings"));
-            this.DialogResult = true;
-            this.Close();
-        }
 
         private void MakeFoldersCancel_Click(object sender, RoutedEventArgs e)
         {
             this.DialogResult = false;
             this.Close();
         }
-        public async Task<bool> CreateLanguageCodeFoldersAsync(string basePath)
+        public async Task< bool> CreateLanguageCodeFoldersAsync(string basePath)
         {
             try
             {
@@ -173,9 +163,11 @@ namespace ResourceMaker.UI
                     .Where(code => !string.IsNullOrWhiteSpace(code))
                     .Distinct()
                     .ToList();
+                await Task.Run(() =>
+                {
+                    // 重たい処理（例：フォルダ作成など）
 
-                var tasks = allCodes.Select(code =>
-                    Task.Run(() =>
+                    foreach (var code in allCodes)
                     {
                         string folderPath = Path.Combine(basePath, code);
                         if (!Directory.Exists(folderPath))
@@ -198,16 +190,25 @@ namespace ResourceMaker.UI
                             writer.WriteEndElement();         // </root>
                             writer.WriteEndDocument();        // end of document
                         }
-
-                    }));
-
-                await Task.WhenAll(tasks);
+                    }
+                });
                 return true;
             }
             catch
             {
                 return false;
             }
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "VSTHRD100:Avoid async void", Justification = "WPF event handler")]
+        private async void MakeFolders_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                this.DialogResult = await CreateLanguageCodeFoldersAsync(Path.Combine(BaseFolderPath, "Strings"));
+                this.Close();
+            }
+            catch { }
         }
     }
 

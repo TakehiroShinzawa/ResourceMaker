@@ -9,21 +9,61 @@
     <Grid>
         <StackPanel Margin="20">
             <StackPanel Orientation="Vertical">
-                <TextBlock Text="選択テキスト" FontSize="14"/>
-                <TextBox x:Uid="SelectedText" x:Name="SelectedTextname" FontSize="14"
-                    IsReadOnly="True" TextWrapping="Wrap"         
-                    AcceptsReturn="True"
+                <TextBlock Text="対象テキスト" FontSize="14"/>
+                <TextBox x:Uid="SelectedText" x:Name="SelectedText" FontSize="14"
+                    IsReadOnly="True" 
+                    Margin="0,0,5,0"
                     VerticalScrollBarVisibility="Auto"/>
-                
+            
+                <TextBlock Text="書き戻しテキスト" FontSize="14"/>
+                <TextBox x:Uid="ResultText" x:Name="ResultText" FontSize="14"
+                    IsReadOnly="false" 
+                    Margin="0,0,5,0"
+                    VerticalScrollBarVisibility="Auto"/>
+
+
             </StackPanel>
-            <StackPanel Orientation="Horizontal">
+            <StackPanel Orientation="Horizontal" Focusable="False">
                 <TextBlock Text="リソース名を入力" VerticalAlignment="Center" Margin="0,5,0,5"/>
-                <TextBox Name="ResourceKeyBox" Width="200" Margin="5,15,0,15"/>
+                <TextBox x:Name="ResourceKeyBox"
+                    Width="200"
+                    Margin="5"
+                    VerticalAlignment="Center"
+                    Padding="0,0,25,0"
+                    LostFocus="ResourceKeyBox_LostFocus"
+                    KeyDown="TextBox_KeyDown" />
+
+                <Button x:Name="ClearButton"
+                    Content="🗑"
+                    Width="30"
+                    Height="25"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Margin="0,0,15,0"
+                    ToolTip="クリア"
+                    Focusable="False"
+                    Click="ResourceClearButton_Click"/>
+                <TextBlock Text="リソース名取得式" 
+                    VerticalAlignment="Center" 
+                    Margin="0,5,0,5"/>
+                
+                <TextBox x:Name="ResourceGetterBox"
+                    Width="200"
+                    Margin="5"
+                    Focusable="False"
+                    VerticalAlignment="Center"
+                    Padding="0,0,25,0"
+                    KeyDown="TextBox_KeyDown" />
+                <CheckBox Name="Feedback" Content="書き戻す" 
+                    IsChecked="True" 
+                    Focusable="False"
+                    VerticalAlignment="Center" />
+
             </StackPanel>
-            <ItemsControl ItemsSource="{Binding LanguageEntries}">
+            <ItemsControl ItemsSource="{Binding LanguageEntries}" Focusable="False">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
+                        <StackPanel Orientation="Horizontal" Margin="0,5,0,5" >
                             <TextBlock Text="{Binding Code }"
                                 VerticalAlignment="Center"
                                 Width="50"
@@ -33,7 +73,16 @@
                                 Margin="5,0,0,0"
                                 VerticalAlignment="Center"
                                 Padding="0"
+                                AcceptsReturn="True"
+                                TextWrapping="Wrap"
+                                VerticalScrollBarVisibility="Auto"
                                 Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            <Button Content="🗑"
+                                Margin="5,0,0,0"
+                                Width="30"
+                                Height="25"
+                                Command="{Binding DataContext.ClearCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                CommandParameter="{Binding}" />
                         </StackPanel>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>

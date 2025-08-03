@@ -147,28 +147,8 @@ namespace ResourceMaker.UI
         private void ResourceClearButton_Click(object sender, RoutedEventArgs e)
         {
             ResourceKeyBox.Clear();
-            ClearButton.Visibility = Visibility.Collapsed;
         }
 
-        private void ResourceKeyBox_MouseEnter(object sender, MouseEventArgs e)
-        {
-            if (!string.IsNullOrEmpty(ResourceKeyBox.Text))
-                ClearButton.Visibility = Visibility.Visible;
-
-        }
-
-        private void ResourceKeyBox_MouseLeave(object sender, MouseEventArgs e)
-        {
-            ClearButton.Visibility = Visibility.Collapsed;
-        }
-
-        private void ResourceKeyBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            ClearButton.Visibility = string.IsNullOrEmpty(ResourceKeyBox.Text)
-                    ? Visibility.Collapsed
-                    : Visibility.Visible;
-
-        }
         private void TextBox_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)

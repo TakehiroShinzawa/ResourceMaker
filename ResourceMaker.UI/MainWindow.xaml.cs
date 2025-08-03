@@ -1,17 +1,5 @@
-﻿using Microsoft.International.Converters;
-using System.Diagnostics;
-using System.Text;
-using System.Text.RegularExpressions;
+﻿using System.Collections.Generic;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using static System.Net.Mime.MediaTypeNames;
 
 
 namespace ResourceMaker.UI
@@ -24,6 +12,7 @@ namespace ResourceMaker.UI
         public MainWindow()
         {
             InitializeComponent();
+
         }
         private void OpenLanguageWindow_Click(object sender, RoutedEventArgs e)
         {
@@ -42,6 +31,7 @@ namespace ResourceMaker.UI
         private void OpenResourceWindow_Click(object sender, RoutedEventArgs e)
         {
             var resWindow =  new ResourceEditWindow();
+            resWindow.EditorType = "code";
             resWindow.LineText = "await CreateLanguageCodeFoldersAsync(Path.Combine(BaseFolderPath, \"保存\"));";
             resWindow.BaseFolderPath = @"C:\temp\conB2WebApiSimulator\conB2WebApiSimulator\conB2WebApiSimulator";
             resWindow.ShowDialog();
