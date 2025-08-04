@@ -83,7 +83,7 @@ namespace ResourceMaker
             {
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
                 var dte = (DTE2)await GetServiceAsync(typeof(DTE));
-                await ResourceizeProcessor.RunAsync(dte); // ← 非同期呼び出しに変更
+                await ResourceizeProcessor.RunAsync(dte, this); // ← 非同期呼び出しに変更
             });
         }
         #endregion
