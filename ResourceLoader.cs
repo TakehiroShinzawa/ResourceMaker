@@ -104,8 +104,7 @@ namespace ResourceMaker
                                 if (!string.IsNullOrEmpty(key) && value != null)
                                     kvps[key] = value;
                             }
-                            if(kvps.Count > 0 )
-                                result[langCode] = kvps;
+                            result[langCode] = kvps;
                         }
 
                     }

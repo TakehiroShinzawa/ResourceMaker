@@ -1,6 +1,9 @@
 ﻿using EnvDTE;
 using EnvDTE80;
+using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Text.Editor;
+using Microsoft.VisualStudio.TextManager.Interop;
 using ResourceMaker;
 using ResourceMaker.UI;
 using System;
@@ -11,6 +14,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
+using System.Xml.Linq;
 
 namespace ResourceMaker
 {
@@ -54,25 +59,39 @@ namespace ResourceMaker
             Project owningProject = item?.ContainingProject;
             string folder = Path.GetDirectoryName(owningProject.FullName);
 
-            var feedback =  ControlResource(dte,folder,lineText,editorType, serviceProvider);
+            XElement element = null;
+            //xamlをひっかける
+            if(editorType == "xaml")
+                element = ExtractTextBoxXml(start);
 
-            if( !string.IsNullOrEmpty(feedback))
+            int lcid = dte.LocaleID;
+            CultureInfo culture = new CultureInfo(lcid);
+
+            //リソースエディタの展開
+            var resWindow = new ResourceEditWindow(serviceProvider);
+            resWindow.LangCulture = culture.ToString();
+            resWindow.LineText = lineText;
+            resWindow.EditorType = editorType;
+            resWindow.element = element;
+            resWindow.BaseFolderPath = folder;
+            resWindow.ShowDialog();
+            var feedback = resWindow.FeedbackText;
+
+            if (!string.IsNullOrEmpty(feedback))
             {
+                if (feedback == " ")
+                    end.CharRight(); // 改行文字も含める（必要なら）
                 start.Delete(end); // 元の行のテキストを削除
-                start.Insert(indent + feedback); // 新しいテキストを挿入
+                if (feedback != " ")
+                    start.Insert(indent + feedback); // 新しいテキストを挿入
 
             }
         }
 
-        private static String ControlResource(DTE2 dte, 
+        private static String ControlResource(DTE2 dte,
             string baseFolderPath, string lineText, string editorType, IServiceProvider serviceProvider)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
-            //var langWindow = new LanguageSelectionWindow();
-            //langWindow.BaseFolderPath = @"C:\temp\conB2WebApiSimulator\conB2WebApiSimulator\conB2WebApiSimulator";
-            //langWindow.EditorType = "code";
-            //langWindow.LineText = "await CreateLanguageCodeFoldersAsync(Path.Combine(BaseFolderPath, \"Strings\"));";
-            //var result = langWindow.ShowDialog();
 
             int lcid = dte.LocaleID;
             CultureInfo culture = new CultureInfo(lcid);
@@ -85,6 +104,125 @@ namespace ResourceMaker
             resWindow.ShowDialog();
             return resWindow.FeedbackText;
 
+        }
+
+        public static XElement ExtractTextBoxXml(EditPoint startPoint)
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+            StringBuilder builder = new StringBuilder();
+            EditPoint cursor = startPoint.CreateEditPoint();
+            int currentLine = cursor.Line;
+            string lineText = string.Empty;
+            bool foundStart = false;
+
+            // 上に向かって `<TextBox` を探す
+            while (currentLine >= 1)
+            {
+                lineText = cursor.GetLines(currentLine, currentLine + 1);
+                if (lineText.Contains("<"))
+                {
+                    foundStart = true;
+                    break;
+                }
+
+                currentLine--;
+                cursor.MoveToLineAndOffset(currentLine - 1, 1);  // 1 は行頭
+            }
+
+            if (!foundStart)
+            {
+                // 見つからなければ null（または例外・エラー通知）
+                return null;
+            }
+
+            // 開始タグ行から、">"が見つかるまで文字列を構築
+            bool doX = true;
+            var x = "xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\"";
+            while (!lineText.Contains(">"))
+            {
+                builder.AppendLine(lineText.Trim());
+                if( doX)
+                {
+                    builder.AppendLine(x);
+                    doX = false;
+                }
+                currentLine++;
+                cursor.MoveToLineAndOffset(currentLine - 1, 1);  // 1 は行頭
+                lineText = cursor.GetLines(currentLine, currentLine + 1);
+
+                // 無限ループ防止（ファイル末端まで達したら終了）
+                if (string.IsNullOrEmpty(lineText))
+                    break;
+            }
+
+            // 最後の">"を含む行も追加
+            builder.AppendLine(lineText.Trim());
+            Debug.WriteLine(builder.ToString());
+
+            // XMLとしてパース
+            try
+            {
+                return XElement.Parse(builder.ToString());
+            }
+            catch(Exception ex)
+            {
+                // パース失敗時の処理（ログ or null）
+                Debug.WriteLine(ex.Message);
+                return null;
+            }
+        }
+
+        public static XElement ExtractElementFromBuffer(IWpfTextView textView, int cursorLine)
+        {
+            var snapshot = textView.TextSnapshot;
+            var totalLines = snapshot.LineCount;
+
+            int startLine = -1;
+            int endLine = -1;
+
+            // 上方向に <TextBox など開始タグの検出
+            for (int i = cursorLine; i >= 0; i--)
+            {
+                var lineText = snapshot.GetLineFromLineNumber(i).GetText();
+                if (lineText.Contains("<TextBox"))
+                {
+                    startLine = i;
+                    break;
+                }
+            }
+
+            // 下方向に /> または </TextBox> の検出
+            for (int i = cursorLine; i < totalLines; i++)
+            {
+                var lineText = snapshot.GetLineFromLineNumber(i).GetText();
+                if (lineText.Contains("/>") || lineText.Contains("</TextBox>"))
+                {
+                    endLine = i;
+                    break;
+                }
+            }
+
+            if (startLine == -1 || endLine == -1 || endLine < startLine)
+                return null; // 抽出失敗（安全ガード）
+
+            // 抽出したXAML断片を連結
+            var builder = new StringBuilder();
+            for (int i = startLine; i <= endLine; i++)
+            {
+                builder.AppendLine(snapshot.GetLineFromLineNumber(i).GetText());
+            }
+
+            string fragment = builder.ToString();
+
+            try
+            {
+                var element = XElement.Parse(fragment);
+                return element;
+            }
+            catch
+            {
+                return null; // XMLとして不整形なら null 返却
+            }
         }
     }
 }
