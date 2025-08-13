@@ -58,9 +58,13 @@ namespace ResourceMaker
                 }
             }
         }
+        public static void Clear()
+        {
+            cachedResources = null;
+        }
         public static Dictionary<string, Dictionary<string, string>> Get(string currentProjectPath)
         {
-            if (cachedProjectPath == currentProjectPath && cachedResources != null)
+            if (cachedProjectPath == currentProjectPath && cachedResources != null && cachedResources.Count != 0)
             {
                 return cachedResources;
             }
@@ -104,7 +108,7 @@ namespace ResourceMaker
                                 if (!string.IsNullOrEmpty(key) && value != null)
                                     kvps[key] = value;
                             }
-                            if(kvps.Count > 0 )
+                            //if(kvps.Count > 0 )
                                 result[langCode] = kvps;
                         }
 

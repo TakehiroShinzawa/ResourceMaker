@@ -1,8 +1,17 @@
 ﻿using CommunityToolkit.Mvvm.Input;
+#if UI
+#else
+using Microsoft.VisualStudio.OLE.Interop;
+using Microsoft.VisualStudio.Settings;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Settings;
+#endif
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -10,6 +19,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace ResourceMaker.UI
 {
@@ -22,12 +32,17 @@ namespace ResourceMaker.UI
         public string LineText { get; set; } = string.Empty;
         public string EditorType { get; set; } = string.Empty;
         public string FeedbackText { get; set; } = string.Empty;
-        public List<string> allCodes = new List<string>();
+        public string LangCulture { get; set; } = string.Empty;
+        public XElement element { get; set; }
 
+        public List<string> allCodes = new List<string>();
+        bool noValue = true;
         private string baseFolderPath = string.Empty;
 
         private string lastKeyName = string.Empty;
-        private Dictionary<string,Dictionary<string,string>> cacheList = new Dictionary<string,Dictionary<string,string>>();
+        private Dictionary<string, Dictionary<string, string>> cacheList = new Dictionary<string, Dictionary<string, string>>();
+
+        private XNamespace x = "http://schemas.microsoft.com/winfx/2006/xaml";
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string propertyName)
@@ -52,21 +67,69 @@ namespace ResourceMaker.UI
         public ObservableCollection<LanguageEntry> LanguageEntries { get; } = new ObservableCollection<LanguageEntry>();
         private string AccessMethod = string.Empty;
 
+#if UI
+        private void SaveSettings()
+        {
+            AccessMethod = ResourceGetterBox.Text;
+            Properties.Settings.Default.AccessMethod = AccessMethod;
+            Properties.Settings.Default.Save();
+
+        }
+#else
+        private readonly System.IServiceProvider _serviceProvider;
+
+        public ResourceEditWindow(System.IServiceProvider serviceProvider)
+        {
+            _serviceProvider = serviceProvider;
+            InitializeComponent();
+            this.DataContext = this; // ← これが必要！
+            LoadSettings();
+            this.Closing += (s, e) =>
+            {
+                // クローズ前に行いたい処理をここに記述
+                if (Feedback.IsChecked == true)
+                    FeedbackText = ResultText.Text;
+                else
+                    FeedbackText = string.Empty;
+            };
+        }
+
+        private void LoadSettings()
+        {
+            var shellSettingsManager = new ShellSettingsManager(_serviceProvider); // ← ServiceProvider を渡すか取得する
+            var store = shellSettingsManager.GetWritableSettingsStore(SettingsScope.UserSettings);
+
+            if (!store.CollectionExists("ResourceMaker"))
+                store.CreateCollection("ResourceMaker");
+
+            if (!store.PropertyExists("ResourceMaker", "AccessMethod"))
+                store.SetString("ResourceMaker", "AccessMethod", "loader.GetString");
+
+            AccessMethod = store.GetString("ResourceMaker", "AccessMethod");
+            // UIに反映するなど
+            ResourceGetterBox.Text = AccessMethod;
+        }
+
+        private void SaveSettings()
+        {
+            var shellSettingsManager = new ShellSettingsManager(_serviceProvider);
+            var store = shellSettingsManager.GetWritableSettingsStore(SettingsScope.UserSettings);
+
+            if (!store.CollectionExists("ResourceMaker"))
+                store.CreateCollection("ResourceMaker");
+
+            AccessMethod = ResourceGetterBox.Text;
+            // UIの値を取得して保存
+            store.SetString("ResourceMaker", "AccessMethod", AccessMethod);
+        }
+
+#endif
         public ResourceEditWindow()
         {
             InitializeComponent();
             this.DataContext = this; // ← これが必要！
 #if UI
             AccessMethod = Properties.Settings.Default.AccessMethod;
-#else
-            var shellSettingsManager = new ShellSettingsManager(ServiceProvider);
-            var writableSettingsStore = shellSettingsManager.GetWritableSettingsStore(SettingsScope.UserSettings);
-            if (!writableSettingsStore.CollectionExists("ResourceMaker") )
-                writableSettingsStore.CreateCollection("ResourceMaker");
-
-            if( !writableSettingsStore.PropertyExists("ResourceMaker", "AccessMethod"))
-                writableSettingsStore.SetString("ResourceMaker", "AccessMethod", "loader.getString");
-            AccessMethod = writableSettingsStore.GetString("ResourceMaker", "AccessMethod");
 #endif
             ResourceGetterBox.Text = AccessMethod;
         }
@@ -105,31 +168,67 @@ namespace ResourceMaker.UI
             if (isClose)
                 this.Close();
             //
-            this.SelectedText.Text = this.LineText;
-            this.ResultText.Text = this.LineText;
+
             string targetName = string.Empty;
+            var itemName = string.Empty;
             var matches = Regex.Matches(LineText, "\"([^\"]+)\"");
+
             foreach (Match match in matches)
             {
-                targetName = match.Groups[1].Value;
-                Debug.WriteLine(targetName); // → Strings
+                itemName = match.Groups[1].Value;
+
+                Debug.WriteLine(itemName); // → Strings
+                BaseTexts.Items.Add(itemName);
 
             }
-
+            if (!string.IsNullOrEmpty(itemName))
+            {
+                BaseTexts.SelectedIndex = 0;
+                targetName = BaseTexts.Text;
+            }
             cacheList = ResourceCacheController.Get(baseFolderPath);
-            ResourceKeyBox.Text = targetName;
+
+            SelectedText.Text = LineText;
+            if (EditorType == "xaml")
+            {
+                MakeXamlForm();
+                targetName = ResourceKeyBox.Text;
+            }
+            else
+            {
+                ResultText.Text = LineText;
+                ResourceKeyBox.Text = targetName;
+            }
+            noValue = true;
+            LangCulture = CultureInfo.CurrentUICulture.Name;
 
             LanguageEntries.Clear();
-            foreach (var code in allCodes.Distinct())
+            foreach (var code in allCodes)
             {
-                LanguageEntries.Add(new LanguageEntry(code,targetName));
-            }
+                try
+                {
+                    var val = cacheList[code][targetName];
+                    if (code == LangCulture)
+                        LanguageEntries.Insert(0, new LanguageEntry(code, val));
+                    else
+                        LanguageEntries.Add(new LanguageEntry(code, val));
 
+                    noValue = false;
+                }
+                catch
+                {
+                    if (code == LangCulture)
+                        LanguageEntries.Insert(0, new LanguageEntry(code, targetName));
+                    else
+                        LanguageEntries.Add(new LanguageEntry(code, targetName));
+                }
+            }
+            Feedback.IsChecked = noValue;
         }
         private void SaveResource_Click(object sender, RoutedEventArgs e)
         {
             //キャッシュに書き戻す
-            foreach ( var langCode in allCodes)
+            foreach (var langCode in allCodes)
             {
                 var existingEntry = LanguageEntries
                     .FirstOrDefault(entry => entry.Code == langCode);
@@ -138,6 +237,7 @@ namespace ResourceMaker.UI
             }
             ResourceCacheController.Save(baseFolderPath);
 
+            this.Close();
         }
         public class LanguageEntry : INotifyPropertyChanged
         {
@@ -195,26 +295,29 @@ namespace ResourceMaker.UI
             if (entry != null) entry.Value = string.Empty;
         });
 
+        //リソースの名前を定義するボックス
         private void ResourceKeyBox_LostFocus(object sender, RoutedEventArgs e)
         {
             if (sender is TextBox textBox)
             {
-                bool isExist = false;
-                var text = textBox.Text;
-                string value;
-                if (lastKeyName != text)
-                {
+                if (textBox.Tag is string oldValue && textBox.Text != oldValue)
+                {// テキストが変わっていたらね
+                    Feedback.IsChecked = true;
+                    textBox.Tag = null;
+                    bool isExist = false;
+                    var text = textBox.Text;
+                    string value;
                     foreach (var entry in cacheList)
                     {
                         var dic = entry.Value;
-                        if (dic.TryGetValue(text, out  value))
+                        if (dic.TryGetValue(text, out value))
                         {
                             isExist = true;
                             break;
                         }
                     }
                     if (isExist)
-                    {
+                    {//既に存在している値ならテストを表示する
                         foreach (var langCode in allCodes)
                         {
                             if (cacheList.TryGetValue(langCode, out var dict) &&
@@ -230,25 +333,123 @@ namespace ResourceMaker.UI
                         }
                     }
                     //変換テキストの作成
-                    if (EditorType == "code")
+                    string targetName = BaseTexts.Text;
+
+                    if (!string.IsNullOrEmpty(targetName) && Feedback.IsChecked == true)
                     {
-                        string targetName = string.Empty;
-                        var matches = Regex.Matches(LineText, "\"([^\"]+)\"");
-                        foreach (Match match in matches)
+                        string modifiedString = string.Empty;
+                        if (EditorType == "code")
                         {
-                            targetName = match.Groups[1].Value;
-                            Debug.WriteLine(targetName); // → Strings
+                            if (noValue)
+                                modifiedString = ResourceGetterBox.Text + "(\"" + ResourceKeyBox.Text + "\")";
+                            else
+                                modifiedString = "\"" + ResourceKeyBox.Text + "\"";
+
+                            FeedbackText = LineText.Replace("\"" + targetName + "\"", modifiedString);
+                            ResultText.Text = FeedbackText;
                         }
-                        if (!string.IsNullOrEmpty(targetName) && Feedback.IsChecked == true)
+                        else if (EditorType == "xaml")
                         {
-                            string modifiedString = string.Empty;
-                            modifiedString = ResourceGetterBox.Text + "(\"" + ResourceKeyBox.Text + "\")";
-                            ResultText.Text = SelectedText.Text.Replace("\"" + targetName + "\"", modifiedString);
-                            FeedbackText = ResultText.Text;
+                            if (ResultText.Text == "x:Uid=\"NoNameElement\"")
+                            {
+                                var tmp = ResourceKeyBox.Text.Split('.');
+                                FeedbackText = $"x:Uid=\"{tmp[0]}\"";
+                                ResultText.Text = FeedbackText;
+                            }
                         }
                     }
                 }
             }
+        }
+
+        private string GetUid(string name)
+        {
+            return element.Attribute(x + name)?.Value ?? string.Empty;
+        }
+
+        private string GetXmlValue(string name)
+        {
+            return element.Attribute(name)?.Value ?? string.Empty;
+        }
+
+        private void MakeXamlForm()
+        {
+            string itemsKey = string.Empty;
+            string result = string.Empty;
+            bool noName = true;
+            //x:Uidを検索
+            string uidName = GetUid("Uid");
+            string xName = string.Empty;
+
+            if (String.IsNullOrEmpty(uidName))
+            {// x:Nameを検索
+                xName = GetUid("Name");
+                if (String.IsNullOrEmpty(xName))
+                {
+                    xName = GetXmlValue("Name");
+                    noName = String.IsNullOrEmpty(xName);
+                }
+                else
+                    noName = false;
+            }
+            else
+                noName = false;
+            var tmp = LineText.Split('=')[0].Split('.');
+
+            itemsKey = tmp[tmp.Length - 1];
+            if (noName)
+            {//名無しなので、x:Uidの入力を促す
+                ResultText.Text = "x:Uid=\"NoNameElement\"";
+                ResourceKeyBox.Text = "NoNameElement." + itemsKey;
+
+                ResourceKeyBox.Focus();
+                ResourceKeyBox.Select(0, 13);
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(uidName))
+                {
+                    ResultText.Text = $"x:Uid=\"{xName}\"";
+                    ResourceKeyBox.Text = $"{xName}.{itemsKey}";
+                }
+                else
+                {
+                    ResultText.Text = " ";
+                    ResourceKeyBox.Text = $"{uidName}.{itemsKey}";
+                }
+            }
+        }
+        private void TextBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox textBox)
+            {
+                if (textBox.Tag is null)
+                    textBox.Tag = textBox.Text;
+            }
+        }
+
+        private void ResourceGetterBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox textBox)
+            {
+                if (textBox.Tag is string oldValue && textBox.Text != oldValue)
+                {
+                    SaveSettings();
+                    textBox.Tag = null;
+                }
+            }
+        }
+
+        private void AddResource(object sender, RoutedEventArgs e)
+        {
+            var langWindow = new LanguageSelectionWindow();
+            langWindow.BaseFolderPath = BaseFolderPath;
+            langWindow.EditorType = EditorType;
+            langWindow.LineText = LineText;
+            var result = langWindow.ShowDialog();
+            this.FeedbackText = "";
+            ResourceCacheController.Clear();
+            this.Close();
         }
     }
 }

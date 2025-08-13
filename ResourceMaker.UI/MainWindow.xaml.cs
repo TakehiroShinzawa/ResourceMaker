@@ -32,7 +32,7 @@ namespace ResourceMaker.UI
         {
             var resWindow =  new ResourceEditWindow();
             resWindow.EditorType = "code";
-            resWindow.LineText = "await CreateLanguageCodeFoldersAsync(Path.Combine(BaseFolderPath, \"保存\"));";
+            resWindow.LineText = "picker.FileTypeChoices.Add(\"JSON ファイル\", new[] { \".json\" });";
             resWindow.BaseFolderPath = @"C:\temp\conB2WebApiSimulator\conB2WebApiSimulator\conB2WebApiSimulator";
             resWindow.ShowDialog();
         }

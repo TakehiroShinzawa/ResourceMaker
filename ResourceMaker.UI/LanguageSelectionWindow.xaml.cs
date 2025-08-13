@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.Input;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -27,7 +28,9 @@ namespace ResourceMaker.UI
         public string LineText { get; set; } = string.Empty;
         public string EditorType { get; set; } = string.Empty;
         private string baseFolderPath = string.Empty;
+        List<string> folders = null;
 
+        public List<string> folderCodes = new List<string>();
         public List<string> allCodes = new List<string>();
 
         public string BaseFolderPath
@@ -58,7 +61,7 @@ namespace ResourceMaker.UI
 
         public void LoadLanguageOptionsFromFolder(string basePath)
         {
-            List<string> folders = null;
+            folders = null;
             var stringsRoot = Path.Combine(BaseFolderPath, "Strings");
             if (Directory.Exists(stringsRoot))
             {
@@ -141,12 +144,12 @@ namespace ResourceMaker.UI
             }
         }
 
-
         private void MakeFoldersCancel_Click(object sender, RoutedEventArgs e)
         {
             this.DialogResult = false;
             this.Close();
         }
+
         public async Task< bool> CreateLanguageCodeFoldersAsync(string basePath)
         {
             try
@@ -177,20 +180,44 @@ namespace ResourceMaker.UI
                         string fileName = "Resources.resw";
                         string filePath = Path.Combine(folderPath, fileName);
 
-                        XmlWriterSettings settings = new XmlWriterSettings
+                        if (!File.Exists(filePath))
                         {
-                            Indent = true,
-                            Encoding = System.Text.Encoding.UTF8
-                        };
 
-                        using (XmlWriter writer = XmlWriter.Create(filePath, settings))
-                        {
-                            writer.WriteStartDocument(); // <?xml version="1.0" encoding="utf-8"?>
-                            writer.WriteStartElement("root"); // <root>
-                            writer.WriteEndElement();         // </root>
-                            writer.WriteEndDocument();        // end of document
+                            XmlWriterSettings settings = new XmlWriterSettings
+                            {
+                                Indent = true,
+                                Encoding = System.Text.Encoding.UTF8
+                            };
+
+                            using (XmlWriter writer = XmlWriter.Create(filePath, settings))
+                            {
+                                writer.WriteStartDocument(); // <?xml version="1.0" encoding="utf-8"?>
+                                writer.WriteStartElement("root"); // <root>
+                                writer.WriteEndElement();         // </root>
+                                writer.WriteEndDocument();        // end of document
+                            }
                         }
                     }
+                    //削除も対応
+                    List<string> notInAllCodes = new List<string>();
+                    foreach (var item in folders)
+                    {
+                        if (!allCodes.Contains(item))
+                        {
+                            notInAllCodes.Add(item);
+                        }
+                    }
+                    foreach( var item in notInAllCodes)
+                    {
+                        string folderPath = Path.Combine(basePath, item);
+                        try
+                        {
+                            Directory.Delete(folderPath, true); // true で中身も再帰的に削除
+                        }
+                        catch { }
+
+                    }
+
                 });
                 return true;
             }
