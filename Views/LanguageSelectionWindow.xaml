@@ -29,7 +29,12 @@
             <StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="追加言語コード（例: it-IT）"/>
-                    <TextBox Text="{Binding NewLanguageInput}" Width="150"/>
+                    <TextBox Text="{Binding NewLanguageInput,  UpdateSourceTrigger=PropertyChanged}" Width="150">
+                        <TextBox.InputBindings>
+                            <KeyBinding Key="Enter"
+                                Command="{Binding AddNewLanguageCommand}" />
+                        </TextBox.InputBindings>
+                    </TextBox>
                     <Button Content="Add" Command="{Binding AddNewLanguageCommand}" Margin="5,0,0,0" />
                 </StackPanel>
                 <Separator Margin="5" Height="2" Background="Gray" />

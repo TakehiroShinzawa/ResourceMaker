@@ -4,6 +4,7 @@ using Microsoft.VisualStudio.Shell;
 using System;
 using System.ComponentModel.Design;
 using System.Diagnostics.CodeAnalysis;
+using System.Resources;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Task = System.Threading.Tasks.Task;
@@ -72,8 +73,25 @@ namespace ResourceMaker
             if (commandService != null)
             {
                 var commandId = new CommandID(CommandSetGuid, ResourceizeCommandId);
-                var menuItem = new MenuCommand(ExecuteResourceize, commandId);
+                //var menuItem = new MenuCommand(ExecuteResourceize, commandId);
+                var menuItem = new OleMenuCommand(ExecuteResourceize, commandId);
+                var rm = new ResourceManager("ResourceMaker.Resources.Resources", GetType().Assembly);
+                
+
+                EventHandler handler = null;
+                handler = (s, e) =>
+                {
+                    var cmd = (OleMenuCommand)s;
+                    cmd.Text = rm.GetString("ResourceizeText");
+
+                    // 一度だけで十分なので、イベント解除
+                    cmd.BeforeQueryStatus -= handler;
+                };
+
+                menuItem.BeforeQueryStatus += handler;
+
                 commandService.AddCommand(menuItem);
+
             }
         }
 

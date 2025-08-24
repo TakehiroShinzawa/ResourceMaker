@@ -25,7 +25,8 @@
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="元テキスト" VerticalAlignment="Center" Margin="0,5,0,5"/>
-                <ComboBox Name="BaseTexts" VerticalAlignment="Center" Margin="0,5,0,5" Width="200"/>
+                <ComboBox Name="BaseTexts" VerticalAlignment="Center" Margin="0,5,0,5" Width="200"
+                    SelectionChanged="BaseTexts_SelectionChanged" />
             </StackPanel>
             <StackPanel Orientation="Horizontal" Focusable="False">
                 <TextBlock Text="リソース名を入力" VerticalAlignment="Center" Margin="0,5,0,5"/>
@@ -60,6 +61,7 @@
                     LostFocus="ResourceGetterBox_LostFocus"
                     VerticalAlignment="Center"
                     Padding="0,0,25,0"
+                    ToolTipService.ToolTip="public ResourceLoader loader =&#x0a;    Windows.ApplicationModel.Resources.&#x0a;    ResourceLoader.GetForViewIndependentUse();"
                     KeyDown="TextBox_KeyDown" />
                 <CheckBox Name="Feedback" Content="書き戻す" 
                     IsChecked="True" 
@@ -96,7 +98,11 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
             <StackPanel>
-                <Button Content="保存" Click="SaveResource_Click" Width="50"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button x:Name="SaveResource" Content="リソースの保存" Click="SaveResource_Click" Margin="5,0,0,0"/>
+                    <Button x:Name="SaveAndClose" Content="反映" Click="SaveResource_Click" Margin="15,0,0,0"/>
+                    <Button Content="言語の追加" Click="AddResource" Margin="25,0,0,0"/>
+                </StackPanel>
             </StackPanel>
         </StackPanel>
     </Grid>

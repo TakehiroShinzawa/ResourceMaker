@@ -25,10 +25,11 @@ namespace ResourceMaker
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-            string language = dte?.ActiveDocument?.Language;
-            string fileName = dte?.ActiveDocument?.Name;
+            var activeDoc = dte?.ActiveDocument ?? null;
+            string language = activeDoc?.Language;
+            string fileName = activeDoc?.Name;
 
-            string editorType = "Unknown";
+            string editorType = "code";
 
             if (language == "CSharp")
                 editorType = "code";
@@ -54,14 +55,14 @@ namespace ResourceMaker
             string indent = originalLine.Substring(0, originalLine.Length - lineText.Length); // 行頭の空白だけを抽出
 
             //フォルダ関係
-            Document activeDoc = dte.ActiveDocument;
             ProjectItem item = activeDoc?.ProjectItem;
             Project owningProject = item?.ContainingProject;
-            string folder = Path.GetDirectoryName(owningProject.FullName);
+            var projctFile = owningProject.FullName;
+            string folder = Path.GetDirectoryName(projctFile);
 
             XElement element = null;
             //xamlをひっかける
-            if(editorType == "xaml")
+            if (editorType == "xaml")
                 element = ExtractTextBoxXml(start);
 
             int lcid = dte.LocaleID;
@@ -72,6 +73,7 @@ namespace ResourceMaker
             resWindow.LangCulture = culture.ToString();
             resWindow.LineText = lineText;
             resWindow.EditorType = editorType;
+            resWindow.DevelopType = GetResourcePattern(projctFile, dte);
             resWindow.element = element;
             resWindow.BaseFolderPath = folder;
             resWindow.ShowDialog();
@@ -87,23 +89,63 @@ namespace ResourceMaker
 
             }
         }
-
-        private static String ControlResource(DTE2 dte,
-            string baseFolderPath, string lineText, string editorType, IServiceProvider serviceProvider)
+        public static bool IsVsixProject(Project project)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
+            if (project?.Properties == null)
+                return false;
 
-            int lcid = dte.LocaleID;
-            CultureInfo culture = new CultureInfo(lcid);
+            try
+            {
+                foreach (Property prop in project.Properties)
+                {
+                    if (prop?.Name?.StartsWith("VsixProjectExtender.") == true)
+                        return true;
+                }
+            }
+            catch
+            {
+                // ログ出力などで補足可能
+            }
 
-            var resWindow = new ResourceEditWindow(serviceProvider);
-            resWindow.LangCulture = culture.ToString();
-            resWindow.LineText = lineText;
-            resWindow.EditorType = editorType;
-            resWindow.BaseFolderPath = baseFolderPath;
-            resWindow.ShowDialog();
-            return resWindow.FeedbackText;
+            return false;
+        }
+        public static string GetResourcePattern(string csprojFile, DTE2 dte)
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+            XDocument doc = XDocument.Load(csprojFile);
+            XNamespace ns = doc.Root.Name.Namespace;
+            string resourceFolderTemplate = null;
 
+            Project currentProject = dte?.ActiveDocument?.ProjectItem?.ContainingProject;
+            bool isVsix = IsVsixProject(currentProject);
+            if (IsVsixProject(currentProject))
+                return "vsix";
+
+            if (doc.Descendants(ns + "TargetPlatformIdentifier").Any(e => e.Value == "Windows"))
+            {
+                resourceFolderTemplate = @"Strings\{culture}\Resources.resw";
+            }
+            else if (doc.Descendants(ns + "PackageReference").Any(e => e.Attribute("Include")?.Value.Contains("Microsoft.WindowsAppSDK") == true))
+            {
+                resourceFolderTemplate = @"Strings\{culture}\Resources.resw";
+            }
+            else if (doc.Descendants(ns + "Reference").Any(e => e.Attribute("Include")?.Value.Contains("PresentationFramework") == true))
+            {
+                resourceFolderTemplate = @"Properties\Resources.{culture}.resx";
+            }
+            else if (doc.Descendants(ns + "UseWindowsForms").Any(e => e.Value == "true") ||
+                     doc.Descendants(ns + "Reference").Any(e => e.Attribute("Include")?.Value.Contains("System.Windows.Forms") == true))
+            {
+                resourceFolderTemplate = @"Properties\Resources.{culture}.resx";
+            }
+            else if (doc.Root.Attribute("Sdk")?.Value.Contains("Microsoft.Maui.Sdk") == true)
+            {
+                resourceFolderTemplate = @"Resources.{culture}.resx";
+            }
+            else
+                return "resx";
+            return resourceFolderTemplate.Split('.')[1];
         }
 
         public static XElement ExtractTextBoxXml(EditPoint startPoint)
@@ -141,7 +183,7 @@ namespace ResourceMaker
             while (!lineText.Contains(">"))
             {
                 builder.AppendLine(lineText.Trim());
-                if( doX)
+                if (doX)
                 {
                     builder.AppendLine(x);
                     doX = false;
@@ -164,7 +206,7 @@ namespace ResourceMaker
             {
                 return XElement.Parse(builder.ToString());
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 // パース失敗時の処理（ログ or null）
                 Debug.WriteLine(ex.Message);

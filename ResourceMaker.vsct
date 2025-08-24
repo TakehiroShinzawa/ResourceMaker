@@ -45,8 +45,10 @@
     <Buttons>
       <Button guid="guidResourceMakerCmdSet" id="cmdidResourceize" priority="0x0100" type="Button">
         <Parent guid="guidResourceMakerCmdSet" id="MyMenuGroup" />
+        <CommandFlag>TextChanges</CommandFlag>
+        <CommandFlag>DynamicVisibility</CommandFlag>
         <Strings>
-          <ButtonText>リソース化</ButtonText>
+          <ButtonText>Localize</ButtonText>
         </Strings>
       </Button>
     </Buttons>

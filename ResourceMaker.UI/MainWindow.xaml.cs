@@ -17,9 +17,12 @@ namespace ResourceMaker.UI
         private void OpenLanguageWindow_Click(object sender, RoutedEventArgs e)
         {
             var langWindow = new LanguageSelectionWindow();
-            langWindow.BaseFolderPath = @"C:\temp\conB2WebApiSimulator\conB2WebApiSimulator\conB2WebApiSimulator";
-            langWindow.EditorType = "code";
-            langWindow.LineText = "await CreateLanguageCodeFoldersAsync(Path.Combine(BaseFolderPath, \"Strings\"));";
+            langWindow.EditorType = "xaml";
+            langWindow.DevelopType = "vsix";
+            langWindow.ProjectName = "ResourceMaker";
+
+            langWindow.LineText = "<Button Content=\"言語選択ウィンドウを開く\" Click=\"OpenLanguageWindow_Click\" Margin=\"0,0,0,10\"/>";
+            langWindow.BaseFolderPath = @"C:\temp\ResourceMaker";
             var result = langWindow.ShowDialog();
             if (result == true)
             {
@@ -30,10 +33,12 @@ namespace ResourceMaker.UI
 
         private void OpenResourceWindow_Click(object sender, RoutedEventArgs e)
         {
-            var resWindow =  new ResourceEditWindow();
+            var resWindow = new ResourceEditWindow();
             resWindow.EditorType = "code";
-            resWindow.LineText = "picker.FileTypeChoices.Add(\"JSON ファイル\", new[] { \".json\" });";
-            resWindow.BaseFolderPath = @"C:\temp\conB2WebApiSimulator\conB2WebApiSimulator\conB2WebApiSimulator";
+            resWindow.DevelopType = "vsix";
+            resWindow.ProjectName = "ResourceMaker";
+            resWindow.LineText = "string fileName = \"Resources.resw\";";
+            resWindow.BaseFolderPath = @"C:\temp\ResourceMaker";
             resWindow.ShowDialog();
         }
 
