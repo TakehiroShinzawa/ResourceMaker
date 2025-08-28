@@ -8,61 +8,98 @@
         Title="LanguageSelectionWindow" Height="450" Width="800">
     <Grid>
         <StackPanel Margin="20">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="使用したい言語を選択してください" FontSize="14" Margin="0,0,20,10"/>
-                <Button 
-                    Content="Create"
-                    VerticalAlignment="Center"
-                    Click="MakeFolders_Click" Margin="0,0,20,10"/>
-                <Button 
-                    Content="Cancel"
-                    VerticalAlignment="Center"
-                    Click="MakeFoldersCancel_Click" Margin="0,0,20,10"/>
-            </StackPanel>
-            <ItemsControl ItemsSource="{Binding LanguageOptions}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <CheckBox Content="{Binding DisplayName}" IsChecked="{Binding IsSelected, Mode=TwoWay}" />
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-            <StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="追加言語コード（例: it-IT）"/>
-                    <TextBox Text="{Binding NewLanguageInput,  UpdateSourceTrigger=PropertyChanged}" Width="150">
-                        <TextBox.InputBindings>
-                            <KeyBinding Key="Enter"
-                                Command="{Binding AddNewLanguageCommand}" />
-                        </TextBox.InputBindings>
-                    </TextBox>
-                    <Button Content="Add" Command="{Binding AddNewLanguageCommand}" Margin="5,0,0,0" />
+            <StackPanel x:Name="ProjectTypePanel" Visibility="Collapsed" Margin="10">
+                <!-- ラベル -->
+                <TextBlock Text="プロジェクトタイプを選択してください"
+               FontWeight="Bold"
+               Margin="0,0,0,8"
+               HorizontalAlignment="Left" />
+
+                <!-- 横並びラジオボタン -->
+                <StackPanel Orientation="Vertical"  HorizontalAlignment="Left">
+                    <RadioButton Content="resw (UWP) ./String/{country}/Resources.resw"
+                     GroupName="ProjectType"
+                     Tag="Strings.Resources.resw"
+                     Checked="ProjectType_Checked"
+                     Margin="0,0,20,0" />
+
+                    <RadioButton Content="resx (WinUI3/WPF) ./Resources.Strings.{country}.resx"
+                     Tag="Resources.Strings.resx"
+                     Checked="ProjectType_Checked"
+                    GroupName="ProjectType" />
+                    
+                    <RadioButton Content="resx (WinForms) ./Properties.Resources.{country}.resx"
+                     Tag="Properties.Resources.resx"
+                     Checked="ProjectType_Checked"
+                    GroupName="ProjectType" />
                 </StackPanel>
-                <Separator Margin="5" Height="2" Background="Gray" />
-                <ItemsControl ItemsSource="{Binding CustomLanguages}">
+            </StackPanel>
+            <StackPanel x:Name="LanguagePanel" >
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock x:Name="SelectLanguagesGuide" Text="語を選択してください" FontSize="14" Margin="0,0,20,10"/>
+                    <Button 
+                        Content="Create"
+                        VerticalAlignment="Center"
+                        Click="MakeFolders_Click" Margin="0,0,20,10"/>
+                    
+                    <Button 
+                        Content="Cancel"
+                        VerticalAlignment="Center"
+                        Click="MakeFoldersCancel_Click" Margin="0,0,20,10"/>
+
+                    <Button 
+                        Content="Close"
+                        VerticalAlignment="Center"
+                        Click="MakeFolders_Click" Margin="0,0,20,10"/>
+
+                </StackPanel>
+                <ItemsControl ItemsSource="{Binding LanguageOptions}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-
-                                <StackPanel Orientation="Horizontal" Grid.Column="0">
-                                <TextBox 
-                                     Text="{Binding Code, Mode=TwoWay}"
-                                     Width="150"
-                                     Margin="0,0,5,0"/>
-
-                                <Button 
-                                    Content="X"
-                                    Width="25" Height="25"
-                                    VerticalAlignment="Center"
-                                    Click="DeleteItem_Click"/>
-                                </StackPanel>
-                            </Grid>
+                            <CheckBox Content="{Binding DisplayName}" 
+                                      IsEnabled="{Binding IsEnabled}"
+                                      IsChecked="{Binding IsSelected, Mode=TwoWay}" />
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock x:Name="AdditionalLanguageCode" Text="追加言語コード（例: it-IT）"/>
+                        <TextBox Text="{Binding NewLanguageInput,  UpdateSourceTrigger=PropertyChanged}" Width="150">
+                            <TextBox.InputBindings>
+                                <KeyBinding Key="Enter"
+                                    Command="{Binding AddNewLanguageCommand}" />
+                            </TextBox.InputBindings>
+                        </TextBox>
+                        <Button Content="Add" Command="{Binding AddNewLanguageCommand}" Margin="5,0,0,0" />
+                    </StackPanel>
+                    <Separator Margin="5" Height="2" Background="Gray" />
+                    <ItemsControl ItemsSource="{Binding CustomLanguages}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Orientation="Horizontal" Grid.Column="0">
+                                    <TextBox 
+                                         Text="{Binding Code, Mode=TwoWay}"
+                                         Width="150"
+                                         Margin="0,0,5,0"/>
+
+                                    <Button 
+                                        Content="X"
+                                        Width="25" Height="25"
+                                        VerticalAlignment="Center"
+                                        Click="DeleteItem_Click"/>
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
             </StackPanel>
         </StackPanel>
     </Grid>

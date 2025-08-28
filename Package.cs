@@ -75,7 +75,7 @@ namespace ResourceMaker
                 var commandId = new CommandID(CommandSetGuid, ResourceizeCommandId);
                 //var menuItem = new MenuCommand(ExecuteResourceize, commandId);
                 var menuItem = new OleMenuCommand(ExecuteResourceize, commandId);
-                var rm = new ResourceManager("ResourceMaker.Resources.Resources", GetType().Assembly);
+                var rm = new ResourceManager("ResourceMaker.Resources.Strings", GetType().Assembly);
                 
 
                 EventHandler handler = null;

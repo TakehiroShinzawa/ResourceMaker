@@ -2,6 +2,7 @@
 #if UI
 #else
 using Microsoft.VisualStudio.Settings;
+using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Shell.Settings;
 #endif
 using System;
@@ -27,7 +28,8 @@ namespace ResourceMaker.UI
     public partial class ResourceEditWindow : Window
     {
         private static readonly Regex MyRegex = new Regex(@"^[a-z]{2}(-[A-Z]{2})?$", RegexOptions.Compiled);
-        private static readonly Regex CultureRegex = new Regex(@"Resources(?:\.(?<culture>[a-z]{2}(?:-[A-Z]{2})?))?\.resx$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex CultureRegex = new Regex(@"^(?<basename>.+?)\.(?<culture>[a-z]{2}(?:-[A-Z]{2})?)\.resx$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex candidateRegex = new Regex("\"([^\"]*)\"");
 
         public string LineText { get; set; } = string.Empty;
         public string EditorType { get; set; } = string.Empty;
@@ -37,6 +39,8 @@ namespace ResourceMaker.UI
         public string DevelopType { get; set; } = string.Empty;
         public string ProjectName { get; set; } = string.Empty;
 
+
+        private string resourcerFilename = string.Empty;
         public XElement element { get; set; }
         private string xUid = string.Empty;
 
@@ -46,9 +50,10 @@ namespace ResourceMaker.UI
 
         private bool isUpdating = false;
         private bool isUidMode = false;
-        private string rootFolderName = string.Empty;
-        private string loaderGuide = string.Empty;
+        private string resFolderName = string.Empty;
 
+        private string resName = string.Empty;
+        private string resSuffix = string.Empty;
 
         private string lastKeyName = string.Empty;
         private Dictionary<string, Dictionary<string, string>> cacheList = new Dictionary<string, Dictionary<string, string>>();
@@ -124,7 +129,9 @@ namespace ResourceMaker.UI
             AccessMethod = store.GetString("ResourceMaker", "AccessMethod");
             // UIに反映するなど
             ResourceGetterBox.Text = AccessMethod;
-            loader = new ResourceManager("ResourceMaker.Resources.Resources", GetType().Assembly);
+            loader = new ResourceManager("ResourceMaker.Resources.Strings", GetType().Assembly);
+            //リソース呼び出し
+            LocalizeScreenXaml();
         }
 
         private void SaveSettings()
@@ -138,8 +145,22 @@ namespace ResourceMaker.UI
             AccessMethod = ResourceGetterBox.Text;
             // UIの値を取得して保存
             store.SetString("ResourceMaker", "AccessMethod", AccessMethod);
-        }
 
+        }
+        private void LocalizeScreenXaml()
+        {
+
+            LabelTargetText.Text = loader.GetString("LabelTargetText.Text");
+            LabelUpdatedText.Text = loader.GetString("LabelUpdatedText.Text");
+            OriginalText.Text = loader.GetString("OriginalText.Text");
+            ResourceKey.Text = loader.GetString("ResourceKey.Text");
+            ResourceGetterExpression.Content = loader.GetString("ResourceGetterExpression.Content");
+            Feedback.Content = loader.GetString("Feedback.Content");
+            SaveAndClose.Content = loader.GetString("SaveAndClose.Content");
+            SaveResource.Content = loader.GetString("SaveResource.Content");
+            AddLanguage.Content = loader.GetString("AddLanguage.Content");
+
+        }
 #endif
         public ResourceEditWindow()
         {
@@ -148,6 +169,7 @@ namespace ResourceMaker.UI
 #if UI
             AccessMethod = Properties.Settings.Default.AccessMethod;
 #endif
+            loader = new ResourceManager("ResourceMaker.Resources.Strings", GetType().Assembly);
             ResourceGetterBox.Text = AccessMethod;
 
         }
@@ -155,104 +177,68 @@ namespace ResourceMaker.UI
         //フォルダーがセットされると呼ばれます。
         private void LoadLanguageOptionsFromFolder(string basePath)
         {
-            
-            switch (DevelopType)
-            {
-                case "resw":
-                    rootFolderName = "Strings";
-                    break;
-                case "resx":
-                    rootFolderName = "Properties";
-                    break;
-                case "vsix":
-                    rootFolderName = "Resources";
-                    break;
-            }
-            loaderGuide = $"System.Resources.ResourceManager loader = \r\n    new ResourceManager(\"{ProjectName}.{rootFolderName}.Resources\", typeof(ResourceEditWindow).Assembly);";
+            var tmp = DevelopType.Split('.');
+            resFolderName = tmp[0];
+            resName = tmp[1];
+            resSuffix = tmp[2];
+            resourcerFilename = Path.Combine(basePath, "ResourceAdder.cs");
+
+            var loaderGuide = $"System.Resources.ResourceManager loader = \r\n    new ResourceManager(\"{ProjectName}.{resFolderName}.Resources\", GetType().Assembly);";
             //        private readonly System.Resources.ResourceManager loader = 
             //new ResourceManager("ResourceMaker.LanguageResources.Resources", typeof(ResourceEditWindow).Assembly);
+            ToolTipService.SetToolTip(ResourceGetterBox, loaderGuide);
 
 
-            var resourcesRoot = Path.Combine(BaseFolderPath, rootFolderName);
+            var resourcesRoot = Path.Combine(baseFolderPath, resFolderName);
 
-            //リソースの状態検査
-            bool isClose = false;
-            var stringsRoot = Path.Combine(BaseFolderPath, rootFolderName);
-            if (!Directory.Exists(stringsRoot))
-            {
-                var langWindow = new LanguageSelectionWindow();
-                langWindow.DevelopType = DevelopType;
-                langWindow.BaseFolderPath = BaseFolderPath;
-                if (langWindow.ShowDialog() == false)
-                    isClose = true;
-
-                else
-                    allCodes = langWindow.allCodes;
+            if (resSuffix == "resw")
+            { //UWP
+                allCodes = Directory.GetDirectories(resourcesRoot)
+                    .Select(Path.GetFileName)
+                   .Where(name => MyRegex.IsMatch(name ?? string.Empty))
+                   .Distinct()
+                   .ToList();
             }
-            else
-            {
-
-                if (DevelopType == "resw")
-                { //UWP
-                    allCodes = Directory.GetDirectories(resourcesRoot)
-                        .Select(Path.GetFileName)
-                       .Where(name => MyRegex.IsMatch(name ?? string.Empty))
-                       .Distinct()
-                       .ToList();
-                }
-                else if (DevelopType.Substring(1) == "resx" || DevelopType == "vsix")
-                {// WPF MAUI vsix
-                    allCodes = Directory.GetFiles(resourcesRoot)
-                        .Select(path => Path.GetFileName(path))
-                        .Select(file =>
-                        {
-                            var match = CultureRegex.Match(file ?? string.Empty);
-                            return match.Success
-                                ? match.Groups["culture"].Value // 空文字列なら中立言語
-                                : null;
-                        })
-                        .Where(culture => culture != null) // 中立言語を除外するならここでフィルタ
-                        .Distinct()
-                        .ToList();
-                }
-
-                if (allCodes.Count == 0)
-                {
-                    var langWindow = new LanguageSelectionWindow();
-                    langWindow.DevelopType = DevelopType;
-                    langWindow.BaseFolderPath = BaseFolderPath;
-                    if (langWindow.ShowDialog() == false)
-                        isClose = true;
-                    else
-                        allCodes = langWindow.allCodes;
-                }
-
+            else 
+            {// WPF MAUI vsix
+                var hh = Directory.GetFiles(resourcesRoot);
+                allCodes = Directory.GetFiles(resourcesRoot)
+                    .Select(path => Path.GetFileName(path))
+                    .Select(file =>
+                    {
+                        var match = CultureRegex.Match(file ?? string.Empty);
+                        return match.Success
+                            ? match.Groups["culture"].Value // 空文字列なら中立言語
+                            : null;
+                    })
+                    .Where(culture => !string.IsNullOrEmpty(culture))  // 中立言語を除外するならここでフィルタ
+                    .Distinct()
+                    .ToList();
+                
             }
-            if (isClose)
-                this.Close();
 
             //置き換え対象の収集
             string targetName = string.Empty;
             var itemName = string.Empty;
-            var matches = Regex.Matches(LineText, "\"([^\"]+)\"");
+            var matches = candidateRegex.Matches(LineText);
 
             foreach (Match match in matches)
             {
                 itemName = match.Groups[1].Value;
 
-                Debug.WriteLine(itemName); // → Strings
-                BaseTexts.Items.Add(itemName);
+               if (!string.IsNullOrEmpty(itemName)) // → Strings
+                    BaseTexts.Items.Add(itemName);
 
             }
             //取得できていれば、先頭を表示
-            if (!string.IsNullOrEmpty(itemName))
+            if (BaseTexts.Items.Count > 0)
             {
                 isUpdating = true;
                 BaseTexts.SelectedIndex = 0;
                 targetName = BaseTexts.Text;
                 isUpdating = false;
             }
-            cacheList = ResourceCacheController.Get(baseFolderPath,rootFolderName, DevelopType);
+            cacheList = ResourceCacheController.Get(baseFolderPath,resFolderName, DevelopType);
 
             //言語セットを作成する
             LanguageEntries.Clear();
@@ -313,21 +299,31 @@ namespace ResourceMaker.UI
         {
             if (sender is Button button)
             {
-                //キャッシュに書き戻す
-                foreach (var langCode in allCodes)
+                try
                 {
-                    var existingEntry = LanguageEntries
-                        .FirstOrDefault(entry => entry.Code == langCode);
+                    File.AppendAllText(resourcerFilename, $"{ResourceKeyBox.Text} = {ResourceGetterBox.Text}(\"{ResourceKeyBox.Text}\");{Environment.NewLine}");
 
-                    cacheList[langCode][ResourceKeyBox.Text] = existingEntry.Value;
+                    //キャッシュに書き戻す
+                    foreach (var langCode in allCodes)
+                    {
+                        var existingEntry = LanguageEntries
+                            .FirstOrDefault(entry => entry.Code == langCode);
+
+                        cacheList[langCode][ResourceKeyBox.Text] = existingEntry.Value;
+                    }
+
+                    ResourceCacheController.Save(baseFolderPath, resFolderName, DevelopType);
+                    if (button.Name == "SaveAndClose")
+                    {
+                        FeedbackText = ResultText.Text;
+                        this.Close();
+                    }
+                    SaveResource.IsEnabled = false;
                 }
-                ResourceCacheController.Save(baseFolderPath, rootFolderName,DevelopType);
-                if (button.Name == "SaveAndClose")
+                catch (Exception ex)
                 {
-                    FeedbackText = ResultText.Text;
-                    this.Close();
+                    Infomation.Text = ex.Message;
                 }
-                SaveResource.IsEnabled = false;
             }
         }
 
@@ -448,8 +444,8 @@ namespace ResourceMaker.UI
                         else if (EditorType == "xaml")
                         {
                             var tmp = ResourceKeyBox.Text.Split('.');
-                            var resText = $"x:Uid=\"{tmp[0]}\"";
-                            ResultText.Text = ResultText.Text.Replace("x:Uid=\"NoNameElement\"", resText);
+                            var resText = $"=\"{tmp[0]}\"";
+                            ResultText.Text = ResultText.Text.Replace("=\"NoNameElement\"", resText);
                         }
                     }
                 }
@@ -458,24 +454,36 @@ namespace ResourceMaker.UI
 
         private string GetUid(string name)
         {
-            return element.Attribute(x + name)?.Value ?? string.Empty;
+            return element?.Attribute(x + name)?.Value ?? string.Empty;
         }
 
         private string GetXmlValue(string name)
         {
-            return element.Attribute(name)?.Value ?? string.Empty;
+            return element?.Attribute(name)?.Value ?? string.Empty;
         }
 
         private void MakeXamlForm()
         {
+            var tmp = DevelopType.Split('.');
+            resFolderName = tmp[0];
+            resName = tmp[1];
+            resSuffix = tmp[2];
+
             string itemsKey = string.Empty;
             string result = string.Empty;
+            string searchWord = string.Empty;
             bool noName = true;
-            var pos = LineText.IndexOf("x:Uid=");
+            if (resSuffix == "resw")
+                searchWord = "Uid";
+            else
+                searchWord = "Name";
+            var pos = LineText.IndexOf("x:" + searchWord + "=");
+
             if (pos > -1)
             {
                 string keyname = string.Empty;
-                pos += 7;
+                pos += (searchWord.Length + 4);
+
                 var pos2 = LineText.IndexOf('\"', pos);
                 if (pos2 != -1)
                     keyname = LineText.Substring(pos, pos2 - pos);
@@ -493,22 +501,26 @@ namespace ResourceMaker.UI
                             .Select(k => k.Substring(prefix.Length))
                             .ToList();
 
-                        isUpdating = true;
-                        BaseTexts.Items.Clear(); // 必要に応じて初期化
-                        isUidMode = true;
-
-                        foreach (var key in filteredKeys)
+                        if (filteredKeys.Count != 0)
                         {
-                            BaseTexts.Items.Add(key);
+                            isUpdating = true;
+                            BaseTexts.Items.Clear(); // 必要に応じて初期化
+                            isUidMode = true;
+
+                            foreach (var key in filteredKeys)
+                            {
+                                BaseTexts.Items.Add(key);
+                            }
+                            isUpdating = false;
+                            BaseTexts.SelectedIndex = 0;
+                            Feedback.IsChecked = false;
+                            return;
                         }
-                        isUpdating = false;
-                        BaseTexts.SelectedIndex = 0;
-                        return;
                     }
                 }
             }
-            //x:Uidを検索
-            string uidName = GetUid("Uid");
+            //x:Uidまたはx:Nameを検索
+            string uidName = GetUid(searchWord);
             string xName = string.Empty;
 
             if (String.IsNullOrEmpty(uidName))
@@ -553,21 +565,23 @@ namespace ResourceMaker.UI
                 }
             }
             //結果置き場
-            if (string.IsNullOrEmpty(uidName))
+            if ((DevelopType == "vsix" && string.IsNullOrEmpty(uidName) && string.IsNullOrEmpty(xName))                ||
+                (DevelopType != "vsix" && string.IsNullOrEmpty(uidName)))
             {// x:Uidを捏造挿入
                 if (LineText.StartsWith("<"))
-                    ResultText.Text = InsertUid(LineText, resultText);
+                    ResultText.Text = InsertUid(LineText, resultText, searchWord);
 
                 else
-                    ResultText.Text = $" x:Uid=\"{resultText}\" {LineText.Replace(BaseTexts.Text,"")}";
+                    ResultText.Text = $" x:{searchWord}=\"{resultText}\" {LineText.Replace(BaseTexts.Text,"")}";
             }
             else
             {
                 ResultText.Text = LineText;
+                noValue = false;
             }
         }
 
-        public string InsertUid(string xamlLine, string uidValue)
+        public string InsertUid(string xamlLine, string uidValue, string keyWord)
         {
             // タグ名の終わり（空白 or '>'）を探す
             int tagEndIndex = -1;
@@ -583,7 +597,7 @@ namespace ResourceMaker.UI
             if (tagEndIndex < 0) return xamlLine;
 
             // 挿入する文字列
-            string insert = $" x:Uid=\"{uidValue}\"";
+            string insert = $" x:{keyWord}=\"{uidValue}\"";
 
             // タグ名直後に挿入
             return xamlLine.Insert(tagEndIndex, insert);
@@ -680,10 +694,22 @@ namespace ResourceMaker.UI
         //値のキー名を取得する
         private string GetXmlKeyname(string target)
         {
-            string matchedProperty = element.Attributes()
+            string matchedProperty = element?.Attributes()
                 .FirstOrDefault(attr => attr.Value == target)?.Name.LocalName;
             return matchedProperty;
         }
-        
+
+        private void ResourceGetterExpression_Click(object sender, RoutedEventArgs e)
+        {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+            // "ResourceGetterBox" の ToolTip を取得
+            var tooltip = ResourceGetterBox.ToolTip?.ToString().Replace("\r\n    ", "") ?? loader.GetString("NotSetTooltip");
+
+            // クリップボードにコピー
+            Clipboard.SetText(tooltip);
+            ClipText.Text = tooltip;
+            Infomation.Text = loader.GetString("LoaderDeclaration");
+        }
+
     }
 }

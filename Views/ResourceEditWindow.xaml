@@ -9,14 +9,14 @@
     <Grid>
         <StackPanel Margin="20">
             <StackPanel Orientation="Vertical">
-                <TextBlock Text="対象テキスト" FontSize="14"/>
-                <TextBox x:Uid="SelectedText" x:Name="SelectedText" FontSize="14"
+                <TextBlock x:Name="LabelTargetText" Text="" FontSize="14"/>
+                <TextBox x:Name="SelectedText" FontSize="14"
                     IsReadOnly="True" 
                     Margin="0,0,5,0"
                     VerticalScrollBarVisibility="Auto"/>
             
-                <TextBlock Text="書き戻しテキスト" FontSize="14"/>
-                <TextBox x:Uid="ResultText" x:Name="ResultText" FontSize="14"
+                <TextBlock x:Name="LabelUpdatedText" Text="書き戻しテキスト" FontSize="14"/>
+                <TextBox x:Name="ResultText" FontSize="14"
                     IsReadOnly="false" 
                     Margin="0,0,5,0"
                     VerticalScrollBarVisibility="Auto"/>
@@ -24,12 +24,12 @@
 
             </StackPanel>
             <StackPanel Orientation="Horizontal">
-                <TextBlock Text="元テキスト" VerticalAlignment="Center" Margin="0,5,0,5"/>
+                <TextBlock x:Name="OriginalText" Text="" VerticalAlignment="Center" Margin="0,5,0,5"/>
                 <ComboBox Name="BaseTexts" VerticalAlignment="Center" Margin="0,5,0,5" Width="200"
                     SelectionChanged="BaseTexts_SelectionChanged" />
             </StackPanel>
             <StackPanel Orientation="Horizontal" Focusable="False">
-                <TextBlock Text="リソース名を入力" VerticalAlignment="Center" Margin="0,5,0,5"/>
+                <TextBlock x:Name="ResourceKey" Text="リソース名を入力" VerticalAlignment="Center" Margin="0,5,0,5"/>
                 <TextBox x:Name="ResourceKeyBox"
                     Width="200"
                     Margin="5"
@@ -46,12 +46,13 @@
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
                     Margin="0,0,15,0"
-                    ToolTip="クリア"
                     Focusable="False"
                     Click="ResourceClearButton_Click"/>
-                <TextBlock Text="リソース名取得式" 
-                    VerticalAlignment="Center" 
-                    Margin="0,5,0,5"/>
+                <Button x:Name="ResourceGetterExpression"
+                    Content="取得式"
+                    VerticalAlignment="Center"
+                    Margin="0,5,0,5"
+                    Click="ResourceGetterExpression_Click"/>
                 
                 <TextBox x:Name="ResourceGetterBox"
                     Width="200"
@@ -61,9 +62,9 @@
                     LostFocus="ResourceGetterBox_LostFocus"
                     VerticalAlignment="Center"
                     Padding="0,0,25,0"
-                    ToolTipService.ToolTip="public ResourceLoader loader =&#x0a;    Windows.ApplicationModel.Resources.&#x0a;    ResourceLoader.GetForViewIndependentUse();"
+                    ToolTipService.ToolTip=""
                     KeyDown="TextBox_KeyDown" />
-                <CheckBox Name="Feedback" Content="書き戻す" 
+                <CheckBox Name="Feedback" Content="" 
                     IsChecked="True" 
                     Focusable="False"
                     VerticalAlignment="Center" />
@@ -101,8 +102,12 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <Button x:Name="SaveResource" Content="リソースの保存" Click="SaveResource_Click" Margin="5,0,0,0"/>
                     <Button x:Name="SaveAndClose" Content="反映" Click="SaveResource_Click" Margin="15,0,0,0"/>
-                    <Button Content="言語の追加" Click="AddResource" Margin="25,0,0,0"/>
+                    <Button x:Name="AddLanguage" Content="言語の追加" Click="AddResource" Margin="25,0,0,0"/>
                 </StackPanel>
+            </StackPanel>
+            <StackPanel HorizontalAlignment="Center">
+                <TextBox x:Name="ClipText"/>
+                <TextBlock x:Name="Infomation" Text=""/>
             </StackPanel>
         </StackPanel>
     </Grid>

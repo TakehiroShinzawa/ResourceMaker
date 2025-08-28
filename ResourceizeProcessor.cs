@@ -14,6 +14,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -21,6 +22,9 @@ namespace ResourceMaker
 {
     internal static class ResourceizeProcessor
     {
+        private static string devType = string.Empty;
+        private static string cachedProjectPath = string.Empty;
+
         public static async Task RunAsync(DTE2 dte, IServiceProvider serviceProvider)
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
@@ -35,8 +39,6 @@ namespace ResourceMaker
                 editorType = "code";
             else if (fileName?.EndsWith(".xaml", StringComparison.OrdinalIgnoreCase) == true)
                 editorType = "xaml";
-
-            Debug.WriteLine($"Called from: {editorType}");
 
             var selection = dte?.ActiveDocument?.Selection as TextSelection;
             if (selection == null)
@@ -53,27 +55,59 @@ namespace ResourceMaker
 
             string lineText = originalLine.TrimStart();
             string indent = originalLine.Substring(0, originalLine.Length - lineText.Length); // 行頭の空白だけを抽出
-
             //フォルダ関係
             ProjectItem item = activeDoc?.ProjectItem;
             Project owningProject = item?.ContainingProject;
-            var projctFile = owningProject.FullName;
-            string folder = Path.GetDirectoryName(projctFile);
+            var projectFile = owningProject.FullName;
+            string folder = Path.GetDirectoryName(projectFile);
+            bool setLang = true;
+
+            int lcid = dte.LocaleID;
+            CultureInfo culture = new CultureInfo(lcid);
+
+            if (IsVsixProject(owningProject))
+            {
+                devType = "Resources.Strings.resx";
+                var files = Directory.GetFiles(Path.Combine(folder, "Resources"), "Strings.*.resx");
+                if (files.Length != 0)
+                    setLang = false;
+                cachedProjectPath = folder;
+            }
+            else
+            {
+
+                if (folder != cachedProjectPath || string.IsNullOrEmpty(devType))
+                    cachedProjectPath = folder;
+
+                else
+                    setLang = false;
+            }
+
+            if (setLang)
+            {
+                var resLanguage = new LanguageSelectionWindow();
+                resLanguage.DevelopType = devType;
+                resLanguage.LangCulture = culture.ToString();
+                resLanguage.BaseFolderPath = folder;
+                var result = resLanguage.ShowDialog();
+                if (result == false)
+                    return;
+                devType = resLanguage.DevelopType;
+            }
+            
 
             XElement element = null;
             //xamlをひっかける
             if (editorType == "xaml")
                 element = ExtractTextBoxXml(start);
 
-            int lcid = dte.LocaleID;
-            CultureInfo culture = new CultureInfo(lcid);
-
             //リソースエディタの展開
             var resWindow = new ResourceEditWindow(serviceProvider);
             resWindow.LangCulture = culture.ToString();
             resWindow.LineText = lineText;
             resWindow.EditorType = editorType;
-            resWindow.DevelopType = GetResourcePattern(projctFile, dte);
+            resWindow.DevelopType = devType;
+            resWindow.ProjectName = owningProject.Name;
             resWindow.element = element;
             resWindow.BaseFolderPath = folder;
             resWindow.ShowDialog();
@@ -99,17 +133,47 @@ namespace ResourceMaker
             {
                 foreach (Property prop in project.Properties)
                 {
+                    Debug.WriteLine(prop.Name);
                     if (prop?.Name?.StartsWith("VsixProjectExtender.") == true)
                         return true;
                 }
             }
-            catch
-            {
-                // ログ出力などで補足可能
-            }
+            catch { }
 
             return false;
         }
+
+        public static string ResolveDevelopType(string basePath, Project project)
+        {
+            if (IsVsixProject(project))
+                return "vsix";
+
+            // 候補パターン
+            var candidates = new[]
+            {
+                new { Type = "Strings.Resources.resw", Folder = "Strings",name = "Resources", FileExtension = ".resw" },    //UWP
+                new { Type = "Resources.Strings.resx", Folder = "Resources", name = "Strings", FileExtension = ".resx" },    //WinUI3 WPF
+                new { Type = "Properties.Resources.resx", Folder = "Properties",name = "Resources" , FileExtension = ".resx" } // WindowsForms
+
+            };
+            //Resources.Strings.resx
+            foreach (var candidate in candidates)
+            {
+                string folderPath = Path.Combine(basePath, candidate.Folder);
+                if (Directory.Exists(folderPath))
+                {
+                    var files = Directory.GetFiles(folderPath, $"{candidate.name}*{candidate.FileExtension}", SearchOption.AllDirectories);
+                    if (files.Length > 0)
+                    {
+                        return candidate.Type;
+                    }
+                }
+            }
+
+            // 該当なし → ユーザー選択にフォールバック
+            return string.Empty;
+        }
+
         public static string GetResourcePattern(string csprojFile, DTE2 dte)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
@@ -122,26 +186,38 @@ namespace ResourceMaker
             if (IsVsixProject(currentProject))
                 return "vsix";
 
-            if (doc.Descendants(ns + "TargetPlatformIdentifier").Any(e => e.Value == "Windows"))
+            string sdkAttr = doc.Root.Attribute("Sdk")?.Value ?? string.Empty;
+
+            if (sdkAttr.Equals("Microsoft.Maui.Sdk", StringComparison.OrdinalIgnoreCase))
             {
-                resourceFolderTemplate = @"Strings\{culture}\Resources.resw";
-            }
-            else if (doc.Descendants(ns + "PackageReference").Any(e => e.Attribute("Include")?.Value.Contains("Microsoft.WindowsAppSDK") == true))
-            {
-                resourceFolderTemplate = @"Strings\{culture}\Resources.resw";
-            }
-            else if (doc.Descendants(ns + "Reference").Any(e => e.Attribute("Include")?.Value.Contains("PresentationFramework") == true))
-            {
-                resourceFolderTemplate = @"Properties\Resources.{culture}.resx";
-            }
-            else if (doc.Descendants(ns + "UseWindowsForms").Any(e => e.Value == "true") ||
-                     doc.Descendants(ns + "Reference").Any(e => e.Attribute("Include")?.Value.Contains("System.Windows.Forms") == true))
-            {
-                resourceFolderTemplate = @"Properties\Resources.{culture}.resx";
-            }
-            else if (doc.Root.Attribute("Sdk")?.Value.Contains("Microsoft.Maui.Sdk") == true)
-            {
+                // MAUI
                 resourceFolderTemplate = @"Resources.{culture}.resx";
+            }
+            //else if (sdkAttr?.IndexOf("Microsoft.NET.Sdk.WindowsDesktop", StringComparison.OrdinalIgnoreCase) >= 0)
+            else if( sdkAttr.Contains("Microsoft.NET.Sdk.WindowsDeskto"))
+            {
+                // WPF / WinForms の可能性が高い → 下でさらに判定
+                if (doc.Descendants(ns + "UseWindowsForms").Any(e => e.Value.Equals("true", StringComparison.OrdinalIgnoreCase)) ||
+                    doc.Descendants(ns + "Reference").Any(e => string.Equals(e.Attribute("Include")?.Value, "System.Windows.Forms", StringComparison.OrdinalIgnoreCase)))
+                {
+                    resourceFolderTemplate = @"Properties\Resources.{culture}.resx";
+                }
+                else if (doc.Descendants(ns + "Reference").Any(e => string.Equals(e.Attribute("Include")?.Value, "PresentationFramework", StringComparison.OrdinalIgnoreCase)))
+                {
+                    resourceFolderTemplate = @"Properties\Resources.{culture}.resx";
+                }
+            }
+            else if (doc.Descendants(ns + "PackageReference").Any(e =>
+                string.Equals(e.Attribute("Include")?.Value, "Microsoft.WindowsAppSDK", StringComparison.OrdinalIgnoreCase)))
+            {
+                // WinUI 3
+                resourceFolderTemplate = @"Strings\{culture}\Resources.resw";
+            }
+            else if (doc.Descendants(ns + "TargetPlatformIdentifier").Any(e =>
+                e.Value.Equals("Windows", StringComparison.OrdinalIgnoreCase)))
+            {
+                // UWP
+                resourceFolderTemplate = @"Strings\{culture}\Resources.resw";
             }
             else
                 return "resx";
@@ -156,51 +232,62 @@ namespace ResourceMaker
             int currentLine = cursor.Line;
             string lineText = string.Empty;
             bool foundStart = false;
-
-            // 上に向かって `<TextBox` を探す
-            while (currentLine >= 1)
-            {
-                lineText = cursor.GetLines(currentLine, currentLine + 1);
-                if (lineText.Contains("<"))
-                {
-                    foundStart = true;
-                    break;
-                }
-
-                currentLine--;
-                cursor.MoveToLineAndOffset(currentLine - 1, 1);  // 1 は行頭
-            }
-
-            if (!foundStart)
-            {
-                // 見つからなければ null（または例外・エラー通知）
-                return null;
-            }
-
-            // 開始タグ行から、">"が見つかるまで文字列を構築
-            bool doX = true;
             var x = "xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\"";
-            while (!lineText.Contains(">"))
+
+            lineText = (cursor.GetLines(currentLine, currentLine + 1)).Trim();
+            if (lineText.StartsWith("<") && lineText.EndsWith(">"))
             {
-                builder.AppendLine(lineText.Trim());
-                if (doX)
-                {
-                    builder.AppendLine(x);
-                    doX = false;
-                }
-                currentLine++;
-                cursor.MoveToLineAndOffset(currentLine - 1, 1);  // 1 は行頭
-                lineText = cursor.GetLines(currentLine, currentLine + 1);
-
-                // 無限ループ防止（ファイル末端まで達したら終了）
-                if (string.IsNullOrEmpty(lineText))
-                    break;
+                int spacePos = lineText.IndexOf(' ');
+                builder.Append(lineText.Substring(0, spacePos));
+                builder.Append($" {x}");
+                builder.AppendLine(lineText.Substring(spacePos));
+                
             }
+            else
+            {
+                // 上に向かって `<TextBox` を探す
+                while (currentLine >= 1)
+                {
+                    lineText = cursor.GetLines(currentLine, currentLine + 1);
+                    if (lineText.Contains("<"))
+                    {
+                        foundStart = true;
+                        break;
+                    }
 
-            // 最後の">"を含む行も追加
-            builder.AppendLine(lineText.Trim());
-            Debug.WriteLine(builder.ToString());
+                    currentLine--;
+                    cursor.MoveToLineAndOffset(currentLine - 1, 1);  // 1 は行頭
+                }
 
+                if (!foundStart)
+                {
+                    // 見つからなければ null（または例外・エラー通知）
+                    return null;
+                }
+
+                // 開始タグ行から、">"が見つかるまで文字列を構築
+                bool doX = true;
+                while (!lineText.Contains(">"))
+                {
+                    builder.AppendLine(lineText.Trim());
+                    if (doX)
+                    {
+                        builder.AppendLine(x);
+                        doX = false;
+                    }
+                    currentLine++;
+                    cursor.MoveToLineAndOffset(currentLine - 1, 1);  // 1 は行頭
+                    lineText = cursor.GetLines(currentLine, currentLine + 1);
+
+                    // 無限ループ防止（ファイル末端まで達したら終了）
+                    if (string.IsNullOrEmpty(lineText))
+                        break;
+                }
+
+                // 最後の">"を含む行も追加
+                builder.AppendLine(lineText.Trim());
+                Debug.WriteLine(builder.ToString());
+            }
             // XMLとしてパース
             try
             {

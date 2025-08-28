@@ -32,14 +32,18 @@ namespace ResourceMaker.UI
         public string EditorType { get; set; } = string.Empty;
         public string DevelopType { get; set; } = string.Empty;
         public string ProjectName { get; set; } = string.Empty;
+        public string LangCulture { get; set; } = string.Empty;
+
         private string baseFolderPath = string.Empty;
-        private string rootFolderName = string.Empty;
-        List<string> countries = null;
+        private string resFolderName = string.Empty;
+        
+        List<string> countries = new List<string>();
+        
+        private System.Resources.ResourceManager loader;
+        private string resName = string.Empty;
+        private string resSuffix = string.Empty;
 
-        private string loaderGuide = string.Empty;
-
-        private static readonly ResourceManager lodear =
-                new ResourceManager("ResourceMaker.Resources.Resources", typeof(LanguageSelectionWindow).Assembly);
+        public bool isAddResource = false;
 
         public List<string> folderCodes = new List<string>();
         public List<string> allCodes = new List<string>();
@@ -59,7 +63,7 @@ namespace ResourceMaker.UI
         }
 
         private static readonly Regex MyRegex = new Regex(@"^[a-z]{2}(-[A-Z]{2})?$", RegexOptions.Compiled);
-        private static readonly Regex CultureRegex = new Regex(@"Resources(?:\.(?<culture>[a-z]{2}(?:-[A-Z]{2})?))?\.resx$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex CultureRegex = new Regex(@"^(?<basename>.+?)\.(?<culture>[a-z]{2}(?:-[A-Z]{2})?)\.resx$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         public ObservableCollection<LanguageOption> LanguageOptions { get; set; } = new ObservableCollection<LanguageOption>();
         public ObservableCollection<LanguageEntry> CustomLanguages { get; } = new ObservableCollection<LanguageEntry>();
@@ -68,31 +72,37 @@ namespace ResourceMaker.UI
         {
             InitializeComponent();
             this.DataContext = this; // ← これが必要！
+            loader = new ResourceManager("ResourceMaker.Resources.Strings", GetType().Assembly);
+            LocalizeScreenXaml();
 
         }
-
+        private void LocalizeScreenXaml()
+        {
+            SelectLanguagesGuide.Text = loader.GetString("SelectLanguagesGuide.Text");
+            AdditionalLanguageCode.Text = loader.GetString("AdditionalLanguageCode.Text");
+        }
         public void LoadLanguageOptionsFromFolder(string basePath)
         {
-            countries = null;
-            
-            switch ( DevelopType)
+            countries = new List<string>();
+
+            if (string.IsNullOrEmpty(DevelopType))
             {
-                case "resw":
-                    rootFolderName = "Strings";
-                    break;
-                case "resx":
-                    rootFolderName = "Properties";
-                    break;
-                case "vsix":
-                    rootFolderName = "Resources";
-                    break;
+                ProjectTypePanel.Visibility = Visibility.Visible;
+                LanguagePanel.Visibility = Visibility.Collapsed; 
+            }
+            else
+            {
+                var tmp = DevelopType.Split('.');
+                resFolderName = tmp[0];
+                resName = tmp[1];
+                resSuffix = tmp[2];
             }
 
-            var resourcesRoot = Path.Combine(BaseFolderPath, rootFolderName);
+            var resourcesRoot = Path.Combine(BaseFolderPath, resFolderName);
             if (Directory.Exists(resourcesRoot))
             {
                 // フォルダが存在している
-                if (DevelopType == "resw")
+                if (resSuffix == "resw")
                 { //UWP
                     countries = Directory.GetDirectories(resourcesRoot)
                         .Select(Path.GetFileName)
@@ -100,9 +110,9 @@ namespace ResourceMaker.UI
                        .Distinct()
                        .ToList();
                 }
-                else if (DevelopType.Substring(1) == "resx" || DevelopType == "vsix")
+                else 
                 {// WPF MAUI vsix
-                    countries = Directory.GetFiles(resourcesRoot)
+                    countries = Directory.GetFiles(resourcesRoot, $"{resName}.*.{resSuffix}")
                         .Select(path => Path.GetFileName(path))
                         .Select(file =>
                         {
@@ -111,29 +121,28 @@ namespace ResourceMaker.UI
                                 ? match.Groups["culture"].Value // 空文字列なら中立言語
                                 : null;
                         })
-                        .Where(culture => culture != null) // 中立言語を除外するならここでフィルタ
+                        .Where(culture => !string.IsNullOrEmpty(culture)) // 中立言語を除外するならここでフィルタ
                         .Distinct()
                         .ToList();
                 }
             }
             else
-            {
                 // フォルダが存在していない
                 Directory.CreateDirectory(resourcesRoot);
-                countries = new List<string>();
-            }
 
             LanguageOptions.Clear();
             // ① 初期言語を設定
-            var defaultCodes = new[] { "ja-JP", "en-US" , "zh-CN", "fr-FR"};
+            var defaultCodes = new[] { "ja-JP", "en-US", "zh-CN", "fr-FR" };
             foreach (var code in defaultCodes)
             {
                 LanguageOptions.Add(new LanguageOption
                 {
                     DisplayName = code,
                     CultureCode = code,
-                    IsSelected = false
+                    IsSelected = (code == "en-US" || code == LangCulture),
+                    IsEnabled = (code != "en-US") // en-US はチェック不可
                 });
+
             }
 
             // ② countries の内容で反映
@@ -201,6 +210,10 @@ namespace ResourceMaker.UI
                 if (string.IsNullOrWhiteSpace(basePath))
                     return false;
 
+                var tmp = DevelopType.Split('.');
+                resFolderName = tmp[0];
+                resName = tmp[1];
+                resSuffix = tmp[2];
                 if (!Directory.Exists(basePath))
                     Directory.CreateDirectory(basePath);
 
@@ -213,20 +226,22 @@ namespace ResourceMaker.UI
                 await Task.Run(() =>
                 {
                     // 重たい処理（例：フォルダ作成など）
-                    string folderPath = basePath;
-                    string fileName = "Resources.resw";
+                    string folderBase = Path.Combine(basePath, resFolderName);
+                    string folderPath = folderBase;
+                    string fileName = $"{resName}.{resSuffix}";
+                    if (!Directory.Exists(folderPath))
+                        Directory.CreateDirectory(folderPath);
 
                     foreach (var code in allCodes)
                     {
-                        if (DevelopType == "resw")
+                        if (resSuffix == "resw")
                         {
-                            folderPath = Path.Combine(basePath, code);
+                            folderPath = Path.Combine(folderBase, code);
                             if (!Directory.Exists(folderPath))
                                 Directory.CreateDirectory(folderPath);
                         }
                         else
-                            fileName = $"Resources.{code}.resx";
-
+                            fileName = $"{resName}.{code}.{resSuffix}";
                         //テンプレートの作成
                         string filePath = Path.Combine(folderPath, fileName);
 
@@ -256,18 +271,18 @@ namespace ResourceMaker.UI
                             notInAllCodes.Add(item);
 
                     }
-                    foreach (var item in notInAllCodes)
+                    foreach (var code in notInAllCodes)
                     {
                         try
                         {
-                            if (DevelopType == "resw")
+                            if (resSuffix == "resw")
                             {
-                                folderPath = Path.Combine(basePath, item);
+                                folderPath = Path.Combine(basePath, code);
                                 Directory.Delete(folderPath, true); // true で中身も再帰的に削除
                             }
                             else
                             {
-                                fileName = $"Resources.{item}.resx";
+                                fileName = $"{resName}.{code}.{resSuffix}";
                                 string fullPath = Path.Combine(basePath, fileName);
                                 File.Delete(fullPath);
                             }
@@ -275,7 +290,7 @@ namespace ResourceMaker.UI
                         catch { }
 
                     }
-
+                    ResourceCacheController.Clear();
                 });
                 return true;
             }
@@ -290,13 +305,25 @@ namespace ResourceMaker.UI
         {
             try
             {
-                this.DialogResult = await CreateLanguageCodeFoldersAsync(Path.Combine(BaseFolderPath, rootFolderName));
+                if (string.IsNullOrEmpty(DevelopType))
+                    return;
+
+                this.DialogResult = await CreateLanguageCodeFoldersAsync(BaseFolderPath);
                 this.Close();
             }
             catch { }
         }
-    }
 
+        private void ProjectType_Checked(object sender, RoutedEventArgs e)
+        {
+            if (sender is RadioButton rb && rb.Tag is string type)
+            {
+                DevelopType = type;
+                LanguagePanel.Visibility = Visibility.Visible;
+                LoadLanguageOptionsFromFolder(baseFolderPath);
+            }
+        }
+    }
     public class LanguageEntry : INotifyPropertyChanged
     {
         private string _code = string.Empty;
@@ -317,5 +344,6 @@ namespace ResourceMaker.UI
         public string DisplayName { get; internal set; } = string.Empty;
         public string CultureCode { get; internal set; } = string.Empty;
         public bool IsSelected { get; set; } = false;
+        public bool IsEnabled {  get; set; } = false;
     }
 }

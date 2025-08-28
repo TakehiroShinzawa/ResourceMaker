@@ -117,7 +117,46 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ResourceizeText" xml:space="preserve">
-    <value>リソース化</value>
-  </data>
+<data name="ResourceizeText" xml:space="preserve">
+    <value>Ressourcisation</value>
+</data>
+<data name="LabelTargetText.Text" xml:space="preserve">
+    <value>Texte cible</value>
+</data>
+<data name="LabelUpdatedText.Text" xml:space="preserve">
+    <value>Texte réécrit</value>
+</data>
+<data name="OriginalText.Text" xml:space="preserve">
+    <value>Texte original</value>
+</data>
+<data name="ResourceKey.Text" xml:space="preserve">
+    <value>Entrez le nom de la ressource</value>
+</data>
+<data name="ResourceGetterExpression.Content" xml:space="preserve">
+    <value>Expression d’obtention de ressource</value>
+</data>
+<data name="Feedback.Content" xml:space="preserve">
+    <value>Réécrire</value>
+</data>
+<data name="SaveResource.Content" xml:space="preserve">
+    <value>Appliquer</value>
+</data>
+<data name="SaveAndClose.Content" xml:space="preserve">
+    <value>Enregistrer</value>
+</data>
+<data name="AddLanguage.Content" xml:space="preserve">
+    <value>Ajouter une langue</value>
+</data>
+<data name="SelectLanguagesGuide.Text" xml:space="preserve">
+    <value>Veuillez sélectionner la langue à utiliser</value>
+</data>
+<data name="AdditionalLanguageCode.Text" xml:space="preserve">
+    <value>Code langue supplémentaire (ex : it-IT)</value>
+</data>
+<data name="LoaderDeclaration" xml:space="preserve">
+    <value>Déclaration du loader copiée dans le presse-papiers</value>
+</data>
+<data name="NotSetTooltip" xml:space="preserve">
+    <value>Info-bulle non définie</value>
+</data>
 </root>
