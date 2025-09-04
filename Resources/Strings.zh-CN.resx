@@ -117,46 +117,64 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-<data name="ResourceizeText" xml:space="preserve">
+  <data name="ResourceizeText" xml:space="preserve">
     <value>资源化</value>
-</data>
-<data name="LabelTargetText.Text" xml:space="preserve">
+  </data>
+  <data name="LabelTargetText.Text" xml:space="preserve">
     <value>目标文本</value>
-</data>
-<data name="LabelUpdatedText.Text" xml:space="preserve">
+  </data>
+  <data name="LabelUpdatedText.Text" xml:space="preserve">
     <value>回写文本</value>
-</data>
-<data name="OriginalText.Text" xml:space="preserve">
+  </data>
+  <data name="OriginalText.Text" xml:space="preserve">
     <value>原始文本</value>
-</data>
-<data name="ResourceKey.Text" xml:space="preserve">
+  </data>
+  <data name="ResourceKey.Text" xml:space="preserve">
     <value>请输入资源名称</value>
-</data>
-<data name="ResourceGetterExpression.Content" xml:space="preserve">
+  </data>
+  <data name="ResourceGetterExpression.Content" xml:space="preserve">
     <value>资源获取表达式</value>
-</data>
-<data name="Feedback.Content" xml:space="preserve">
+  </data>
+  <data name="Feedback.Content" xml:space="preserve">
     <value>回写</value>
-</data>
-<data name="SaveResource.Content" xml:space="preserve">
+  </data>
+  <data name="SaveResource.Content" xml:space="preserve">
     <value>应用</value>
-</data>
-<data name="SaveAndClose.Content" xml:space="preserve">
+  </data>
+  <data name="SaveAndClose.Content" xml:space="preserve">
     <value>保存</value>
-</data>
-<data name="AddLanguage.Content" xml:space="preserve">
+  </data>
+  <data name="AddLanguage.Content" xml:space="preserve">
     <value>添加语言</value>
-</data>
-<data name="SelectLanguagesGuide.Text" xml:space="preserve">
+  </data>
+  <data name="SelectLanguagesGuide.Text" xml:space="preserve">
     <value>请选择要使用的语言</value>
-</data>
-<data name="AdditionalLanguageCode.Text" xml:space="preserve">
+  </data>
+  <data name="AdditionalLanguageCode.Text" xml:space="preserve">
     <value>附加语言代码（例如：it-IT）</value>
-</data>
-<data name="LoaderDeclaration" xml:space="preserve">
+  </data>
+  <data name="LoaderDeclaration" xml:space="preserve">
     <value>已将 loader 声明复制到剪贴板</value>
-</data>
-<data name="NotSetTooltip" xml:space="preserve">
+  </data>
+  <data name="NotSetTooltip" xml:space="preserve">
     <value>未设置工具提示</value>
-</data>
+  </data>
+  <data name="ClearCache.Content" xml:space="preserve">
+    <value>清除缓存</value>
+  </data>
+  <data name="ProjectSelector.Text" xml:space="preserve">
+    <value>请选择项目类型。</value>
+  </data>
+  <data name="BtnCreate.Content" xml:space="preserve">
+    <value>创建</value>
+  </data>
+  <data name="BtnCancel.Content" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="BtnClose.Content" xml:space="preserve">
+    <value>关闭</value>
+  </data>
+  <data name="BtnAdd.Content" xml:space="preserve">
+    <value>添加</value>
+  </data>
 </root>

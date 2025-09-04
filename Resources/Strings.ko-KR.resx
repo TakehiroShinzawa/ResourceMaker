@@ -117,46 +117,64 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-<data name="ResourceizeText" xml:space="preserve">
+  <data name="ResourceizeText" xml:space="preserve">
     <value>리소스화</value>
-</data>
-<data name="LabelTargetText.Text" xml:space="preserve">
+  </data>
+  <data name="LabelTargetText.Text" xml:space="preserve">
     <value>대상 텍스트</value>
-</data>
-<data name="LabelUpdatedText.Text" xml:space="preserve">
+  </data>
+  <data name="LabelUpdatedText.Text" xml:space="preserve">
     <value>되쓰기 텍스트</value>
-</data>
-<data name="OriginalText.Text" xml:space="preserve">
+  </data>
+  <data name="OriginalText.Text" xml:space="preserve">
     <value>원본 텍스트</value>
-</data>
-<data name="ResourceKey.Text" xml:space="preserve">
+  </data>
+  <data name="ResourceKey.Text" xml:space="preserve">
     <value>리소스 이름을 입력하세요</value>
-</data>
-<data name="ResourceGetterExpression.Content" xml:space="preserve">
+  </data>
+  <data name="ResourceGetterExpression.Content" xml:space="preserve">
     <value>리소스 가져오기 식</value>
-</data>
-<data name="Feedback.Content" xml:space="preserve">
+  </data>
+  <data name="Feedback.Content" xml:space="preserve">
     <value>되쓰기</value>
-</data>
-<data name="SaveResource.Content" xml:space="preserve">
+  </data>
+  <data name="SaveResource.Content" xml:space="preserve">
     <value>반영</value>
-</data>
-<data name="SaveAndClose.Content" xml:space="preserve">
+  </data>
+  <data name="SaveAndClose.Content" xml:space="preserve">
     <value>저장</value>
-</data>
-<data name="AddLanguage.Content" xml:space="preserve">
+  </data>
+  <data name="AddLanguage.Content" xml:space="preserve">
     <value>언어 추가</value>
-</data>
-<data name="SelectLanguagesGuide.Text" xml:space="preserve">
+  </data>
+  <data name="SelectLanguagesGuide.Text" xml:space="preserve">
     <value>사용할 언어를 선택하세요</value>
-</data>
-<data name="AdditionalLanguageCode.Text" xml:space="preserve">
+  </data>
+  <data name="AdditionalLanguageCode.Text" xml:space="preserve">
     <value>추가 언어 코드 (예: it-IT)</value>
-</data>
-<data name="LoaderDeclaration" xml:space="preserve">
+  </data>
+  <data name="LoaderDeclaration" xml:space="preserve">
     <value>loader 선언이 클립보드에 복사되었습니다</value>
-</data>
-<data name="NotSetTooltip" xml:space="preserve">
+  </data>
+  <data name="NotSetTooltip" xml:space="preserve">
     <value>툴팁이 설정되지 않았습니다</value>
-</data>
+  </data>
+  <data name="ClearCache.Content" xml:space="preserve">
+    <value>캐시 지우기</value>
+  </data>
+  <data name="ProjectSelector.Text" xml:space="preserve">
+    <value>프로젝트 유형을 선택하세요.</value>
+  </data>
+  <data name="BtnCreate.Content" xml:space="preserve">
+    <value>만들기</value>
+  </data>
+  <data name="BtnCancel.Content" xml:space="preserve">
+    <value>취소</value>
+  </data>
+  <data name="BtnClose.Content" xml:space="preserve">
+    <value>닫기</value>
+  </data>
+  <data name="BtnAdd.Content" xml:space="preserve">
+    <value>추가</value>
+  </data>
 </root>

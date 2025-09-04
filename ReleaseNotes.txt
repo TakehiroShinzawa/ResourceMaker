@@ -1,0 +1,9 @@
+## Version 1.0.0 - 2025-08-31
+
+### 🚀 Initial Release
+- First public release of the extension.
+- Supports multi-language resource management for WPF, WinUI, and VSIX projects.
+
+### 🌐 日本語補足
+- 拡張機能の初回公開バージョンです。
+- UWP、WPF、WinUI、VSIX向けの多言語リソース管理に対応。

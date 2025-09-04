@@ -34,23 +34,23 @@ namespace ResourceMaker
                     if (cachedNodes == null || cachedNodes.Count == 0)
                     {
                         cachedNodes = new List<XNode>
-                    {
-                        new XElement("resheader",
-                            new XAttribute("name", "resmimetype"),
-                            new XElement("value", "text/microsoft-resx")),
+                        {
+                            new XElement("resheader",
+                                new XAttribute("name", "resmimetype"),
+                                new XElement("value", "text/microsoft-resx")),
 
-                        new XElement("resheader",
-                            new XAttribute("name", "version"),
-                            new XElement("value", "2.0")),
+                            new XElement("resheader",
+                                new XAttribute("name", "version"),
+                                new XElement("value", "2.0")),
 
-                        new XElement("resheader",
-                            new XAttribute("name", "reader"),
-                            new XElement("value", "System.Resources.ResXResourceReader, System.Windows.Forms")),
+                            new XElement("resheader",
+                                new XAttribute("name", "reader"),
+                                new XElement("value", "System.Resources.ResXResourceReader, System.Windows.Forms")),
 
-                        new XElement("resheader",
-                            new XAttribute("name", "writer"),
-                            new XElement("value", "System.Resources.ResXResourceWriter, System.Windows.Forms"))
-                    };
+                            new XElement("resheader",
+                                new XAttribute("name", "writer"),
+                                new XElement("value", "System.Resources.ResXResourceWriter, System.Windows.Forms"))
+                        };
                     }
 
                     var addedFolderPath = Path.Combine(baseFolderPath, ResourceFolder);
@@ -91,7 +91,7 @@ namespace ResourceMaker
                         );
 
                         doc.Save(reswFilePath);
-                        if (langCode == "en-US")
+                        if ( resSuffix != "resw" && langCode == "en-US")
                             File.Copy(reswFilePath, reswFilePath.Replace("en-US.", ""), overwrite: true);
 
                     }

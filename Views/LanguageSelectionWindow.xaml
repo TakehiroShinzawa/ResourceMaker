@@ -10,7 +10,7 @@
         <StackPanel Margin="20">
             <StackPanel x:Name="ProjectTypePanel" Visibility="Collapsed" Margin="10">
                 <!-- ラベル -->
-                <TextBlock Text="プロジェクトタイプを選択してください"
+                <TextBlock x:Name="ProjectSelector" Text="プロジェクトタイプ"
                FontWeight="Bold"
                Margin="0,0,0,8"
                HorizontalAlignment="Left" />
@@ -23,12 +23,12 @@
                      Checked="ProjectType_Checked"
                      Margin="0,0,20,0" />
 
-                    <RadioButton Content="resx (WinUI3/WPF) ./Resources.Strings.{country}.resx"
+                    <RadioButton Content="resx (WinUI3/WPF) ./Resources/Strings.{country}.resx"
                      Tag="Resources.Strings.resx"
                      Checked="ProjectType_Checked"
                     GroupName="ProjectType" />
                     
-                    <RadioButton Content="resx (WinForms) ./Properties.Resources.{country}.resx"
+                    <RadioButton Content="resx (WinForms) ./Properties/Resources.{country}.resx"
                      Tag="Properties.Resources.resx"
                      Checked="ProjectType_Checked"
                     GroupName="ProjectType" />
@@ -38,19 +38,19 @@
                 <StackPanel Orientation="Horizontal">
                     <TextBlock x:Name="SelectLanguagesGuide" Text="語を選択してください" FontSize="14" Margin="0,0,20,10"/>
                     <Button 
-                        Content="Create"
+                         x:Name="BtnCreate" Content="Create"
                         VerticalAlignment="Center"
                         Click="MakeFolders_Click" Margin="0,0,20,10"/>
                     
                     <Button 
-                        Content="Cancel"
+                         x:Name="BtnCancel" Content="Cancel"
                         VerticalAlignment="Center"
                         Click="MakeFoldersCancel_Click" Margin="0,0,20,10"/>
 
                     <Button 
-                        Content="Close"
+                         x:Name="BtnClose" Content="Close"
                         VerticalAlignment="Center"
-                        Click="MakeFolders_Click" Margin="0,0,20,10"/>
+                        Click="BtnClose_Click" Margin="0,0,20,10"/>
 
                 </StackPanel>
                 <ItemsControl ItemsSource="{Binding LanguageOptions}">
@@ -71,7 +71,7 @@
                                     Command="{Binding AddNewLanguageCommand}" />
                             </TextBox.InputBindings>
                         </TextBox>
-                        <Button Content="Add" Command="{Binding AddNewLanguageCommand}" Margin="5,0,0,0" />
+                        <Button x:Name="BtnAdd" Content="Add" Command="{Binding AddNewLanguageCommand}" Margin="5,0,0,0" />
                     </StackPanel>
                     <Separator Margin="5" Height="2" Background="Gray" />
                     <ItemsControl ItemsSource="{Binding CustomLanguages}">

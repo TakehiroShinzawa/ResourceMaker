@@ -1,21 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="ResourceMaker.c247936d-a5f2-4c53-a393-5017c1811a99" Version="1.0" Language="ja-JP" Publisher="hiros435" />
-        <DisplayName>言語リソース化支援ツール</DisplayName>
-        <Description xml:space="preserve">XAMLアイテム/固定文字列からリソースキーを自動生成し、.reswに登録する拡張機能</Description>
+        <Identity Id="ResourceMaker.c247936d-a5f2-4c53-a393-5017c1811a99" Version="1.0" Language="en-US" Publisher="hiros435" />
+        <DisplayName>ResourceMaker – 言語リソース化支援ツール</DisplayName>
+        <Description xml:space="preserve">ResourceMaker is a localization-friendly extension for Visual Studio that streamlines multi-language resource management.
+
+It allows developers to extract string literals from code or XAML editors, assign keys and values across multiple languages, and export them directly into resource (.resx/.resw) files.  
+Existing keys and values are automatically loaded from resource files and displayed for reference.
+---
+
+多言語化支援ツールです。コードやXAMLエディタ上の文字列を抽出し、各言語のキーと値を設定して、.resx/.reswファイルに書き出します。処理中のリソースは設定言語全て読み込み表示されます。言語の追加・削除にも対応しています。
+
+Supported features include:
+- Multi-language key/value assignment (Japanese, English, Chinese, French, Korean, etc.)
+- Dynamic language addition/removal
+- Placeholder-aware templates for scalable localization
+- Context-aware resource preview and overwrite detection
+
+Designed for reproducibility, clarity, and team scalability, ResourceMaker empowers developers to maintain clean, localized UI and error messaging across diverse .NET projects.
+
+</Description>
+        <MoreInfo>https://note.com/alert_zephyr9426/n/n57f10b4add5d</MoreInfo>
+        <License >licence.txt</License>
+        <ReleaseNotes>ReleaseNotes.txt</ReleaseNotes>
+        <Icon>icon.png</Icon>
+        <Tags>localization,translation,multilanguage,resource,resx,resw,internationalization,globalization,多言語対応,リソース化ツール</Tags>
     </Metadata>
     <Installation>
-        <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.0, 18.0)">
+        <!-- VS2019 (32bit) -->
+
+        <!-- VS2022 (64bit) -->
+        <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.0,18.0)">
+            <ProductArchitecture>amd64</ProductArchitecture>
+        </InstallationTarget>
+        <InstallationTarget Id="Microsoft.VisualStudio.Professional" Version="[17.0,18.0)">
+            <ProductArchitecture>amd64</ProductArchitecture>
+        </InstallationTarget>
+        <InstallationTarget Id="Microsoft.VisualStudio.Enterprise" Version="[17.0,18.0)">
             <ProductArchitecture>amd64</ProductArchitecture>
         </InstallationTarget>
     </Installation>
     <Dependencies>
         <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.5,)" />
-        <Dependency Id="Microsoft.VisualStudio.MPF.16.0" DisplayName="Visual Studio MPF 16.0" d:Source="Installed" Version="[16.0,17.0)" />
     </Dependencies>
     <Prerequisites>
-        <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[17.0,18.0)" DisplayName="Visual Studio core editor" />
+        <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[16.0,19.0)" DisplayName="Visual Studio core editor" />
     </Prerequisites>
     <Assets>
         <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />

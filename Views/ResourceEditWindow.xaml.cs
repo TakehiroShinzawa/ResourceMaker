@@ -50,10 +50,11 @@ namespace ResourceMaker.UI
 
         private bool isUpdating = false;
         private bool isUidMode = false;
-        private string resFolderName = string.Empty;
 
+        private string resFolderName = string.Empty;
         private string resName = string.Empty;
         private string resSuffix = string.Empty;
+        private bool isUWP = false;
 
         private string lastKeyName = string.Empty;
         private Dictionary<string, Dictionary<string, string>> cacheList = new Dictionary<string, Dictionary<string, string>>();
@@ -159,7 +160,7 @@ namespace ResourceMaker.UI
             SaveAndClose.Content = loader.GetString("SaveAndClose.Content");
             SaveResource.Content = loader.GetString("SaveResource.Content");
             AddLanguage.Content = loader.GetString("AddLanguage.Content");
-
+            ClearCache.Content = loader.GetString("ClearCache.Content");
         }
 #endif
         public ResourceEditWindow()
@@ -181,17 +182,24 @@ namespace ResourceMaker.UI
             resFolderName = tmp[0];
             resName = tmp[1];
             resSuffix = tmp[2];
+            isUWP = resSuffix == "resw";
             resourcerFilename = Path.Combine(basePath, "ResourceAdder.cs");
 
-            var loaderGuide = $"System.Resources.ResourceManager loader = \r\n    new ResourceManager(\"{ProjectName}.{resFolderName}.Resources\", GetType().Assembly);";
-            //        private readonly System.Resources.ResourceManager loader = 
-            //new ResourceManager("ResourceMaker.LanguageResources.Resources", typeof(ResourceEditWindow).Assembly);
+            
+
+            string loaderGuide;
+            if (isUWP)
+                loaderGuide = $"Windows.ApplicationModel.Resources.ResourceLoader loader = \r\n    ResourceLoader.GetForViewIndependentUse();";
+
+            else
+                loaderGuide = $"System.Resources.ResourceManager loader = \r\n    new ResourceManager(\"{ProjectName}.{resFolderName}.{resName}\", GetType().Assembly);";
+
             ToolTipService.SetToolTip(ResourceGetterBox, loaderGuide);
 
 
             var resourcesRoot = Path.Combine(baseFolderPath, resFolderName);
 
-            if (resSuffix == "resw")
+            if (isUWP)
             { //UWP
                 allCodes = Directory.GetDirectories(resourcesRoot)
                     .Select(Path.GetFileName)
@@ -201,7 +209,6 @@ namespace ResourceMaker.UI
             }
             else 
             {// WPF MAUI vsix
-                var hh = Directory.GetFiles(resourcesRoot);
                 allCodes = Directory.GetFiles(resourcesRoot)
                     .Select(path => Path.GetFileName(path))
                     .Select(file =>
@@ -301,7 +308,8 @@ namespace ResourceMaker.UI
             {
                 try
                 {
-                    File.AppendAllText(resourcerFilename, $"{ResourceKeyBox.Text} = {ResourceGetterBox.Text}(\"{ResourceKeyBox.Text}\");{Environment.NewLine}");
+                    if( !isUWP)
+                        File.AppendAllText(resourcerFilename, $"{ResourceKeyBox.Text} = {ResourceGetterBox.Text}(\"{ResourceKeyBox.Text}\");{Environment.NewLine}");
 
                     //キャッシュに書き戻す
                     foreach (var langCode in allCodes)
@@ -312,9 +320,9 @@ namespace ResourceMaker.UI
                         cacheList[langCode][ResourceKeyBox.Text] = existingEntry.Value;
                     }
 
-                    ResourceCacheController.Save(baseFolderPath, resFolderName, DevelopType);
                     if (button.Name == "SaveAndClose")
                     {
+                        ResourceCacheController.Save(baseFolderPath, resFolderName, DevelopType);
                         FeedbackText = ResultText.Text;
                         this.Close();
                     }
@@ -464,31 +472,34 @@ namespace ResourceMaker.UI
 
         private void MakeXamlForm()
         {
-            var tmp = DevelopType.Split('.');
-            resFolderName = tmp[0];
-            resName = tmp[1];
-            resSuffix = tmp[2];
-
+            int adjPos = 4;
             string itemsKey = string.Empty;
             string result = string.Empty;
             string searchWord = string.Empty;
+            bool needXUid = false;
             bool noName = true;
-            if (resSuffix == "resw")
+            if (isUWP)
                 searchWord = "Uid";
             else
                 searchWord = "Name";
+
             var pos = LineText.IndexOf("x:" + searchWord + "=");
 
+            if (pos == -1 && !isUWP)
+            {
+                pos = LineText.IndexOf(" " + searchWord + "=");
+                adjPos--;
+            }
             if (pos > -1)
             {
                 string keyname = string.Empty;
-                pos += (searchWord.Length + 4);
+                pos += (searchWord.Length + adjPos);
 
                 var pos2 = LineText.IndexOf('\"', pos);
                 if (pos2 != -1)
                     keyname = LineText.Substring(pos, pos2 - pos);
-                
-                if(!string.IsNullOrEmpty(keyname))
+
+                if (!string.IsNullOrEmpty(keyname))
                 // uidなら設定済みデータを登録
                 {
                     Dictionary<string, string> firstInnerDict = cacheList.Values.FirstOrDefault();
@@ -525,20 +536,38 @@ namespace ResourceMaker.UI
 
             if (String.IsNullOrEmpty(uidName))
             {// x:Nameを検索
-                xName = GetUid("Name");
-                if (String.IsNullOrEmpty(xName))
+                if (isUWP)// UWPならx:Uidを補填しないとね。
+                    needXUid = true;
+
+                uidName = GetUid("Name");
+                if (String.IsNullOrEmpty(uidName))
                 {
-                    xName = GetXmlValue("Name");
-                    noName = String.IsNullOrEmpty(xName);
+                    uidName = GetXmlValue("Name");
+                    noName = String.IsNullOrEmpty(uidName);
                 }
                 else
                     noName = false;
             }
             else
+            {
                 noName = false;
 
-            //
+            }
 
+            if (!noName)
+            {
+                var itemToRemove = BaseTexts.Items
+                .Cast<object>()
+                .FirstOrDefault(item => item?.ToString() == uidName);
+
+                if (itemToRemove != null)
+                {
+                    isUpdating = true;
+                    BaseTexts.Items.Remove(itemToRemove);
+                    BaseTexts.SelectedIndex = 0;
+                    isUpdating = false;
+                }
+            }
             itemsKey = GetXmlKeyname(BaseTexts.Text);
             string resultText = string.Empty;
 
@@ -552,33 +581,36 @@ namespace ResourceMaker.UI
             }
             else
             {
-                if (string.IsNullOrEmpty(uidName))
-                {// ネームからxUidを生成
-                    resultText = xName;
-                    ResourceKeyBox.Text = $"{xName}.{itemsKey}";
-                    xUid = xName;
-                }
-                else
+                //if (string.IsNullOrEmpty(uidName))
+                //{// ネームからxUidを生成
+                //    resultText = xName;
+                //    ResourceKeyBox.Text = $"{xName}.{itemsKey}";
+                //    xUid = xName;
+                //}
+                //else
                 {//uid発見なら
                     xUid = uidName;
                     ResourceKeyBox.Text = $"{uidName}.{itemsKey}";
                 }
             }
             //結果置き場
-            if ((DevelopType == "vsix" && string.IsNullOrEmpty(uidName) && string.IsNullOrEmpty(xName))                ||
-                (DevelopType != "vsix" && string.IsNullOrEmpty(uidName)))
+            if ((!isUWP && string.IsNullOrEmpty(uidName) && string.IsNullOrEmpty(xName)) || needXUid)
             {// x:Uidを捏造挿入
+                if (!noName && needXUid)
+                    resultText = uidName;
+
                 if (LineText.StartsWith("<"))
                     ResultText.Text = InsertUid(LineText, resultText, searchWord);
 
                 else
-                    ResultText.Text = $" x:{searchWord}=\"{resultText}\" {LineText.Replace(BaseTexts.Text,"")}";
+                    ResultText.Text = $" x:{searchWord}=\"{resultText}\" {LineText.Replace(BaseTexts.Text, "")}";
             }
             else
             {
                 ResultText.Text = LineText;
                 noValue = false;
             }
+
         }
 
         public string InsertUid(string xamlLine, string uidValue, string keyWord)
@@ -711,5 +743,10 @@ namespace ResourceMaker.UI
             Infomation.Text = loader.GetString("LoaderDeclaration");
         }
 
+        private void ClearCache_Click(object sender, RoutedEventArgs e)
+        {
+            ResourceCacheController.Clear();
+            this.Close();
+        }
     }
 }

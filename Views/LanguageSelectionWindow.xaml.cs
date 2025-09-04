@@ -80,6 +80,11 @@ namespace ResourceMaker.UI
         {
             SelectLanguagesGuide.Text = loader.GetString("SelectLanguagesGuide.Text");
             AdditionalLanguageCode.Text = loader.GetString("AdditionalLanguageCode.Text");
+            ProjectSelector.Text = loader.GetString("ProjectSelector.Text");
+            BtnCreate.Content = loader.GetString("BtnCreate.Content");
+            BtnCancel.Content = loader.GetString("BtnCancel.Content");
+            BtnClose.Content = loader.GetString("BtnClose.Content");
+            BtnAdd.Content = loader.GetString("BtnAdd.Content");
         }
         public void LoadLanguageOptionsFromFolder(string basePath)
         {
@@ -160,7 +165,8 @@ namespace ResourceMaker.UI
                     {
                         DisplayName = folderCode,
                         CultureCode = folderCode,
-                        IsSelected = true
+                        IsSelected = true,
+                        IsEnabled = true
                     });
             }
         }
@@ -322,6 +328,12 @@ namespace ResourceMaker.UI
                 LanguagePanel.Visibility = Visibility.Visible;
                 LoadLanguageOptionsFromFolder(baseFolderPath);
             }
+        }
+
+        private void BtnClose_Click(object sender, RoutedEventArgs e)
+        {
+            this.DialogResult = !string.IsNullOrEmpty(DevelopType);
+            this.Close();
         }
     }
     public class LanguageEntry : INotifyPropertyChanged

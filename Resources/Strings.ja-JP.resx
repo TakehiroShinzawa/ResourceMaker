@@ -159,4 +159,22 @@
   <data name="NotSetTooltip" xml:space="preserve">
     <value>ツールチップが設定されていません</value>
   </data>
+  <data name="ClearCache.Content" xml:space="preserve">
+    <value>キャッシュをクリア</value>
+  </data>
+  <data name="ProjectSelector.Text" xml:space="preserve">
+    <value>プロジェクトタイプを選択してください</value>
+  </data>
+  <data name="BtnCreate.Content" xml:space="preserve">
+    <value>作成</value>
+  </data>
+  <data name="BtnCancel.Content" xml:space="preserve">
+    <value>キャンセル</value>
+  </data>
+  <data name="BtnClose.Content" xml:space="preserve">
+    <value>閉じる</value>
+  </data>
+  <data name="BtnAdd.Content" xml:space="preserve">
+    <value>追加</value>
+  </data>
 </root>

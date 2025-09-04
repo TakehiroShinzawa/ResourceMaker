@@ -65,6 +65,9 @@ namespace ResourceMaker
             int lcid = dte.LocaleID;
             CultureInfo culture = new CultureInfo(lcid);
 
+            if (folder != cachedProjectPath)
+                devType = string.Empty;
+
             if (IsVsixProject(owningProject))
             {
                 devType = "Resources.Strings.resx";
@@ -94,7 +97,6 @@ namespace ResourceMaker
                     return;
                 devType = resLanguage.DevelopType;
             }
-            
 
             XElement element = null;
             //xamlをひっかける
@@ -143,86 +145,6 @@ namespace ResourceMaker
             return false;
         }
 
-        public static string ResolveDevelopType(string basePath, Project project)
-        {
-            if (IsVsixProject(project))
-                return "vsix";
-
-            // 候補パターン
-            var candidates = new[]
-            {
-                new { Type = "Strings.Resources.resw", Folder = "Strings",name = "Resources", FileExtension = ".resw" },    //UWP
-                new { Type = "Resources.Strings.resx", Folder = "Resources", name = "Strings", FileExtension = ".resx" },    //WinUI3 WPF
-                new { Type = "Properties.Resources.resx", Folder = "Properties",name = "Resources" , FileExtension = ".resx" } // WindowsForms
-
-            };
-            //Resources.Strings.resx
-            foreach (var candidate in candidates)
-            {
-                string folderPath = Path.Combine(basePath, candidate.Folder);
-                if (Directory.Exists(folderPath))
-                {
-                    var files = Directory.GetFiles(folderPath, $"{candidate.name}*{candidate.FileExtension}", SearchOption.AllDirectories);
-                    if (files.Length > 0)
-                    {
-                        return candidate.Type;
-                    }
-                }
-            }
-
-            // 該当なし → ユーザー選択にフォールバック
-            return string.Empty;
-        }
-
-        public static string GetResourcePattern(string csprojFile, DTE2 dte)
-        {
-            ThreadHelper.ThrowIfNotOnUIThread();
-            XDocument doc = XDocument.Load(csprojFile);
-            XNamespace ns = doc.Root.Name.Namespace;
-            string resourceFolderTemplate = null;
-
-            Project currentProject = dte?.ActiveDocument?.ProjectItem?.ContainingProject;
-            bool isVsix = IsVsixProject(currentProject);
-            if (IsVsixProject(currentProject))
-                return "vsix";
-
-            string sdkAttr = doc.Root.Attribute("Sdk")?.Value ?? string.Empty;
-
-            if (sdkAttr.Equals("Microsoft.Maui.Sdk", StringComparison.OrdinalIgnoreCase))
-            {
-                // MAUI
-                resourceFolderTemplate = @"Resources.{culture}.resx";
-            }
-            //else if (sdkAttr?.IndexOf("Microsoft.NET.Sdk.WindowsDesktop", StringComparison.OrdinalIgnoreCase) >= 0)
-            else if( sdkAttr.Contains("Microsoft.NET.Sdk.WindowsDeskto"))
-            {
-                // WPF / WinForms の可能性が高い → 下でさらに判定
-                if (doc.Descendants(ns + "UseWindowsForms").Any(e => e.Value.Equals("true", StringComparison.OrdinalIgnoreCase)) ||
-                    doc.Descendants(ns + "Reference").Any(e => string.Equals(e.Attribute("Include")?.Value, "System.Windows.Forms", StringComparison.OrdinalIgnoreCase)))
-                {
-                    resourceFolderTemplate = @"Properties\Resources.{culture}.resx";
-                }
-                else if (doc.Descendants(ns + "Reference").Any(e => string.Equals(e.Attribute("Include")?.Value, "PresentationFramework", StringComparison.OrdinalIgnoreCase)))
-                {
-                    resourceFolderTemplate = @"Properties\Resources.{culture}.resx";
-                }
-            }
-            else if (doc.Descendants(ns + "PackageReference").Any(e =>
-                string.Equals(e.Attribute("Include")?.Value, "Microsoft.WindowsAppSDK", StringComparison.OrdinalIgnoreCase)))
-            {
-                // WinUI 3
-                resourceFolderTemplate = @"Strings\{culture}\Resources.resw";
-            }
-            else if (doc.Descendants(ns + "TargetPlatformIdentifier").Any(e =>
-                e.Value.Equals("Windows", StringComparison.OrdinalIgnoreCase)))
-            {
-                // UWP
-                resourceFolderTemplate = @"Strings\{culture}\Resources.resw";
-            }
-            else
-                return "resx";
-            return resourceFolderTemplate.Split('.')[1];
-        }
 
         public static XElement ExtractTextBoxXml(EditPoint startPoint)
         {

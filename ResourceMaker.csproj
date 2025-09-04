@@ -105,6 +105,18 @@
     <VSCTCompile Include="ResourceMaker.vsct">
       <ResourceName>Menus.ctmenu</ResourceName>
     </VSCTCompile>
+    <Content Include="icon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="licence.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="ReleaseNotes.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <Content Include="Resources\Package.ico" />
   </ItemGroup>
   <ItemGroup>
@@ -122,6 +134,7 @@
     <EmbeddedResource Include="Resources\Strings.fr-FR.resx" />
     <EmbeddedResource Include="Resources\Strings.ja-JP.resx" />
     <EmbeddedResource Include="Resources\Strings.ko-KR.resx" />
+    <EmbeddedResource Include="Resources\Strings.resx" />
     <EmbeddedResource Include="Resources\Strings.zh-CN.resx" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

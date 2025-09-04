@@ -130,7 +130,7 @@
     <value>Original Text</value>
   </data>
   <data name="ResourceKey.Text" xml:space="preserve">
-    <value>Resource Key</value>
+    <value>Enter resource name</value>
   </data>
   <data name="ResourceGetterExpression.Content" xml:space="preserve">
     <value>Resource Getter Expression</value>
@@ -158,5 +158,23 @@
   </data>
   <data name="NotSetTooltip" xml:space="preserve">
     <value>Tooltip is not set.</value>
+  </data>
+  <data name="ClearCache.Content" xml:space="preserve">
+    <value>Clear cache</value>
+  </data>
+  <data name="ProjectSelector.Text" xml:space="preserve">
+    <value>Please select a project type.</value>
+  </data>
+  <data name="BtnCreate.Content" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="BtnCancel.Content" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="BtnClose.Content" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="BtnAdd.Content" xml:space="preserve">
+    <value>Add</value>
   </data>
 </root>

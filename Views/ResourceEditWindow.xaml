@@ -55,7 +55,7 @@
                     Click="ResourceGetterExpression_Click"/>
                 
                 <TextBox x:Name="ResourceGetterBox"
-                    Width="200"
+                    Width="150"
                     Margin="5"
                     IsTabStop="False"
                     GotFocus="TextBox_GotFocus"
@@ -103,11 +103,12 @@
                     <Button x:Name="SaveResource" Content="リソースの保存" Click="SaveResource_Click" Margin="5,0,0,0"/>
                     <Button x:Name="SaveAndClose" Content="反映" Click="SaveResource_Click" Margin="15,0,0,0"/>
                     <Button x:Name="AddLanguage" Content="言語の追加" Click="AddResource" Margin="25,0,0,0"/>
+                    <Button x:Name="ClearCache" Content="言語のクリア" Click="ClearCache_Click"  Margin="25,0,0,0"/>
                 </StackPanel>
             </StackPanel>
             <StackPanel HorizontalAlignment="Center">
                 <TextBox x:Name="ClipText"/>
-                <TextBlock x:Name="Infomation" Text=""/>
+                <TextBlock x:Name="Infomation" Text="" TextWrapping="Wrap" />
             </StackPanel>
         </StackPanel>
     </Grid>
