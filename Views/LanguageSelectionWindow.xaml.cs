@@ -288,7 +288,7 @@ namespace ResourceMaker.UI
                             }
                             else
                             {
-                                fileName = $"{resName}.{code}.{resSuffix}";
+                                fileName = $"{resFolderName}\\{resName}.{code}.{resSuffix}";
                                 string fullPath = Path.Combine(basePath, fileName);
                                 File.Delete(fullPath);
                             }

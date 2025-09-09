@@ -2,6 +2,7 @@
 #if UI
 #else
 using Microsoft.VisualStudio.Settings;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Shell.Settings;
 #endif
@@ -38,7 +39,8 @@ namespace ResourceMaker.UI
 
         public string DevelopType { get; set; } = string.Empty;
         public string ProjectName { get; set; } = string.Empty;
-
+        
+        private HashSet<string> resourceKeys = new HashSet<string>();
 
         private string resourcerFilename = string.Empty;
         public XElement element { get; set; }
@@ -56,13 +58,15 @@ namespace ResourceMaker.UI
         private string resSuffix = string.Empty;
         private bool isUWP = false;
 
+        private int _localized = 0;
+
         private string lastKeyName = string.Empty;
         private Dictionary<string, Dictionary<string, string>> cacheList = new Dictionary<string, Dictionary<string, string>>();
 
         private XNamespace x = "http://schemas.microsoft.com/winfx/2006/xaml";
 
         private System.Resources.ResourceManager loader;
-            
+
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string propertyName)
@@ -104,6 +108,7 @@ namespace ResourceMaker.UI
             InitializeComponent();
             this.DataContext = this; // ← これが必要！
             LoadSettings();
+
             this.Closing += (s, e) =>
             {
                 // クローズ前に行いたい処理をここに記述
@@ -132,7 +137,17 @@ namespace ResourceMaker.UI
             ResourceGetterBox.Text = AccessMethod;
             loader = new ResourceManager("ResourceMaker.Resources.Strings", GetType().Assembly);
             //リソース呼び出し
-            LocalizeScreenXaml();
+            this.LayoutUpdated += (_, __) =>
+            {
+                if (_localized == 0)
+                {
+                    LocalizeScreenXaml();
+                    _localized++;
+                    Debug.WriteLine($"Screen {_localized}");
+                }
+            };
+
+            //LocalizeScreenXaml();
         }
 
         private void SaveSettings()
@@ -185,7 +200,7 @@ namespace ResourceMaker.UI
             isUWP = resSuffix == "resw";
             resourcerFilename = Path.Combine(basePath, "ResourceAdder.cs");
 
-            
+
 
             string loaderGuide;
             if (isUWP)
@@ -207,7 +222,7 @@ namespace ResourceMaker.UI
                    .Distinct()
                    .ToList();
             }
-            else 
+            else
             {// WPF MAUI vsix
                 allCodes = Directory.GetFiles(resourcesRoot)
                     .Select(path => Path.GetFileName(path))
@@ -221,7 +236,7 @@ namespace ResourceMaker.UI
                     .Where(culture => !string.IsNullOrEmpty(culture))  // 中立言語を除外するならここでフィルタ
                     .Distinct()
                     .ToList();
-                
+
             }
 
             //置き換え対象の収集
@@ -233,7 +248,7 @@ namespace ResourceMaker.UI
             {
                 itemName = match.Groups[1].Value;
 
-               if (!string.IsNullOrEmpty(itemName)) // → Strings
+                if (!string.IsNullOrEmpty(itemName)) // → Strings
                     BaseTexts.Items.Add(itemName);
 
             }
@@ -245,7 +260,12 @@ namespace ResourceMaker.UI
                 targetName = BaseTexts.Text;
                 isUpdating = false;
             }
-            cacheList = ResourceCacheController.Get(baseFolderPath,resFolderName, DevelopType);
+            cacheList = ResourceCacheController.Get(baseFolderPath, resFolderName, DevelopType);
+
+            //キャッシュからキーの一覧を作成する
+
+            if (allCodes.Count > 0 && cacheList.TryGetValue(allCodes[0], out var innerDict))
+                resourceKeys = innerDict.Keys.ToHashSet();
 
             //言語セットを作成する
             LanguageEntries.Clear();
@@ -297,7 +317,7 @@ namespace ResourceMaker.UI
                 SaveResource.Visibility = Visibility.Visible;
             else
                 SaveResource.Visibility = Visibility.Collapsed;
-            
+
             SaveResource.IsEnabled = (BaseTexts.Items.Count > 1);
         }
 
@@ -308,17 +328,21 @@ namespace ResourceMaker.UI
             {
                 try
                 {
-                    if( !isUWP)
+                    if (!isUWP)
                         File.AppendAllText(resourcerFilename, $"{ResourceKeyBox.Text} = {ResourceGetterBox.Text}(\"{ResourceKeyBox.Text}\");{Environment.NewLine}");
 
+                    string keyName = ResourceKeyBox.Text;
                     //キャッシュに書き戻す
                     foreach (var langCode in allCodes)
                     {
                         var existingEntry = LanguageEntries
                             .FirstOrDefault(entry => entry.Code == langCode);
 
-                        cacheList[langCode][ResourceKeyBox.Text] = existingEntry.Value;
+                        cacheList[langCode][keyName] = existingEntry.Value;
                     }
+
+                    resourceKeys.Add(keyName);
+
 
                     if (button.Name == "SaveAndClose")
                     {
@@ -390,76 +414,84 @@ namespace ResourceMaker.UI
             if (entry != null) entry.Value = string.Empty;
         });
 
+
+
         //リソースの名前を定義するボックス
         private void ResourceKeyBox_LostFocus(object sender, RoutedEventArgs e)
         {
             if (sender is TextBox textBox)
             {
-                if (textBox.Tag is string oldValue && textBox.Text != oldValue)
-                {// テキストが変わっていたらね
-                    SaveResource.IsEnabled = true;
-                    Feedback.IsChecked = true;
-                    textBox.Tag = null;
-                    bool isExist = false;
-                    var text = textBox.Text;
-                    string value;
-                    foreach (var entry in cacheList)
+                if (SuggestionPopup.IsOpen)
+                    return;
+
+                //if (textBox.Tag is string oldValue && textBox.Text != oldValue)
+                    ResouceKeyUpdate(textBox);// テキストが変わっていたらね
+
+            }
+        }
+        private void ResouceKeyUpdate(TextBox textBox)
+        {
+            SaveResource.IsEnabled = true;
+            Feedback.IsChecked = true;
+            textBox.Tag = null;
+            bool isExist = false;
+            var text = textBox.Text;
+            string value;
+            foreach (var entry in cacheList)
+            {
+                var dic = entry.Value;
+                if (dic.TryGetValue(text, out value))
+                {
+                    isExist = true;
+                    break;
+                }
+            }
+            if (isExist)
+            {//既に存在している値ならテキストを表示する
+                foreach (var langCode in allCodes)
+                {
+                    if (cacheList.TryGetValue(langCode, out var dict) &&
+                        dict.TryGetValue(text, out var localizedValue))
                     {
-                        var dic = entry.Value;
-                        if (dic.TryGetValue(text, out value))
-                        {
-                            isExist = true;
-                            break;
-                        }
-                    }
-                    if (isExist)
-                    {//既に存在している値ならテキストを表示する
-                        foreach (var langCode in allCodes)
-                        {
-                            if (cacheList.TryGetValue(langCode, out var dict) &&
-                                dict.TryGetValue(text, out var localizedValue))
-                            {
-                                var existingEntry = LanguageEntries
-                                    .FirstOrDefault(entry => entry.Code == langCode);
+                        var existingEntry = LanguageEntries
+                            .FirstOrDefault(entry => entry.Code == langCode);
 
-                                if (existingEntry != null)
-                                    existingEntry.Value = localizedValue;
+                        if (existingEntry != null)
+                            existingEntry.Value = localizedValue;
 
-                            }
-                        }
-                    }
-                    //変換テキストの作成
-                    string targetName = BaseTexts.Text;
-
-                    if (!string.IsNullOrEmpty(targetName) && Feedback.IsChecked == true)
-                    {
-                        string modifiedString = string.Empty;
-                        if (EditorType == "code")
-                        {
-                            if (noValue)
-                                modifiedString = ResourceGetterBox.Text + "(\"" + ResourceKeyBox.Text + "\")";
-                            else
-                                modifiedString = "\"" + ResourceKeyBox.Text + "\"";
-
-                            var resText = string.Empty;
-                            if ( BaseTexts.Items.Count == 1)
-                                resText = LineText.Replace("\"" + targetName + "\"", modifiedString);
-                            else
-                                resText = ResultText.Text.Replace("\"" + targetName + "\"", modifiedString);
-
-                            ResultText.Text = resText;
-                        }
-                        else if (EditorType == "xaml")
-                        {
-                            var tmp = ResourceKeyBox.Text.Split('.');
-                            var resText = $"=\"{tmp[0]}\"";
-                            ResultText.Text = ResultText.Text.Replace("=\"NoNameElement\"", resText);
-                        }
                     }
                 }
             }
-        }
+            //変換テキストの作成
+            string targetName = BaseTexts.Text;
 
+            if (!string.IsNullOrEmpty(targetName) && Feedback.IsChecked == true)
+            {
+                string modifiedString = string.Empty;
+                if (EditorType == "code")
+                {
+                    if (noValue)
+                        modifiedString = ResourceGetterBox.Text + "(\"" + ResourceKeyBox.Text + "\")";
+                    else
+                        modifiedString = "\"" + ResourceKeyBox.Text + "\"";
+
+                    var resText = string.Empty;
+                    if (BaseTexts.Items.Count == 1)
+                        resText = LineText.Replace("\"" + targetName + "\"", modifiedString);
+                    else
+                        resText = ResultText.Text.Replace("\"" + targetName + "\"", modifiedString);
+
+                    ResultText.Text = resText;
+                }
+                else if (EditorType == "xaml")
+                {
+                    var tmp = ResourceKeyBox.Text.Split('.');
+                    var resText = $"=\"{tmp[0]}\"";
+                    ResultText.Text = ResultText.Text.Replace("=\"NoNameElement\"", resText);
+                }
+            }
+
+        }
         private string GetUid(string name)
         {
             return element?.Attribute(x + name)?.Value ?? string.Empty;
@@ -581,17 +613,8 @@ namespace ResourceMaker.UI
             }
             else
             {
-                //if (string.IsNullOrEmpty(uidName))
-                //{// ネームからxUidを生成
-                //    resultText = xName;
-                //    ResourceKeyBox.Text = $"{xName}.{itemsKey}";
-                //    xUid = xName;
-                //}
-                //else
-                {//uid発見なら
-                    xUid = uidName;
-                    ResourceKeyBox.Text = $"{uidName}.{itemsKey}";
-                }
+                xUid = uidName;
+                ResourceKeyBox.Text = $"{uidName}.{itemsKey}";
             }
             //結果置き場
             if ((!isUWP && string.IsNullOrEmpty(uidName) && string.IsNullOrEmpty(xName)) || needXUid)
@@ -644,6 +667,8 @@ namespace ResourceMaker.UI
             }
         }
 
+
+
         private void ResourceGetterBox_LostFocus(object sender, RoutedEventArgs e)
         {
             if (sender is TextBox textBox)
@@ -667,13 +692,14 @@ namespace ResourceMaker.UI
             var result = langWindow.ShowDialog();
             FeedbackText = string.Empty;
             ResourceCacheController.Clear();
+            
             this.Close();
         }
 
         //置き換え候補コンボ
         private void BaseTexts_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if(isUpdating) return;
+            if (isUpdating) return;
             string text = BaseTexts.SelectedItem.ToString();
             if (EditorType == "code")
             {
@@ -747,6 +773,82 @@ namespace ResourceMaker.UI
         {
             ResourceCacheController.Clear();
             this.Close();
+        }
+        private void ResourceKeyBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            string query = ResourceKeyBox.Text.ToLower();
+            if (query == "")
+            {
+                SuggestionPopup.IsOpen = false;
+                return;
+            }
+            var matches = resourceKeys
+                .Where(k => k.ToLower().Contains(query)).OrderBy(k => k)
+                .ToList();
+
+            if (matches.Any())
+            {
+                if (matches.Count == 1 && matches[0].Equals(query, StringComparison.OrdinalIgnoreCase))
+                {
+                    SuggestionPopup.IsOpen = false;
+                    return;
+                }
+                SuggestionList.ItemsSource = matches;
+                SuggestionPopup.IsOpen = true;
+            }
+            else
+                SuggestionPopup.IsOpen = false;
+        }
+
+        private void SuggestionList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (SuggestionList.SelectedItem is string selected)
+            {
+                ResourceKeyBox.Text = selected;
+                SuggestionPopup.IsOpen = false;
+                ResourceKeyBox.Focus();
+                ResourceKeyBox.CaretIndex = ResourceKeyBox.Text.Length;
+            }
+        }
+
+        private void ResourceKeyBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                if (SuggestionPopup.IsOpen)
+                {
+                    string selected = string.Empty;
+
+                    if (SuggestionList.SelectedItem is string s)
+                        selected = s;
+
+                    else if (SuggestionList.Items.Count > 0 && SuggestionList.Items[0] is string first)
+                        selected = first;
+
+                    if (!string.IsNullOrEmpty(selected))
+                    {
+                        ResourceKeyBox.Text = selected;
+                        SuggestionPopup.IsOpen = false;
+                        ResourceKeyBox.CaretIndex = ResourceKeyBox.Text.Length;
+                        e.Handled = true;
+
+                    }
+                }
+                // 次のフォーカス可能な要素に移動
+                TraversalRequest request = new TraversalRequest(FocusNavigationDirection.Next);
+                UIElement focusedElement = Keyboard.FocusedElement as UIElement;
+                if (focusedElement != null)
+                    focusedElement.MoveFocus(request);
+            }
+        }
+
+        private void ResourceKeyBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox textBox)
+            {
+                if (textBox.Tag is null && !SuggestionPopup.IsOpen)
+                    textBox.Tag = textBox.Text;
+            }
         }
     }
 }

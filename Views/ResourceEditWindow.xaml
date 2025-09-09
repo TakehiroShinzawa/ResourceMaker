@@ -35,9 +35,23 @@
                     Margin="5"
                     VerticalAlignment="Center"
                     Padding="0,0,25,0"
-                    GotFocus="TextBox_GotFocus"
+                    GotFocus="ResourceKeyBox_GotFocus"
+                    TextChanged="ResourceKeyBox_TextChanged"
                     LostFocus="ResourceKeyBox_LostFocus"
-                    KeyDown="TextBox_KeyDown" />
+                    KeyDown="ResourceKeyBox_KeyDown" />
+                
+                <Popup x:Name="SuggestionPopup"
+                    PlacementTarget="{Binding ElementName=ResourceKeyBox}"
+                    Placement="Bottom"
+                    StaysOpen="False"
+                    IsOpen="False">
+                    <Border Background="White" BorderBrush="Gray" BorderThickness="1">
+                        <ListBox x:Name="SuggestionList"
+                            SelectionChanged="SuggestionList_SelectionChanged"
+                            Width="{Binding ElementName=ResourceKeyBox, Path=ActualWidth}" />
+                    </Border>
+                </Popup>
+
 
                 <Button x:Name="ClearButton"
                     Content="🗑"
@@ -52,6 +66,7 @@
                     Content="取得式"
                     VerticalAlignment="Center"
                     Margin="0,5,0,5"
+                        IsTabStop="False"
                     Click="ResourceGetterExpression_Click"/>
                 
                 <TextBox x:Name="ResourceGetterBox"
@@ -70,46 +85,59 @@
                     VerticalAlignment="Center" />
 
             </StackPanel>
-            <ItemsControl ItemsSource="{Binding LanguageEntries}" Focusable="False">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal" Margin="0,5,0,5" >
-                            <TextBlock Text="{Binding Code }"
-                                VerticalAlignment="Center"
-                                Width="50"
-                                Margin="0,0,0,0" />
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
 
-                            <TextBox Width="250"
-                                Margin="5,0,0,0"
-                                VerticalAlignment="Center"
-                                Padding="0"
-                                AcceptsReturn="True"
-                                TextWrapping="Wrap"
-                                VerticalScrollBarVisibility="Auto"
-                                Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                            <Button Content="🗑"
+                <!-- スクロール可能領域 -->
+                <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" MaxHeight="180">
+                    <ItemsControl ItemsSource="{Binding LanguageEntries}" IsTabStop="False">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <VirtualizingStackPanel />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
+                                    <TextBlock Text="{Binding Code}" Width="50" VerticalAlignment="Center" />
+                                    <TextBox Width="500"
+                                 Margin="5,0,0,0"
+                                 VerticalAlignment="Center"
+                                 AcceptsReturn="True"
+                                 TextWrapping="Wrap"
+                                 VerticalScrollBarVisibility="Auto"
+                                 Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    <Button Content="🗑"
                                 Margin="5,0,0,0"
                                 Width="30"
                                 Height="25"
                                 Focusable="False"
                                 Command="{Binding DataContext.ClearCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                 CommandParameter="{Binding}" />
-                        </StackPanel>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-            <StackPanel>
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <Button x:Name="SaveResource" Content="リソースの保存" Click="SaveResource_Click" Margin="5,0,0,0"/>
-                    <Button x:Name="SaveAndClose" Content="反映" Click="SaveResource_Click" Margin="15,0,0,0"/>
-                    <Button x:Name="AddLanguage" Content="言語の追加" Click="AddResource" Margin="25,0,0,0"/>
-                    <Button x:Name="ClearCache" Content="言語のクリア" Click="ClearCache_Click"  Margin="25,0,0,0"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <!-- 下部固定ボタン群 -->
+                <StackPanel Grid.Row="1" HorizontalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button x:Name="SaveResource" Content="リソースの保存" Click="SaveResource_Click" Margin="5,0,0,0"/>
+                        <Button x:Name="SaveAndClose" Content="反映" Click="SaveResource_Click" Margin="15,0,0,0"/>
+                        <Button x:Name="AddLanguage" Content="言語の追加" Click="AddResource" Margin="25,0,0,0"/>
+                        <Button x:Name="ClearCache" Content="言語のクリア" Click="ClearCache_Click" Margin="25,0,0,0"/>
+                    </StackPanel>
+
+                    <StackPanel HorizontalAlignment="Center" Margin="0,10,0,0">
+                        <TextBox x:Name="ClipText" />
+                        <TextBlock x:Name="Infomation" Text="" TextWrapping="Wrap" />
+                    </StackPanel>
                 </StackPanel>
-            </StackPanel>
-            <StackPanel HorizontalAlignment="Center">
-                <TextBox x:Name="ClipText"/>
-                <TextBlock x:Name="Infomation" Text="" TextWrapping="Wrap" />
-            </StackPanel>
+            </Grid>
         </StackPanel>
     </Grid>
 </Window>
