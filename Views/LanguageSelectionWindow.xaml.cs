@@ -104,6 +104,14 @@ namespace ResourceMaker.UI
             }
 
             var resourcesRoot = Path.Combine(BaseFolderPath, resFolderName);
+            //if (!Directory.Exists(resourcesRoot))
+            //{//フォルダが無い時はクリアする
+            //    DevelopType = "";
+            //    resFolderName = "";
+            //    resName = "";
+            //    resSuffix = "";
+            //}
+
             if (Directory.Exists(resourcesRoot))
             {
                 // フォルダが存在している
@@ -115,7 +123,7 @@ namespace ResourceMaker.UI
                        .Distinct()
                        .ToList();
                 }
-                else 
+                else if((resSuffix == "resx"))
                 {// WPF MAUI vsix
                     countries = Directory.GetFiles(resourcesRoot, $"{resName}.*.{resSuffix}")
                         .Select(path => Path.GetFileName(path))

@@ -32,6 +32,12 @@
                      Tag="Properties.Resources.resx"
                      Checked="ProjectType_Checked"
                     GroupName="ProjectType" />
+
+                    <RadioButton Content="resx (VSIX) ./Resources/Strings.{country}.resx"
+                     Tag="Resources.Strings.resx"
+                     Checked="ProjectType_Checked"
+                    GroupName="ProjectType" />
+
                 </StackPanel>
             </StackPanel>
             <StackPanel x:Name="LanguagePanel" >
@@ -40,6 +46,7 @@
                     <Button 
                          x:Name="BtnCreate" Content="Create"
                         VerticalAlignment="Center"
+                        ToolTipService.ToolTip="チェックの付いている言語ファイルを作成します。既存の場合はスキップします。"
                         Click="MakeFolders_Click" Margin="0,0,20,10"/>
                     
                     <Button 

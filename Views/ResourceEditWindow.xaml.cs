@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Diagnostics.Eventing.Reader;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -48,6 +49,8 @@ namespace ResourceMaker.UI
 
         public List<string> allCodes = new List<string>();
         bool noValue = true;
+        bool isToolTip = false;
+
         private string baseFolderPath = string.Empty;
 
         private bool isUpdating = false;
@@ -89,7 +92,7 @@ namespace ResourceMaker.UI
         }
 
         public ObservableCollection<LanguageEntry> LanguageEntries { get; } = new ObservableCollection<LanguageEntry>();
-        private string AccessMethod = string.Empty;
+        public string AccessMethod = string.Empty;
 
 #if UI
         private void SaveSettings()
@@ -119,22 +122,6 @@ namespace ResourceMaker.UI
 
         private void LoadSettings()
         {
-
-            var shellSettingsManager = new ShellSettingsManager(_serviceProvider); // ← ServiceProvider を渡すか取得する
-            var store = shellSettingsManager.GetWritableSettingsStore(SettingsScope.UserSettings);
-
-            if (!store.CollectionExists("ResourceMaker"))
-                store.CreateCollection("ResourceMaker");
-
-            store.DeleteProperty("ResourceMaker", "AccessMethod");
-
-
-            if (!store.PropertyExists("ResourceMaker", "AccessMethod"))
-                store.SetString("ResourceMaker", "AccessMethod", "loader.GetString");
-
-            AccessMethod = store.GetString("ResourceMaker", "AccessMethod");
-            // UIに反映するなど
-            ResourceGetterBox.Text = AccessMethod;
             loader = new ResourceManager("ResourceMaker.Resources.Strings", GetType().Assembly);
             //リソース呼び出し
             this.LayoutUpdated += (_, __) =>
@@ -186,7 +173,6 @@ namespace ResourceMaker.UI
             AccessMethod = Properties.Settings.Default.AccessMethod;
 #endif
             loader = new ResourceManager("ResourceMaker.Resources.Strings", GetType().Assembly);
-            ResourceGetterBox.Text = AccessMethod;
 
         }
 
@@ -200,7 +186,7 @@ namespace ResourceMaker.UI
             isUWP = resSuffix == "resw";
             resourcerFilename = Path.Combine(basePath, "ResourceAdder.cs");
 
-
+            ResourceGetterBox.Text = AccessMethod;
 
             string loaderGuide;
             if (isUWP)
@@ -328,10 +314,31 @@ namespace ResourceMaker.UI
             {
                 try
                 {
-                    if (!isUWP)
-                        File.AppendAllText(resourcerFilename, $"{ResourceKeyBox.Text} = {ResourceGetterBox.Text}(\"{ResourceKeyBox.Text}\");{Environment.NewLine}");
-
                     string keyName = ResourceKeyBox.Text;
+
+                    if (!isUWP && !isToolTip)
+                        File.AppendAllText(resourcerFilename, $"{keyName} = {ResourceGetterBox.Text}(\"{keyName}\");{Environment.NewLine}");
+
+                    if(isToolTip)
+                    {
+                        var keyName2 = keyName.Replace(".", "");
+                        if (ResultText.Text.Contains(".SetToolTip("))
+                        {
+                            var localKeyName = ResultText.Text.Replace(keyName, keyName2);
+                            var pos = localKeyName.IndexOf("//");
+                            if (pos > 0)
+                                File.AppendAllText(resourcerFilename, localKeyName.Substring(0, pos - 1) + Environment.NewLine);
+                            ResultText.Text = " ";
+                            keyName = keyName2;
+                        }
+                        else
+                        {
+                            var t = $"ToolTipService.SetToolTip({(keyName.Split(new[] { '.' }))[0]}, {ResourceGetterBox.Text}(\"{keyName2}\"));";
+                            File.AppendAllText(resourcerFilename, t + Environment.NewLine);
+                        }
+                        keyName = keyName2;
+                    }
+
                     //キャッシュに書き戻す
                     foreach (var langCode in allCodes)
                     {
@@ -601,6 +608,12 @@ namespace ResourceMaker.UI
                 }
             }
             itemsKey = GetXmlKeyname(BaseTexts.Text);
+            if (itemsKey == "ToolTipService.ToolTip")
+            {
+                isToolTip = true;
+                itemsKey = "ToolTip";
+            }
+
             string resultText = string.Empty;
 
             if (noName)
@@ -626,11 +639,20 @@ namespace ResourceMaker.UI
                     ResultText.Text = InsertUid(LineText, resultText, searchWord);
 
                 else
-                    ResultText.Text = $" x:{searchWord}=\"{resultText}\" {LineText.Replace(BaseTexts.Text, "")}";
+                {
+                    if (isToolTip)
+                        ResultText.Text = $"x:{searchWord}=\"{resultText}\" {LineText.Replace(BaseTexts.Text, "ResourceAdder.csに出力されます")}";
+                    else
+                        ResultText.Text = $"x:{searchWord}=\"{resultText}\" {LineText.Replace(BaseTexts.Text, "")}";
+                }
             }
             else
             {
-                ResultText.Text = LineText;
+                if (isToolTip)
+                    ResultText.Text = $"ToolTipService.SetToolTip({uidName}, {ResourceGetterBox.Text}(\"{ResourceKeyBox.Text}\")); //" + "ResourceAdder.cs に出力します";
+
+                else
+                    ResultText.Text = LineText;
                 noValue = false;
             }
 
@@ -848,6 +870,23 @@ namespace ResourceMaker.UI
             {
                 if (textBox.Tag is null && !SuggestionPopup.IsOpen)
                     textBox.Tag = textBox.Text;
+            }
+        }
+
+        private void Button_MouseEnter(object sender, MouseEventArgs e)
+        {
+            if (sender is Button button)
+            {
+                button.Tag = button.Content;
+                button.Content = "Click me";
+            }
+        }
+
+        private void Button_MouseLeave(object sender, MouseEventArgs e)
+        {
+            if (sender is Button button)
+            {
+                button.Content = button.Tag;
             }
         }
     }

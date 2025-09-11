@@ -1,7 +1,10 @@
 ﻿using EnvDTE;
 using EnvDTE80;
 using Microsoft.VisualStudio.Editor;
+using Microsoft.VisualStudio.OLE.Interop;
+using Microsoft.VisualStudio.Settings;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Settings;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.TextManager.Interop;
 using ResourceMaker;
@@ -25,7 +28,7 @@ namespace ResourceMaker
         private static string devType = string.Empty;
         private static string cachedProjectPath = string.Empty;
 
-        public static async Task RunAsync(DTE2 dte, IServiceProvider serviceProvider)
+        public static async Task RunAsync(DTE2 dte, System.IServiceProvider serviceProvider)
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
@@ -60,42 +63,47 @@ namespace ResourceMaker
             Project owningProject = item?.ContainingProject;
             var projectFile = owningProject.FullName;
             string folder = Path.GetDirectoryName(projectFile);
-            bool setLang = true;
 
             int lcid = dte.LocaleID;
             CultureInfo culture = new CultureInfo(lcid);
 
+            //システムキャッシュ
+            var shellSettingsManager = new ShellSettingsManager(serviceProvider); // ← ServiceProvider を渡すか取得する
+            var store = shellSettingsManager.GetWritableSettingsStore(SettingsScope.UserSettings);
+
+            if (!store.CollectionExists("ResourceMaker"))
+                store.CreateCollection("ResourceMaker");
+
+            //プロジェクトキャッシュ
+            if (!store.PropertyExists("ResourceMaker", "LastProject"))
+                store.SetString("ResourceMaker", "LastProject", "");
+            
+            cachedProjectPath = store.GetString("ResourceMaker", "LastProject");
+
+            if (!store.PropertyExists("ResourceMaker", "LastDevType"))
+                store.SetString("ResourceMaker", "LastDevType", "");
+
+            devType = store.GetString("ResourceMaker", "LastDevType");
+
+            //loader情報
+            if (!store.PropertyExists("ResourceMaker", "AccessMethod"))
+                store.SetString("ResourceMaker", "AccessMethod", "loader.GetString");
+
+
+
             if (folder != cachedProjectPath)
-                devType = string.Empty;
-
-            if (IsVsixProject(owningProject))
-            {
-                devType = "Resources.Strings.resx";
-                var files = Directory.GetFiles(Path.Combine(folder, "Resources"), "Strings.*.resx");
-                if (files.Length != 0)
-                    setLang = false;
-                cachedProjectPath = folder;
-            }
-            else
-            {
-
-                if (folder != cachedProjectPath || string.IsNullOrEmpty(devType))
-                    cachedProjectPath = folder;
-
-                else
-                    setLang = false;
-            }
-
-            if (setLang)
             {
                 var resLanguage = new LanguageSelectionWindow();
-                resLanguage.DevelopType = devType;
+                resLanguage.DevelopType = "";
                 resLanguage.LangCulture = culture.ToString();
                 resLanguage.BaseFolderPath = folder;
                 var result = resLanguage.ShowDialog();
                 if (result == false)
                     return;
                 devType = resLanguage.DevelopType;
+                cachedProjectPath = folder;
+                store.SetString("ResourceMaker", "LastProject", cachedProjectPath);
+                store.SetString("ResourceMaker", "LastDevType", devType);
             }
 
             XElement element = null;
@@ -106,6 +114,8 @@ namespace ResourceMaker
             //リソースエディタの展開
             var resWindow = new ResourceEditWindow(serviceProvider);
             resWindow.LangCulture = culture.ToString();
+            resWindow.AccessMethod = store.GetString("ResourceMaker", "AccessMethod");
+
             resWindow.LineText = lineText;
             resWindow.EditorType = editorType;
             resWindow.DevelopType = devType;

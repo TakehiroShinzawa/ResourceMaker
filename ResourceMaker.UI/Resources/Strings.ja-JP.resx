@@ -13,6 +13,6 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms</value>
   </resheader>
   <data name="TargetText.Text" xml:space="preserve">
-    <value>Target Text</value>
+    <value>対象テキスト</value>
   </data>
 </root>
