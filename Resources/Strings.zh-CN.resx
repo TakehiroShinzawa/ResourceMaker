@@ -133,7 +133,7 @@
     <value>请输入资源名称</value>
   </data>
   <data name="ResourceGetterExpression.Content" xml:space="preserve">
-    <value>资源获取表达式</value>
+    <value>获取表达式</value>
   </data>
   <data name="Feedback.Content" xml:space="preserve">
     <value>回写</value>
@@ -156,9 +156,6 @@
   <data name="LoaderDeclaration" xml:space="preserve">
     <value>已将 loader 声明复制到剪贴板</value>
   </data>
-  <data name="NotSetTooltip" xml:space="preserve">
-    <value>未设置工具提示</value>
-  </data>
   <data name="ClearCache.Content" xml:space="preserve">
     <value>清除缓存</value>
   </data>
@@ -176,5 +173,332 @@
   </data>
   <data name="BtnAdd.Content" xml:space="preserve">
     <value>添加</value>
+  </data>
+  <data name="BtnCreateToolTip" xml:space="preserve">
+    <value>创建已勾选项的语言文件。若已存在则跳过。</value>
+  </data>
+  <data name="BtnCancelToolTip" xml:space="preserve">
+    <value>取消操作，不添加语言文件，也不编辑资源。</value>
+  </data>
+  <data name="BtnCloseToolTip" xml:space="preserve">
+    <value>关闭语言窗口后，编辑资源。</value>
+  </data>
+  <data name="BtnAddToolTip" xml:space="preserve">
+    <value>添加资源语言。也可以按 Enter 键进行添加。</value>
+  </data>
+  <data name="ResultTextToolTip" xml:space="preserve">
+    <value>将替换所选行。</value>
+  </data>
+  <data name="BaseTextsToolTip" xml:space="preserve">
+    <value>请选择要资源化的文本。
+显示资源键时，将显示已注册的值。</value>
+  </data>
+  <data name="ResourceKeyToolTip" xml:space="preserve">
+    <value>キー名を入力してください。xaml編集時は、'キー名.対象名'を定義しますが、対象名は変更しないでください。</value>
+  </data>
+  <data name="ResourceGetterBoxToolTip" xml:space="preserve">
+    <value>此代码为自动生成，但获取方法（loader.GetString）可自定义。</value>
+  </data>
+  <data name="FeedbackToolTip" xml:space="preserve">
+    <value>如果已选中，在创建资源后将回写源文本。</value>
+  </data>
+  <data name="SaveResourceToolTip" xml:space="preserve">
+    <value>将正在编辑的资源保存到缓存中。可继续编辑。</value>
+  </data>
+  <data name="SaveAndCloseToolTip" xml:space="preserve">
+    <value>将编辑的资源应用到全体。结束编辑并关闭窗口。</value>
+  </data>
+  <data name="AddLanguageToolTip" xml:space="preserve">
+    <value>添加或删除语言资源。设置完成后将关闭窗口。</value>
+  </data>
+  <data name="ClearCacheToolTip" xml:space="preserve">
+    <value>清除缓存数据。如在外部编辑了资源，请务必点击此按钮。</value>
+  </data>
+  <data name="ApplyButton.Content" xml:space="preserve">
+    <value>应用</value>
+  </data>
+  <data name="BtnCsvOut.Content" xml:space="preserve">
+    <value>导出 CSV</value>
+  </data>
+  <data name="BtnMakeLoaderCode.Content" xml:space="preserve">
+    <value>导出加载器代码</value>
+  </data>
+  <data name="BtnMakeLoaderCodeToolTip" xml:space="preserve">
+    <value>将代码写入 ResourceAdder.cs</value>
+  </data>
+  <data name="MessageResourceFileNotFound" xml:space="preserve">
+    <value>资源设置已更改。
+未找到预期的资源文件。</value>
+  </data>
+  <data name="TitleResourceRetrievalFailed" xml:space="preserve">
+    <value>资源获取失败</value>
+  </data>
+  <data name="MessageTooltipConflict" xml:space="preserve">
+    <value>工具提示的值与其他属性重复，无法进行资源化。
+请将其与其他属性分开写在不同的行上。</value>
+  </data>
+  <data name="TitleTooltipConflict" xml:space="preserve">
+    <value>工具提示有点特别哦</value>
+  </data>
+  <data name="TitleResourceEditingMode" xml:space="preserve">
+    <value>资源编辑模式</value>
+  </data>
+  <data name="MessageGenerateResourceCode" xml:space="preserve">
+    <value>将生成用于加载所有语言资源的代码。
+'ResourceAdder.cs' 的内容将被覆盖。</value>
+  </data>
+  <data name="TitleGenerateResourceCode" xml:space="preserve">
+    <value>覆盖确认</value>
+  </data>
+  <data name="MessageResourceAdderOutputError" xml:space="preserve">
+    <value>生成 ResourceAdder.cs 时发生错误。
+{0}</value>
+  </data>
+  <data name="TitleFileWriteError" xml:space="preserve">
+    <value>文件写入错误</value>
+  </data>
+  <data name="MessageConfirmKeyDeletionAllLanguages" xml:space="preserve">
+    <value>是否要从所有语言资源中删除键“{0}”？</value>
+  </data>
+  <data name="TitleConfirmResourceDeletion" xml:space="preserve">
+    <value>删除</value>
+  </data>
+  <data name="NoteOutputToResourceAdder" xml:space="preserve">
+    <value>将输出到 ResourceAdder.cs</value>
+  </data>
+  <data name="BtnClickme" xml:space="preserve">
+    <value>点击复制</value>
+  </data>
+  <data name="ManageLanguage.Content" xml:space="preserve">
+    <value>资源管理</value>
+  </data>
+  <data name="ResSeparatedByFolder" xml:space="preserve">
+    <value>{0}（按文件夹分隔）</value>
+  </data>
+  <data name="ResIntoFilename" xml:space="preserve">
+    <value>{0}（插入文件名）</value>
+  </data>
+  <data name="MissingResource_enUS" xml:space="preserve">
+    <value>未找到 en-US 的资源</value>
+  </data>
+  <data name="NoLanguageSelected" xml:space="preserve">
+    <value>无输出对象</value>
+  </data>
+  <data name="NoLanguageSelection" xml:space="preserve">
+    <value>请选择要导出的语言</value>
+  </data>
+  <data name="CsvExportSuccess" xml:space="preserve">
+    <value>已导出 CSV 文件</value>
+  </data>
+  <data name="CsvExportCompleted" xml:space="preserve">
+    <value>导出完成</value>
+  </data>
+  <data name="SelectCsvExportSettings" xml:space="preserve">
+    <value>请选择 CSV 导出条件</value>
+  </data>
+  <data name="MissingCsvExportSettings" xml:space="preserve">
+    <value>未设置导出条件</value>
+  </data>
+  <data name="SelectSingleLanguageForImport" xml:space="preserve">
+    <value>请选择一个要导入的语言</value>
+  </data>
+  <data name="LanguageSelectionRequired" xml:space="preserve">
+    <value>需要选择语言</value>
+  </data>
+  <data name="InvalidCultureCodeEntered" xml:space="preserve">
+    <value>区域代码无效</value>
+  </data>
+  <data name="InvalidCultureCode" xml:space="preserve">
+    <value>区域代码错误</value>
+  </data>
+  <data name="NoTextInClipboard" xml:space="preserve">
+    <value>剪贴板中未找到文本内容</value>
+  </data>
+  <data name="ClipboardEmpty" xml:space="preserve">
+    <value>剪贴板为空</value>
+  </data>
+  <data name="SelectCsvFile" xml:space="preserve">
+    <value>选择 CSV 文件</value>
+  </data>
+  <data name="CsvFileFilter" xml:space="preserve">
+    <value>CSV 文件 (*.csv)|*.csv</value>
+  </data>
+  <data name="NoCultureCodeDetectedInFile" xml:space="preserve">
+    <value>无法从文件中识别区域代码</value>
+  </data>
+  <data name="CultureCodeNotFound" xml:space="preserve">
+    <value>区域代码未找到</value>
+  </data>
+  <data name="LanguageResourceAddedToTarget" xml:space="preserve">
+    <value>已添加语言资源 {0}</value>
+  </data>
+  <data name="LanguageResourceAdded" xml:space="preserve">
+    <value>已添加语言资源</value>
+  </data>
+  <data name="TargetCountMismatchWithDefinitions" xml:space="preserve">
+    <value>对象数量与当前定义数量不一致</value>
+  </data>
+  <data name="UnableToRetrieve" xml:space="preserve">
+    <value>无法获取</value>
+  </data>
+  <data name="SelectLanguageForRelocation" xml:space="preserve">
+    <value>请选择要重新配置的语言</value>
+  </data>
+  <data name="LanguageRelocationRequired" xml:space="preserve">
+    <value>未选择语言</value>
+  </data>
+  <data name="RelocationRootFolderNotSet" xml:space="preserve">
+    <value>尚未设置重新配置根文件夹</value>
+  </data>
+  <data name="RelocationRootFolderDoesNotExist" xml:space="preserve">
+    <value>重新配置根文件夹不存在</value>
+  </data>
+  <data name="InvalidRelocationFolderName" xml:space="preserve">
+    <value>重新配置资源文件夹名称无效</value>
+  </data>
+  <data name="InvalidRelocationFileName" xml:space="preserve">
+    <value>重新配置资源文件名称无效</value>
+  </data>
+  <data name="RelocationFormatNotSelected" xml:space="preserve">
+    <value>未选择重新配置资源格式</value>
+  </data>
+  <data name="RelocationDefinitionError" xml:space="preserve">
+    <value>重新配置定义错误</value>
+  </data>
+  <data name="RelocationErrorOccurred" xml:space="preserve">
+    <value>重新配置过程中发生错误。
+{0}</value>
+  </data>
+  <data name="RelocationRuntimeError" xml:space="preserve">
+    <value>重新配置运行时错误</value>
+  </data>
+  <data name="ChkCustom.Content" xml:space="preserve">
+    <value>自定义设置</value>
+  </data>
+  <data name="CustomResFolder.Text" xml:space="preserve">
+    <value>资源文件夹 ./</value>
+  </data>
+  <data name="CustmResourceName.Text" xml:space="preserve">
+    <value>资源文件名称（无需扩展名）</value>
+  </data>
+  <data name="CustomResPtn.Text" xml:space="preserve">
+    <value>资源模式</value>
+  </data>
+  <data name="ChkResw.Content" xml:space="preserve">
+    <value>resw（按文件夹分离）</value>
+  </data>
+  <data name="ChkResx.Content" xml:space="preserve">
+    <value>resx（插入文件名中</value>
+  </data>
+  <data name="IsNewResource.Text" xml:space="preserve">
+    <value>（新建）</value>
+  </data>
+  <data name="BtnSelectAllLanguage.Content" xml:space="preserve">
+    <value>全选</value>
+  </data>
+  <data name="CsvOutputItem.Text" xml:space="preserve">
+    <value>CSV 输出项：</value>
+  </data>
+  <data name="optVOnly.Content" xml:space="preserve">
+    <value>仅键</value>
+  </data>
+  <data name="optKOnly.Content" xml:space="preserve">
+    <value>仅值</value>
+  </data>
+  <data name="optKVP.Content" xml:space="preserve">
+    <value>键和值</value>
+  </data>
+  <data name="CsvOutputPath.Text" xml:space="preserve">
+    <value>选择输出位置：</value>
+  </data>
+  <data name="RBSameFolder.Content" xml:space="preserve">
+    <value>相同文件夹</value>
+  </data>
+  <data name="RBPrjTop.Content" xml:space="preserve">
+    <value>项目根目录</value>
+  </data>
+  <data name="RBClipboard.Content" xml:space="preserve">
+    <value>剪贴板</value>
+  </data>
+  <data name="ChkWithHeader.Content" xml:space="preserve">
+    <value>合并为一个文件</value>
+  </data>
+  <data name="ChkWithHeaderToolTip" xml:space="preserve">
+    <value>选中后将添加标题行</value>
+  </data>
+  <data name="GetCsv.Content" xml:space="preserve">
+    <value>导入 CSV</value>
+  </data>
+  <data name="ImportFromClipboard.Content" xml:space="preserve">
+    <value>从剪贴板导入</value>
+  </data>
+  <data name="ClipLangCodeToolTip" xml:space="preserve">
+    <value>请输入要导入的区域代码。</value>
+  </data>
+  <data name="LblCultureCode.Text" xml:space="preserve">
+    <value>文化代码</value>
+  </data>
+  <data name="RelocateGroup.Header" xml:space="preserve">
+    <value>资源重新配置</value>
+  </data>
+  <data name="LblCurrentResource.Text" xml:space="preserve">
+    <value>当前资源</value>
+  </data>
+  <data name="LblResourceFolder.Text" xml:space="preserve">
+    <value>资源文件夹</value>
+  </data>
+  <data name="LblResourceName.Text" xml:space="preserve">
+    <value>资源名称</value>
+  </data>
+  <data name="LblFileFormat.Text" xml:space="preserve">
+    <value>文件格式</value>
+  </data>
+  <data name="LblRelocatedResource.Text" xml:space="preserve">
+    <value>重新配置的资源</value>
+  </data>
+  <data name="LblRelResourceFolder.Text" xml:space="preserve">
+    <value>资源文件夹</value>
+  </data>
+  <data name="LblRelResourceName.Text" xml:space="preserve">
+    <value>资源名称</value>
+  </data>
+  <data name="FileFormatResx.Content" xml:space="preserve">
+    <value>RESX格式（.resx）</value>
+  </data>
+  <data name="FileFormatResw.Content" xml:space="preserve">
+    <value>RESW格式（.resx）</value>
+  </data>
+  <data name="LblRelocationProjectFolder.Text" xml:space="preserve">
+    <value>重新配置项目文件夹</value>
+  </data>
+  <data name="BtnBrowseFolder.Content" xml:space="preserve">
+    <value>浏览...</value>
+  </data>
+  <data name="BtnRelocateResource.Content" xml:space="preserve">
+    <value>执行重新配置</value>
+  </data>
+  <data name="LblSelectFolder.Title" xml:space="preserve">
+    <value>选择文件夹</value>
+  </data>
+  <data name="BtnMoveUpFolder.Content" xml:space="preserve">
+    <value>↑ 上一级</value>
+  </data>
+  <data name="BtnCancelFolderSelection.Content" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="BtnConfirmFolderSelection.Content" xml:space="preserve">
+    <value>选择</value>
+  </data>
+  <data name="LblRelFileFormat.Text" xml:space="preserve">
+    <value>文件格式</value>
+  </data>
+  <data name="ResourceGetterExpressionToolTip" xml:space="preserve">
+    <value>将资源加载器的声明复制到剪贴板</value>
+  </data>
+  <data name="LanguageSelectionWindowName" xml:space="preserve">
+    <value>语言管理器</value>
+  </data>
+  <data name="LblResourceWindow" xml:space="preserve">
+    <value>资源管理</value>
   </data>
 </root>

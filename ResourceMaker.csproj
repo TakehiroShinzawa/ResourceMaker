@@ -53,6 +53,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="ResourceLoader.cs" />
+    <Compile Include="ViewModels\FolderPickerViewModel.cs" />
+    <Compile Include="Views\FolderPickerWindow.xaml.cs">
+      <DependentUpon>FolderPickerWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\LanguageSelectionWindow.xaml.cs">
       <DependentUpon>LanguageSelectionWindow.xaml</DependentUpon>
     </Compile>
@@ -109,6 +113,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
+    <Content Include="images\icon.png" />
     <Content Include="license.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
@@ -120,6 +125,10 @@
     <Content Include="Resources\Package.ico" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Views\FolderPickerWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\LanguageSelectionWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

@@ -4,43 +4,55 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ResourceMaker.UI"
+        WindowStartupLocation="CenterOwner"
         mc:Ignorable="d"
-        Title="ResourceEditWindow" Height="450" Width="800">
+        Title="ResourceEditWindow" Height="480" Width="800">
     <Grid>
         <StackPanel Margin="20">
-            <StackPanel Orientation="Vertical">
-                <TextBlock x:Name="LabelTargetText" Text="" FontSize="14"/>
-                <TextBox x:Name="SelectedText" FontSize="14"
-                    IsReadOnly="True" 
-                    Margin="0,0,5,0"
-                    VerticalScrollBarVisibility="Auto"/>
+            <StackPanel x:Name="CodeTextArea" >
+                <StackPanel Orientation="Vertical">
+                    <TextBlock x:Name="LabelTargetText" Text="source" FontSize="14"/>
+                    <TextBox x:Name="SelectedText" FontSize="14"
+                        IsReadOnly="True" 
+                        Margin="0,0,5,0"
+                        VerticalScrollBarVisibility="Auto"/>
             
-                <TextBlock x:Name="LabelUpdatedText" Text="書き戻しテキスト" FontSize="14"/>
-                <TextBox x:Name="ResultText" FontSize="14"
-                    IsReadOnly="false" 
-                    Margin="0,0,5,0"
-                    VerticalScrollBarVisibility="Auto"/>
+                    <TextBlock x:Name="LabelUpdatedText"
+                        Text="書き戻しテキスト" FontSize="14"/>
+                
+                    <TextBox x:Name="ResultText" FontSize="14"
+                        ToolTipService.ToolTip="ResultTextToolTip"
+                        IsReadOnly="false" 
+                        GotFocus="TextBox_GotFocus"
+                        KeyDown="TextBox_KeyDown"
+                        LostFocus="ResultText_LostFocus"
+                        Margin="0,0,5,0"
+                        VerticalScrollBarVisibility="Auto"/>
 
-
-            </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <TextBlock x:Name="OriginalText" Text="" VerticalAlignment="Center" Margin="0,5,0,5"/>
-                <ComboBox Name="BaseTexts" VerticalAlignment="Center" Margin="0,5,0,5" Width="200"
-                    SelectionChanged="BaseTexts_SelectionChanged" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock x:Name="OriginalText" Text="Org" VerticalAlignment="Center" Margin="0,5,0,5"/>
+                    <ComboBox Name="BaseTexts" VerticalAlignment="Center" Margin="5,5,0,5" Width="200"
+                        ToolTipService.ToolTip="BaseTextsToolTip"
+                        SelectionChanged="BaseTexts_SelectionChanged" />
+                </StackPanel>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Focusable="False">
-                <TextBlock x:Name="ResourceKey" Text="リソース名を入力" VerticalAlignment="Center" Margin="0,5,0,5"/>
+                <TextBlock x:Name="ResourceKey" Text="リソース名を入力" 
+                    ToolTipService.ToolTip="ResourceKeyToolTip"
+                    VerticalAlignment="Center" Margin="0,5,0,5"/>
                 <TextBox x:Name="ResourceKeyBox"
                     Width="200"
                     Margin="5"
                     VerticalAlignment="Center"
                     Padding="0,0,25,0"
                     GotFocus="ResourceKeyBox_GotFocus"
-                    TextChanged="ResourceKeyBox_TextChanged"
                     LostFocus="ResourceKeyBox_LostFocus"
-                    KeyDown="ResourceKeyBox_KeyDown" />
+                    PreviewMouseLeftButtonDown="LangBox_GotMouseButton"
+                    PreviewKeyDown="ResourceKeyBox_KeyDown"
+                    TextChanged="ResourceKeyBox_TextChanged" />
                 
-                <Popup x:Name="SuggestionPopup"
+                <Popup x:Name="SuggestionPopup" 
                     PlacementTarget="{Binding ElementName=ResourceKeyBox}"
                     Placement="Bottom"
                     StaysOpen="False"
@@ -48,10 +60,10 @@
                     <Border Background="White" BorderBrush="Gray" BorderThickness="1">
                         <ListBox x:Name="SuggestionList"
                             SelectionChanged="SuggestionList_SelectionChanged"
+                            KeyDown="SuggestionList_KeyDown"
                             Width="{Binding ElementName=ResourceKeyBox, Path=ActualWidth}" />
                     </Border>
                 </Popup>
-
 
                 <Button x:Name="ClearButton"
                     Content="🗑"
@@ -62,29 +74,36 @@
                     Margin="0,0,15,0"
                     Focusable="False"
                     Click="ResourceClearButton_Click"/>
-                <Button x:Name="ResourceGetterExpression"
-                    Content="取得式"
-                    VerticalAlignment="Center"
-                    Margin="0,5,0,5"
-                    IsTabStop="False"
-                    MouseEnter="Button_MouseEnter" MouseLeave="Button_MouseLeave"
-                    Click="ResourceGetterExpression_Click"/>
                 
-                <TextBox x:Name="ResourceGetterBox"
-                    Width="150"
-                    Margin="5"
-                    IsTabStop="False"
-                    GotFocus="TextBox_GotFocus"
-                    LostFocus="ResourceGetterBox_LostFocus"
-                    VerticalAlignment="Center"
-                    Padding="0,0,25,0"
-                    ToolTipService.ToolTip=""
-                    KeyDown="TextBox_KeyDown" />
-                <CheckBox Name="Feedback" Content="" 
-                    IsChecked="True" 
-                    Focusable="False"
-                    VerticalAlignment="Center" />
-
+                <StackPanel x:Name="Getters" Orientation="Horizontal">
+                    <Button x:Name="ResourceGetterExpression"
+                        Content="取得式"
+                        VerticalAlignment="Center"
+                        Margin="0,5,0,5"
+                        IsTabStop="False"
+                        MaxWidth="100"
+                        MinWidth="100"
+                        Width="100"
+                        ToolTipService.ToolTip="ResourceGetterExpressionToolTip"
+                        MouseEnter="Button_MouseEnter" MouseLeave="Button_MouseLeave"
+                        Click="ResourceGetterExpression_Click"/>
+                
+                    <TextBox x:Name="ResourceGetterBox"
+                        Width="150"
+                        Margin="5"
+                        IsTabStop="False"
+                        GotFocus="TextBox_GotFocus"
+                        LostFocus="ResourceGetterBox_LostFocus"
+                        VerticalAlignment="Center"
+                        Padding="0,0,25,0"
+                        ToolTipService.ToolTip="ResourceGetterBoxToolTip"
+                        KeyDown="TextBox_KeyDown" />
+                    <CheckBox Name="Feedback" Content="WriteBack" 
+                        IsChecked="True" 
+                        Focusable="False"
+                        ToolTipService.ToolTip="FeedbackToolTip"
+                        VerticalAlignment="Center" />
+                </StackPanel>
             </StackPanel>
             <Grid>
                 <Grid.RowDefinitions>
@@ -93,7 +112,7 @@
                 </Grid.RowDefinitions>
 
                 <!-- スクロール可能領域 -->
-                <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" MaxHeight="180">
+                <ScrollViewer x:Name="ResourceScroll" Grid.Row="0" VerticalScrollBarVisibility="Auto" MaxHeight="200">
                     <ItemsControl ItemsSource="{Binding LanguageEntries}" IsTabStop="False">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
@@ -105,19 +124,22 @@
                                 <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
                                     <TextBlock Text="{Binding Code}" Width="50" VerticalAlignment="Center" />
                                     <TextBox Width="500"
-                                 Margin="5,0,0,0"
-                                 VerticalAlignment="Center"
-                                 AcceptsReturn="True"
-                                 TextWrapping="Wrap"
-                                 VerticalScrollBarVisibility="Auto"
-                                 Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                        Margin="5,0,0,0"
+                                        VerticalAlignment="Center"
+                                        AcceptsReturn="True"
+                                        TextWrapping="Wrap"
+                                        VerticalScrollBarVisibility="Auto"
+                                        GotKeyboardFocus="LangBox_GotKeyboardFocus"
+                                        PreviewMouseLeftButtonDown="LangBox_GotMouseButton"
+                                        Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    
                                     <Button Content="🗑"
-                                Margin="5,0,0,0"
-                                Width="30"
-                                Height="25"
-                                Focusable="False"
-                                Command="{Binding DataContext.ClearCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                CommandParameter="{Binding}" />
+                                        Margin="5,0,0,0"
+                                        Width="30"
+                                        Height="25"
+                                        Focusable="False"
+                                        Command="{Binding DataContext.ClearCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                        CommandParameter="{Binding}" />
                                 </StackPanel>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
@@ -127,13 +149,30 @@
                 <!-- 下部固定ボタン群 -->
                 <StackPanel Grid.Row="1" HorizontalAlignment="Center">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <Button x:Name="SaveResource" Content="リソースの保存" Click="SaveResource_Click" Margin="5,0,0,0"/>
-                        <Button x:Name="SaveAndClose" Content="反映" Click="SaveResource_Click" Margin="15,0,0,0"/>
-                        <Button x:Name="AddLanguage" Content="言語の追加" Click="AddResource" Margin="25,0,0,0"/>
-                        <Button x:Name="ClearCache" Content="言語のクリア" Click="ClearCache_Click" Margin="25,0,0,0"/>
+                        <Button x:Name="SaveResource" Content="反映" 
+                                ToolTipService.ToolTip="SaveResourceToolTip"
+                                Click="SaveResource_Click" Margin="5,0,0,0"/>
+                        <Button x:Name="SaveAndClose" Content="リソースの保存" 
+                                ToolTipService.ToolTip="SaveAndCloseToolTip"
+                                Click="SaveResource_Click" Margin="15,0,0,0"/>
+                        
+                        <Button x:Name="AddLanguage" Content="言語の追加" 
+                                ToolTipService.ToolTip="AddLanguageToolTip"
+                                Click="AddResource" Margin="25,0,0,0"/>
+                        
+                        <Button x:Name="ManageLanguage" Content="リソースの管理" Visibility="Collapsed"
+                                ToolTipService.ToolTip="ファイル出力や移動などを行います"
+                                Click="AddResource" Margin="25,0,0,0"/>
+                        
+                        <Button x:Name="ClearCache" Content="言語のクリア" 
+                                ToolTipService.ToolTip="ClearCacheToolTip"
+                                Click="ClearCache_Click" Margin="25,0,0,0"/>
+                        <Button x:Name="BtnMakeLoaderCode" Content="ローダーテキストの出力" 
+                                ToolTipService.ToolTip="ResourceAdder.csに書き込みます。"
+                                Click="MakeLoaderText_Click" Margin="25,0,0,0" Visibility="Collapsed"/>
                     </StackPanel>
 
-                    <StackPanel HorizontalAlignment="Center" Margin="0,10,0,0">
+                    <StackPanel x:Name="InformationPanel" HorizontalAlignment="Center" Margin="0,10,0,0">
                         <TextBox x:Name="ClipText" />
                         <TextBlock x:Name="Infomation" Text="" TextWrapping="Wrap" />
                     </StackPanel>

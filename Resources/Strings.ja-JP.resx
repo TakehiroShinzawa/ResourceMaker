@@ -133,7 +133,7 @@
     <value>リソース名を入力</value>
   </data>
   <data name="ResourceGetterExpression.Content" xml:space="preserve">
-    <value>リソース名取得式</value>
+    <value>取得式</value>
   </data>
   <data name="Feedback.Content" xml:space="preserve">
     <value>書き戻す</value>
@@ -156,9 +156,6 @@
   <data name="LoaderDeclaration" xml:space="preserve">
     <value>loaderの宣言をクリップボードに送りました</value>
   </data>
-  <data name="NotSetTooltip" xml:space="preserve">
-    <value>ツールチップが設定されていません</value>
-  </data>
   <data name="ClearCache.Content" xml:space="preserve">
     <value>キャッシュをクリア</value>
   </data>
@@ -176,5 +173,333 @@
   </data>
   <data name="BtnAdd.Content" xml:space="preserve">
     <value>追加</value>
+  </data>
+  <data name="BtnCreateToolTip" xml:space="preserve">
+    <value>チェックの付いている言語ファイルを作成します。既存の場合はスキップします。</value>
+  </data>
+  <data name="BtnCancelToolTip" xml:space="preserve">
+    <value>言語ファイルを追加しません。リソースの編集を行いません。</value>
+  </data>
+  <data name="BtnCloseToolTip" xml:space="preserve">
+    <value>言語ウィンドウを閉じます。その後、リソースの編集を行います。</value>
+  </data>
+  <data name="BtnAddToolTip" xml:space="preserve">
+    <value>リソース言語を追加します。エンターキーでも追加できます。</value>
+  </data>
+  <data name="ResultTextToolTip" xml:space="preserve">
+    <value>選択した行と置き換えられます。</value>
+  </data>
+  <data name="BaseTextsToolTip" xml:space="preserve">
+    <value>リソース化対象のテキストを選んでください。
+リソースキーを表示している時は登録済みの値が表示されます。</value>
+  </data>
+  <data name="ResourceKeyToolTip" xml:space="preserve">
+    <value>키 이름을 입력하세요. 
+XAML에서는 '키이름.대상이름'으로 정의됩니다. 대상 이름은 변경하지 마세요.</value>
+  </data>
+  <data name="ResourceGetterBoxToolTip" xml:space="preserve">
+    <value>このコードは自動生成されますが、取得メソッド(loader.GetString)はカスタマイズ可能です</value>
+  </data>
+  <data name="FeedbackToolTip" xml:space="preserve">
+    <value>チェックされている場合、リソース作成後にソーステキストを書き戻します。</value>
+  </data>
+  <data name="SaveResourceToolTip" xml:space="preserve">
+    <value>編集中のリソースをキャッシュに保存します。引き続き編集を行えます。</value>
+  </data>
+  <data name="SaveAndCloseToolTip" xml:space="preserve">
+    <value>編集リソースを全体に反映します。編集を終了しウィンドウを閉じます。</value>
+  </data>
+  <data name="AddLanguageToolTip" xml:space="preserve">
+    <value>言語リソースの追加・削除を行います。設定後このウィンドウも閉じます。</value>
+  </data>
+  <data name="ClearCacheToolTip" xml:space="preserve">
+    <value>保持データをクリアします。外部でリソースを編集した時は、必ず押下してください。</value>
+  </data>
+  <data name="ApplyButton.Content" xml:space="preserve">
+    <value>決定</value>
+  </data>
+  <data name="BtnCsvOut.Content" xml:space="preserve">
+    <value>CSV出力</value>
+  </data>
+  <data name="BtnMakeLoaderCode.Content" xml:space="preserve">
+    <value>ローダーコードの出力</value>
+  </data>
+  <data name="BtnMakeLoaderCodeToolTip" xml:space="preserve">
+    <value>ResourceAdder.cs にコードを書き込みます</value>
+  </data>
+  <data name="MessageResourceFileNotFound" xml:space="preserve">
+    <value>リソース設定が変更されました。
+想定されるリソースファイルが見つかりませんでした。</value>
+  </data>
+  <data name="TitleResourceRetrievalFailed" xml:space="preserve">
+    <value>リソース取得失敗</value>
+  </data>
+  <data name="MessageTooltipConflict" xml:space="preserve">
+    <value>ツールチップの値が他のプロパティと重複しているため、リソース化できません。
+他のプロパティとは別の行に分けて記述してください。</value>
+  </data>
+  <data name="TitleTooltipConflict" xml:space="preserve">
+    <value>ツールチップは特殊なの</value>
+  </data>
+  <data name="TitleResourceEditingMode" xml:space="preserve">
+    <value>リソース編集モード</value>
+  </data>
+  <data name="MessageGenerateResourceCode" xml:space="preserve">
+    <value>全ての言語リソースのロード用コードを書き出します。
+'ResourceAdder.cs'の内容は書き換えられます。</value>
+  </data>
+  <data name="TitleGenerateResourceCode" xml:space="preserve">
+    <value>上書き確認</value>
+  </data>
+  <data name="MessageResourceAdderOutputError" xml:space="preserve">
+    <value>ResourceAdder.csの出力中にエラーが発生しました。
+{0}</value>
+  </data>
+  <data name="TitleFileWriteError" xml:space="preserve">
+    <value>ファイル書き込みエラー</value>
+  </data>
+  <data name="MessageConfirmKeyDeletionAllLanguages" xml:space="preserve">
+    <value>指定されたキー '{0}' をすべての言語リソースから削除しますか？</value>
+  </data>
+  <data name="TitleConfirmResourceDeletion" xml:space="preserve">
+    <value>削除</value>
+  </data>
+  <data name="NoteOutputToResourceAdder" xml:space="preserve">
+    <value>ResourceAdder.csに出力されます</value>
+  </data>
+  <data name="BtnClickme" xml:space="preserve">
+    <value>Click me</value>
+  </data>
+  <data name="ManageLanguage.Content" xml:space="preserve">
+    <value>リソースの管理</value>
+  </data>
+  <data name="ResSeparatedByFolder" xml:space="preserve">
+    <value>{0} (フォルダで分離)</value>
+  </data>
+  <data name="ResIntoFilename" xml:space="preserve">
+    <value>{0} (ファイル名に挿入)</value>
+  </data>
+  <data name="MissingResource_enUS" xml:space="preserve">
+    <value>en-US のリソースが見つかりません</value>
+  </data>
+  <data name="NoLanguageSelected" xml:space="preserve">
+    <value>出力対象未選択</value>
+  </data>
+  <data name="NoLanguageSelection" xml:space="preserve">
+    <value>出力する言語を選択してください。</value>
+  </data>
+  <data name="CsvExportSuccess" xml:space="preserve">
+    <value>CSVを出力しました。</value>
+  </data>
+  <data name="CsvExportCompleted" xml:space="preserve">
+    <value>出力完了</value>
+  </data>
+  <data name="SelectCsvExportSettings" xml:space="preserve">
+    <value>CSVの出力条件を選択してください。</value>
+  </data>
+  <data name="MissingCsvExportSettings" xml:space="preserve">
+    <value>出力条件未設定</value>
+  </data>
+  <data name="SelectSingleLanguageForImport" xml:space="preserve">
+    <value>取込む言語を一つ選択してください。</value>
+  </data>
+  <data name="LanguageSelectionRequired" xml:space="preserve">
+    <value>言語選択が必要です</value>
+  </data>
+  <data name="InvalidCultureCodeEntered" xml:space="preserve">
+    <value>カルチャコードが正しくありません。</value>
+  </data>
+  <data name="InvalidCultureCode" xml:space="preserve">
+    <value>カルチャコードエラー</value>
+  </data>
+  <data name="NoTextInClipboard" xml:space="preserve">
+    <value>クリップボードにテキストが在りません。</value>
+  </data>
+  <data name="ClipboardEmpty" xml:space="preserve">
+    <value>空クリップボード</value>
+  </data>
+  <data name="SelectCsvFile" xml:space="preserve">
+    <value>CSVファイルを選択</value>
+  </data>
+  <data name="CsvFileFilter" xml:space="preserve">
+    <value>CSVファイル (*.csv)|*.csv</value>
+  </data>
+  <data name="NoCultureCodeDetectedInFile" xml:space="preserve">
+    <value>ファイルからカルチャコードを識別できませんでした</value>
+  </data>
+  <data name="CultureCodeNotFound" xml:space="preserve">
+    <value>カルチャコード未検出</value>
+  </data>
+  <data name="LanguageResourceAddedToTarget" xml:space="preserve">
+    <value>言語リソース{0}を追加しました。</value>
+  </data>
+  <data name="LanguageResourceAdded" xml:space="preserve">
+    <value>言語リソース追加</value>
+  </data>
+  <data name="TargetCountMismatchWithDefinitions" xml:space="preserve">
+    <value>対象が現在の定義数と異なっています。</value>
+  </data>
+  <data name="UnableToRetrieve" xml:space="preserve">
+    <value>取得不能</value>
+  </data>
+  <data name="SelectLanguageForRelocation" xml:space="preserve">
+    <value>再配置する言語を選択してください。</value>
+  </data>
+  <data name="LanguageRelocationRequired" xml:space="preserve">
+    <value>言語未選択</value>
+  </data>
+  <data name="RelocationRootFolderNotSet" xml:space="preserve">
+    <value>再配置ルートフォルダが設定されていません。</value>
+  </data>
+  <data name="RelocationRootFolderDoesNotExist" xml:space="preserve">
+    <value>再配置ルートフォルダが存在しません</value>
+  </data>
+  <data name="InvalidRelocationFolderName" xml:space="preserve">
+    <value>再配置リソースフォルダ名が不正です。</value>
+  </data>
+  <data name="InvalidRelocationFileName" xml:space="preserve">
+    <value>再配置リソースファイル名が不正です</value>
+  </data>
+  <data name="RelocationFormatNotSelected" xml:space="preserve">
+    <value>再配置リソース形式が未選択です。</value>
+  </data>
+  <data name="RelocationDefinitionError" xml:space="preserve">
+    <value>再配置定義エラー</value>
+  </data>
+  <data name="RelocationErrorOccurred" xml:space="preserve">
+    <value>再配置中にエラーが発生しました。
+{0}</value>
+  </data>
+  <data name="RelocationRuntimeError" xml:space="preserve">
+    <value>再配置実行時エラー</value>
+  </data>
+  <data name="ChkCustom.Content" xml:space="preserve">
+    <value>カスタム設定</value>
+  </data>
+  <data name="CustomResFolder.Text" xml:space="preserve">
+    <value>リソースフォルダ ./</value>
+  </data>
+  <data name="CustmResourceName.Text" xml:space="preserve">
+    <value>リソースファイル名(拡張子不要)</value>
+  </data>
+  <data name="CustomResPtn.Text" xml:space="preserve">
+    <value>リソースパターン</value>
+  </data>
+  <data name="ChkResw.Content" xml:space="preserve">
+    <value>resw (フォルダで分離)</value>
+  </data>
+  <data name="ChkResx.Content" xml:space="preserve">
+    <value>resx (ファイル名に挿入)</value>
+  </data>
+  <data name="IsNewResource.Text" xml:space="preserve">
+    <value>(新規作成)</value>
+  </data>
+  <data name="BtnSelectAllLanguage.Content" xml:space="preserve">
+    <value>全て選択</value>
+  </data>
+  <data name="CsvOutputItem.Text" xml:space="preserve">
+    <value>CSV出力項目：</value>
+  </data>
+  <data name="optVOnly.Content" xml:space="preserve">
+    <value>キーのみ</value>
+  </data>
+  <data name="optKOnly.Content" xml:space="preserve">
+    <value>値のみ</value>
+  </data>
+  <data name="optKVP.Content" xml:space="preserve">
+    <value>キーと値</value>
+  </data>
+  <data name="CsvOutputPath.Text" xml:space="preserve">
+    <value>出力先を選択：</value>
+  </data>
+  <data name="RBSameFolder.Content" xml:space="preserve">
+    <value>同じフォルダ</value>
+  </data>
+  <data name="RBPrjTop.Content" xml:space="preserve">
+    <value>プロジェクトトップ</value>
+  </data>
+  <data name="RBClipboard.Content" xml:space="preserve">
+    <value>クリップボード</value>
+  </data>
+  <data name="ChkWithHeader.Content" xml:space="preserve">
+    <value>一つのファイルにまとめる</value>
+  </data>
+  <data name="ChkWithHeaderToolTip" xml:space="preserve">
+    <value>チェックを入れるとヘッダー行が付加されます</value>
+  </data>
+  <data name="GetCsv.Content" xml:space="preserve">
+    <value>CSV取り込み</value>
+  </data>
+  <data name="ImportFromClipboard.Content" xml:space="preserve">
+    <value>クリップボードから取り込み</value>
+  </data>
+  <data name="ClipLangCodeToolTip" xml:space="preserve">
+    <value>読み込み対象のカルチャーコードを入れてください。</value>
+  </data>
+  <data name="LblCultureCode.Text" xml:space="preserve">
+    <value>カルチャコード</value>
+  </data>
+  <data name="RelocateGroup.Header" xml:space="preserve">
+    <value>リソース再配置</value>
+  </data>
+  <data name="LblCurrentResource.Text" xml:space="preserve">
+    <value>現在のリソース</value>
+  </data>
+  <data name="LblResourceFolder.Text" xml:space="preserve">
+    <value>リソースフォルダ</value>
+  </data>
+  <data name="LblResourceName.Text" xml:space="preserve">
+    <value>リソース名</value>
+  </data>
+  <data name="LblFileFormat.Text" xml:space="preserve">
+    <value>ファイル形式</value>
+  </data>
+  <data name="LblRelocatedResource.Text" xml:space="preserve">
+    <value>再配置先リソース</value>
+  </data>
+  <data name="LblRelResourceFolder.Text" xml:space="preserve">
+    <value>リソースフォルダ</value>
+  </data>
+  <data name="LblRelResourceName.Text" xml:space="preserve">
+    <value>リソース名</value>
+  </data>
+  <data name="FileFormatResx.Content" xml:space="preserve">
+    <value>RESX形式（.resx）</value>
+  </data>
+  <data name="FileFormatResw.Content" xml:space="preserve">
+    <value>RESW形式 (.resw)</value>
+  </data>
+  <data name="LblRelocationProjectFolder.Text" xml:space="preserve">
+    <value>再配置プロジェクトフォルダ</value>
+  </data>
+  <data name="BtnBrowseFolder.Content" xml:space="preserve">
+    <value>参照...</value>
+  </data>
+  <data name="BtnRelocateResource.Content" xml:space="preserve">
+    <value>配置変更を実行</value>
+  </data>
+  <data name="LblSelectFolder.Title" xml:space="preserve">
+    <value>フォルダを選択</value>
+  </data>
+  <data name="BtnMoveUpFolder.Content" xml:space="preserve">
+    <value>↑ 上へ</value>
+  </data>
+  <data name="BtnCancelFolderSelection.Content" xml:space="preserve">
+    <value>キャンセル</value>
+  </data>
+  <data name="BtnConfirmFolderSelection.Content" xml:space="preserve">
+    <value>選択</value>
+  </data>
+  <data name="LblRelFileFormat.Text" xml:space="preserve">
+    <value>ファイル形式</value>
+  </data>
+  <data name="ResourceGetterExpressionToolTip" xml:space="preserve">
+    <value>リソースローダーの宣言をクリップボードにコピーします</value>
+  </data>
+  <data name="LanguageSelectionWindowName" xml:space="preserve">
+    <value>言語マネージャー</value>
+  </data>
+  <data name="LblResourceWindow" xml:space="preserve">
+    <value>リソース管理</value>
   </data>
 </root>

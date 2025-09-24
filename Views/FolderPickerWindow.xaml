@@ -1,0 +1,87 @@
+﻿<Window x:Class="ResourceMaker.UI.FolderPickerWindow"
+            xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+            xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+            xmlns:local="clr-namespace:ResourceMaker.UI"
+            x:Name="LblSelectFolder" Title="Folder" 
+            WindowStartupLocation="CenterOwner"
+            mc:Ignorable="d" 
+            Width="600" Height="300"
+            Background="{DynamicResource WindowBackgroundBrush}" Foreground="{DynamicResource TextBrush}">
+
+    <Window.Resources>
+        <SolidColorBrush x:Key="WindowBackgroundBrush" Color="#1E1E1E"/>
+        <SolidColorBrush x:Key="TextBrush" Color="#FFFFFF"/>
+        <Style TargetType="Window">
+            <Setter Property="Background" Value="{StaticResource WindowBackgroundBrush}" />
+            <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        </Style>
+        <Style TargetType="TreeViewItem">
+            <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        </Style>
+        <Style x:Key="FlatDialogButton" TargetType="Button">
+            <Setter Property="Background" Value="#333"/>
+            <Setter Property="Foreground" Value="#EEE"/>
+            <Setter Property="BorderBrush" Value="#555"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <!-- 行定義：TreeView領域 + ボタン領域 -->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <!-- フォルダツリートップ -->
+            <RowDefinition Height="*" />
+            <!-- フォルダツリー -->
+            <RowDefinition Height="Auto" />
+            <!-- ボタン -->
+        </Grid.RowDefinitions>
+        <TextBox x:Name="FolderPathText"
+             Grid.Row="0"
+             Text="{Binding CurrentFolderPath, Mode=TwoWay, UpdateSourceTrigger=Explicit}"
+             KeyDown="FolderPathText_KeyDown"
+             LostFocus="FolderPathText_LostFocus" />
+        <!-- フォルダツリー：ウィンドウ全体に広げる -->
+        <TreeView x:Name="FolderTree"
+                  Grid.Row="1"
+                  ItemsSource="{Binding RootFolders}"
+                  Background="#1E1E1E"
+                  Foreground="#FFFFFF"
+                  
+                  BorderThickness="0"
+                  SelectedItemChanged="FolderTree_SelectedItemChanged">
+            <TreeView.ItemContainerStyle>
+                <Style TargetType="TreeViewItem">
+                    <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                </Style>
+            </TreeView.ItemContainerStyle>
+            <TreeView.ItemTemplate>
+                <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                    <TextBlock Text="{Binding Name}" Foreground="#FFFFFF"  />
+                </HierarchicalDataTemplate>
+            </TreeView.ItemTemplate>
+        </TreeView>
+
+        <!-- ボタン：右下に固定 -->
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="10">
+            <Button x:Name="BtnMoveUpFolder" Content="↑ 上へ"
+                    Style="{StaticResource FlatDialogButton}"
+                    Width="80" Height="28" Margin="5,0,30,0"
+                    Click="MoveUp_Click" />
+            <Button Style="{StaticResource FlatDialogButton}"
+                    x:Name="BtnCancelFolderSelection" Content=""
+                    Width="80" Height="28" Margin="5"
+                    Click="Cancel_Click" />
+            <Button Style="{StaticResource FlatDialogButton}"
+                    x:Name="BtnConfirmFolderSelection" Content="選択"
+                    Width="80" Height="28" Margin="5"
+                    Click="Ok_Click" />
+        </StackPanel>
+    </Grid>
+</Window>

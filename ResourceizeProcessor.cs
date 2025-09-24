@@ -88,9 +88,9 @@ namespace ResourceMaker
             //loader情報
             if (!store.PropertyExists("ResourceMaker", "AccessMethod"))
                 store.SetString("ResourceMaker", "AccessMethod", "loader.GetString");
-
-
-
+#if DEBUG
+            //cachedProjectPath = "";    ///ToDo
+#endif  
             if (folder != cachedProjectPath)
             {
                 var resLanguage = new LanguageSelectionWindow();
@@ -122,6 +122,16 @@ namespace ResourceMaker
             resWindow.ProjectName = owningProject.Name;
             resWindow.element = element;
             resWindow.BaseFolderPath = folder;
+            if( string.IsNullOrEmpty(resWindow.DevelopType))
+            {
+                store.SetString("ResourceMaker", "LastProject", "");
+                store.SetString("ResourceMaker", "LastDevType", "");
+                ResourceCacheController.Clear();
+                return;
+            }
+            if (resWindow.FeedbackText == "NG")
+                return;
+
             resWindow.ShowDialog();
             var feedback = resWindow.FeedbackText;
 
@@ -165,68 +175,79 @@ namespace ResourceMaker
             string lineText = string.Empty;
             bool foundStart = false;
             var x = "xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\"";
-
-            lineText = (cursor.GetLines(currentLine, currentLine + 1)).Trim();
-            if (lineText.StartsWith("<") && lineText.EndsWith(">"))
-            {
-                int spacePos = lineText.IndexOf(' ');
-                builder.Append(lineText.Substring(0, spacePos));
-                builder.Append($" {x}");
-                builder.AppendLine(lineText.Substring(spacePos));
-                
-            }
-            else
-            {
-                // 上に向かって `<TextBox` を探す
-                while (currentLine >= 1)
-                {
-                    lineText = cursor.GetLines(currentLine, currentLine + 1);
-                    if (lineText.Contains("<"))
-                    {
-                        foundStart = true;
-                        break;
-                    }
-
-                    currentLine--;
-                    cursor.MoveToLineAndOffset(currentLine - 1, 1);  // 1 は行頭
-                }
-
-                if (!foundStart)
-                {
-                    // 見つからなければ null（または例外・エラー通知）
-                    return null;
-                }
-
-                // 開始タグ行から、">"が見つかるまで文字列を構築
-                bool doX = true;
-                while (!lineText.Contains(">"))
-                {
-                    builder.AppendLine(lineText.Trim());
-                    if (doX)
-                    {
-                        builder.AppendLine(x);
-                        doX = false;
-                    }
-                    currentLine++;
-                    cursor.MoveToLineAndOffset(currentLine - 1, 1);  // 1 は行頭
-                    lineText = cursor.GetLines(currentLine, currentLine + 1);
-
-                    // 無限ループ防止（ファイル末端まで達したら終了）
-                    if (string.IsNullOrEmpty(lineText))
-                        break;
-                }
-
-                // 最後の">"を含む行も追加
-                builder.AppendLine(lineText.Trim());
-                Debug.WriteLine(builder.ToString());
-            }
-            // XMLとしてパース
             try
             {
-                return XElement.Parse(builder.ToString());
+                lineText = (cursor.GetLines(currentLine, currentLine + 1)).Trim();
+                if (lineText.StartsWith("<") && lineText.EndsWith(">"))
+                {
+                    int spacePos = lineText.IndexOf(' ');
+                    builder.Append(lineText.Substring(0, spacePos));
+                    builder.Append($" {x}");
+                    builder.AppendLine(lineText.Substring(spacePos));
+
+                }
+                else
+                {
+                    // 上に向かって `<TextBox` を探す
+                    while (currentLine >= 1)
+                    {
+                        lineText = cursor.GetLines(currentLine, currentLine + 1);
+                        if (lineText.Contains("<"))
+                        {
+                            foundStart = true;
+                            break;
+                        }
+
+                        currentLine--;
+                        if (currentLine > 1)
+                            cursor.MoveToLineAndOffset(currentLine - 1, 1);  // 1 は行頭
+
+                        else
+                            cursor.MoveToLineAndOffset(1, 1);  // 0行目が存在しない場合、1行目に留める
+                    }
+
+                    if (!foundStart)
+                        // 見つからなければ null（または例外・エラー通知）
+                        return null;
+
+                    // 開始タグ行から、">"が見つかるまで文字列を構築
+                    
+                    while (!lineText.Contains(">"))
+                    {
+                        builder.AppendLine(lineText.Trim());
+                        currentLine++;
+                        cursor.MoveToLineAndOffset(currentLine - 1, 1);  // 1 は行頭
+                        lineText = cursor.GetLines(currentLine, currentLine + 1);
+
+                        // 無限ループ防止（ファイル末端まで達したら終了）
+                        if (string.IsNullOrEmpty(lineText))
+                            break;
+                    }
+
+                    // 最後の">"を含む行も追加
+                    builder.AppendLine(lineText.Trim());
+                    Debug.WriteLine(builder.ToString());
+                }
+                // XMLとしてパース
+                var xmlText = builder.ToString();
+                if (!xmlText.Contains("xmlns:x=\""))
+                    xmlText = xmlText.Replace("/>", " " + x + " />");
+
+                return XElement.Parse(xmlText);
             }
             catch (Exception ex)
             {
+                if( lineText.EndsWith(">") )
+                {
+                    try
+                    {//パネル系はヘッダだけで終了させちゃう
+                        return XElement.Parse(builder.ToString().Replace(">", "/>"));
+                    }
+                    catch (Exception)
+                    {
+                        return null;
+                    }
+                }
                 // パース失敗時の処理（ログ or null）
                 Debug.WriteLine(ex.Message);
                 return null;

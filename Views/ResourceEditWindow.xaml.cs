@@ -20,7 +20,10 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Markup;
+using System.Windows.Media.Animation;
 using System.Xml.Linq;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace ResourceMaker.UI
 {
@@ -50,6 +53,7 @@ namespace ResourceMaker.UI
         public List<string> allCodes = new List<string>();
         bool noValue = true;
         bool isToolTip = false;
+        bool isEditOnly = false;
 
         private string baseFolderPath = string.Empty;
 
@@ -157,12 +161,26 @@ namespace ResourceMaker.UI
             LabelUpdatedText.Text = loader.GetString("LabelUpdatedText.Text");
             OriginalText.Text = loader.GetString("OriginalText.Text");
             ResourceKey.Text = loader.GetString("ResourceKey.Text");
-            ResourceGetterExpression.Content = loader.GetString("ResourceGetterExpression.Content");
             Feedback.Content = loader.GetString("Feedback.Content");
             SaveAndClose.Content = loader.GetString("SaveAndClose.Content");
             SaveResource.Content = loader.GetString("SaveResource.Content");
             AddLanguage.Content = loader.GetString("AddLanguage.Content");
             ClearCache.Content = loader.GetString("ClearCache.Content");
+            BtnMakeLoaderCode.Content = loader.GetString("BtnMakeLoaderCode.Content");
+            ManageLanguage.Content = loader.GetString("ManageLanguage.Content");
+            ResourceGetterExpression.Content = loader.GetString("ResourceGetterExpression.Content");
+
+            ToolTipService.SetToolTip(ResultText, loader.GetString("ResultTextToolTip"));
+            ToolTipService.SetToolTip(BaseTexts, loader.GetString("BaseTextsToolTip"));
+            ToolTipService.SetToolTip(ResourceKey, loader.GetString("ResourceKeyToolTip"));
+            ToolTipService.SetToolTip(ResourceGetterBox, loader.GetString("ResourceGetterBoxToolTip"));
+            ToolTipService.SetToolTip(Feedback, loader.GetString("FeedbackToolTip"));
+            ToolTipService.SetToolTip(SaveResource, loader.GetString("SaveResourceToolTip"));
+            ToolTipService.SetToolTip(SaveAndClose, loader.GetString("SaveAndCloseToolTip"));
+            ToolTipService.SetToolTip(AddLanguage, loader.GetString("AddLanguageToolTip"));
+            ToolTipService.SetToolTip(ClearCache, loader.GetString("ClearCacheToolTip"));
+            ToolTipService.SetToolTip(ResourceGetterExpression, loader.GetString("ResourceGetterExpressionToolTip"));
+
         }
 #endif
         public ResourceEditWindow()
@@ -188,18 +206,21 @@ namespace ResourceMaker.UI
 
             ResourceGetterBox.Text = AccessMethod;
 
-            string loaderGuide;
-            if (isUWP)
-                loaderGuide = $"Windows.ApplicationModel.Resources.ResourceLoader loader = \r\n    ResourceLoader.GetForViewIndependentUse();";
-
-            else
-                loaderGuide = $"System.Resources.ResourceManager loader = \r\n    new ResourceManager(\"{ProjectName}.{resFolderName}.{resName}\", GetType().Assembly);";
-
-            ToolTipService.SetToolTip(ResourceGetterBox, loaderGuide);
-
+            ClearButton.Tag = "Testing";
 
             var resourcesRoot = Path.Combine(baseFolderPath, resFolderName);
-
+            if (!Directory.Exists(resourcesRoot))
+            {
+                ResourceCacheController.Clear();
+                DevelopType = "";
+                var result = System.Windows.MessageBox.Show(
+                    loader.GetString("MessageResourceFileNotFound"), loader.GetString("TitleResourceRetrievalFailed"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Exclamation
+                );
+                return;
+            }
+            //設定済み言語リストの作成
             if (isUWP)
             { //UWP
                 allCodes = Directory.GetDirectories(resourcesRoot)
@@ -266,10 +287,28 @@ namespace ResourceMaker.UI
 
             //選択行の文字列種別で初期化
             SelectedText.Text = LineText;
-            if (EditorType == "xaml")
+            if (EditorType == "xaml" && !string.IsNullOrEmpty(LineText))
             {
+                if (BaseTexts.Items.Count > 1 && LineText.Contains("ToolTipService.ToolTip"))
+                {
+                    MessageBox.Show(
+                        loader.GetString("MessageTooltipConflict"),
+                        loader.GetString("TitleTooltipConflict"),
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Exclamation
+                    );
+                    FeedbackText = "NG";
+                    return;
+
+                }
+                if( element == null)
+                {
+
+                }
                 MakeXamlForm();
-                targetName = BaseTexts.Text;
+                //なんか変
+                //targetName = BaseTexts.Text;
+                targetName = ResourceKeyBox.Text;
                 if (isUidMode) return;
             }
             else
@@ -295,16 +334,115 @@ namespace ResourceMaker.UI
                 {
                     var existingEntry = LanguageEntries
                         .FirstOrDefault(entry => entry.Code == code);
-                    existingEntry.Value = targetName;
+                    existingEntry.Value = BaseTexts.Text;
                 }
             }
             Feedback.IsChecked = noValue;
-            if (BaseTexts.Items.Count > 1)
+            if (BaseTexts.Items.Count != 1)
+            {
                 SaveResource.Visibility = Visibility.Visible;
+                SaveResource.IsEnabled = true;
+            }
             else
+            {
                 SaveResource.Visibility = Visibility.Collapsed;
+                SaveResource.IsEnabled = false;
+            }
 
-            SaveResource.IsEnabled = (BaseTexts.Items.Count > 1);
+            if( BaseTexts.Items.Count == 0)
+            {
+                CodeTextArea.Visibility = Visibility.Collapsed;
+                Getters.Visibility = Visibility.Collapsed;
+                Feedback.IsChecked = false;
+                this.Title = loader.GetString("TitleResourceEditingMode");
+                ResourceKeyBox.Text = "";
+                ResourceScroll.MaxHeight = 300;
+                InformationPanel.Visibility = Visibility.Collapsed;
+                AddLanguage.Visibility = Visibility.Collapsed;
+                ManageLanguage.Visibility = Visibility.Visible;
+                BtnMakeLoaderCode.Visibility = Visibility.Visible;
+                isEditOnly = true;
+            }
+        }
+
+        private string ReplaceXamlValue(string input, string target, string value)
+        {
+            string replaced;
+            target += "=\"";
+            int startIndex = input.IndexOf(target);
+            if (startIndex >= 0)
+            {
+                int valueStart = startIndex + target.Length;
+                int valueEnd = input.IndexOf("\"", valueStart);
+
+                if (valueEnd > valueStart)
+                {
+                    string before = input.Substring(0, valueStart);
+                    string after = input.Substring(valueEnd);
+                    replaced = before + value + after;
+
+                    Console.WriteLine(replaced);
+                }
+                else
+                    return input;
+            }
+            else
+                return input;
+
+            return replaced;
+        }
+
+        //LoaderCodeの作成
+        private void MakeLoaderText_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                string keyName = ResourceKeyBox.Text;
+                if (string.IsNullOrEmpty(keyName))
+                {
+                    var dialogRes = MessageBox.Show(
+                        loader.GetString("MessageGenerateResourceCode"), loader.GetString("TitleGenerateResourceCode"),
+                        MessageBoxButton.OKCancel,
+                        MessageBoxImage.Exclamation
+                    );
+                    if (dialogRes == MessageBoxResult.OK)
+                    {
+                        File.Delete(resourcerFilename);
+                        var keyList = cacheList["en-US"].Keys.OrderBy(k => k).ToArray();
+                        foreach (var key in keyList)
+                        {
+                            File.AppendAllText(resourcerFilename, MakeLoaderText(key));
+                        }
+                    }
+
+                }
+                else
+                    File.AppendAllText(resourcerFilename, MakeLoaderText(keyName));
+            }
+            catch (Exception ex)
+            {
+                var msg = string.Format( loader.GetString("MessageResourceAdderOutputError"), ex.Message);
+                MessageBox.Show(
+                    msg,
+                    loader.GetString("TitleFileWriteError"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Exclamation
+                );
+            }
+        }
+        private string MakeLoaderText(string keyName)
+        {
+            string result;
+            if( keyName.EndsWith("ToolTip"))
+            {
+                // ToolTipService.SetToolTip(ClearCache, loader.GetString("ClearCacheToolTip"));
+                var key = keyName.Replace("ToolTip", "");
+                result = $"ToolTipService.SetToolTip({key}, {ResourceGetterBox.Text}(\"{keyName}\"));{Environment.NewLine}";
+            }
+            else
+                // BtnCsvOut.Content = loader.GetString("BtnCsvOut.Content");
+                result = $"{keyName} = {ResourceGetterBox.Text}(\"{keyName}\");{Environment.NewLine}";
+            return result;
         }
 
         //リソースの保存
@@ -315,49 +453,63 @@ namespace ResourceMaker.UI
                 try
                 {
                     string keyName = ResourceKeyBox.Text;
-
-                    if (!isUWP && !isToolTip)
-                        File.AppendAllText(resourcerFilename, $"{keyName} = {ResourceGetterBox.Text}(\"{keyName}\");{Environment.NewLine}");
-
-                    if(isToolTip)
+                    if (!string.IsNullOrEmpty(keyName))
                     {
-                        var keyName2 = keyName.Replace(".", "");
-                        if (ResultText.Text.Contains(".SetToolTip("))
+                        if (!isUWP && !isToolTip && !isEditOnly && EditorType == "xaml")
+                            File.AppendAllText(resourcerFilename, $"{keyName} = {ResourceGetterBox.Text}(\"{keyName}\");{Environment.NewLine}");
+
+                        if (isToolTip)
                         {
-                            var localKeyName = ResultText.Text.Replace(keyName, keyName2);
-                            var pos = localKeyName.IndexOf("//");
-                            if (pos > 0)
-                                File.AppendAllText(resourcerFilename, localKeyName.Substring(0, pos - 1) + Environment.NewLine);
-                            ResultText.Text = " ";
+                            var keyName2 = keyName.Replace(".", "");
+                            if (ResultText.Text.Contains(".SetToolTip("))
+                            {
+                                var localKeyName = ResultText.Text.Replace(keyName, keyName2);
+                                var pos = localKeyName.IndexOf("//");
+                                if (pos > 0)
+                                    File.AppendAllText(resourcerFilename, localKeyName.Substring(0, pos - 1) + Environment.NewLine);
+
+                                ResultText.Text = ReplaceXamlValue(LineText, "ToolTipService.ToolTip", keyName2);
+                                keyName = keyName2;
+                            }
+                            else
+                            {
+                                ResultText.Text = ReplaceXamlValue(ResultText.Text, "ToolTipService.ToolTip", keyName2);
+                                var t = $"ToolTipService.SetToolTip({(keyName.Split(new[] { '.' }))[0]}, {ResourceGetterBox.Text}(\"{keyName2}\"));";
+                                File.AppendAllText(resourcerFilename, t + Environment.NewLine);
+                            }
                             keyName = keyName2;
                         }
-                        else
+
+
+                        //キャッシュに書き戻す
+                        foreach (var langCode in allCodes)
                         {
-                            var t = $"ToolTipService.SetToolTip({(keyName.Split(new[] { '.' }))[0]}, {ResourceGetterBox.Text}(\"{keyName2}\"));";
-                            File.AppendAllText(resourcerFilename, t + Environment.NewLine);
+                            var existingEntry = LanguageEntries
+                                .FirstOrDefault(entry => entry.Code == langCode);
+
+                            cacheList[langCode][keyName] = existingEntry.Value;
+                            if (isEditOnly)
+                                existingEntry.Value = "";
                         }
-                        keyName = keyName2;
+
+                        resourceKeys.Add(keyName);
+
+                        if (button.Name == "SaveAndClose")
+                        {
+                            ResourceCacheController.Save(baseFolderPath, resFolderName, DevelopType);
+                            FeedbackText = ResultText.Text;
+                            this.Close();
+                        }
                     }
-
-                    //キャッシュに書き戻す
-                    foreach (var langCode in allCodes)
-                    {
-                        var existingEntry = LanguageEntries
-                            .FirstOrDefault(entry => entry.Code == langCode);
-
-                        cacheList[langCode][keyName] = existingEntry.Value;
-                    }
-
-                    resourceKeys.Add(keyName);
-
-
                     if (button.Name == "SaveAndClose")
-                    {
-                        ResourceCacheController.Save(baseFolderPath, resFolderName, DevelopType);
-                        FeedbackText = ResultText.Text;
                         this.Close();
-                    }
+
                     SaveResource.IsEnabled = false;
+                    if (isEditOnly)
+                    {
+                        ResourceKeyBox.Text = "";
+                        SuggestionList.SelectedItem = null;
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -400,7 +552,49 @@ namespace ResourceMaker.UI
 
         private void ResourceClearButton_Click(object sender, RoutedEventArgs e)
         {
-            ResourceKeyBox.Clear();
+            var keyName = ResourceKeyBox.Text;
+
+            if ( !string.IsNullOrEmpty(keyName))
+            {
+                if (isEditOnly)
+                {
+                    var innerDict = cacheList["en-US"];
+                    if (innerDict.ContainsKey(keyName))
+                    {
+                        string msg = string.Format(loader.GetString("MessageConfirmKeyDeletionAllLanguages"), keyName);
+
+                        var result = System.Windows.MessageBox.Show(
+                            msg,
+                            loader.GetString("TitleConfirmResourceDeletion"),
+                            MessageBoxButton.YesNo,
+                            MessageBoxImage.Question
+                        );
+                        if (result == MessageBoxResult.Yes)
+                        {
+                            // Yesが押されたときの処理
+                            foreach (var langCode in allCodes)
+                            {
+                                if (cacheList.ContainsKey(langCode))
+                                {
+                                    innerDict = cacheList[langCode];
+                                    innerDict.Remove(keyName);
+                                    var existingEntry = LanguageEntries
+                                        .FirstOrDefault(entry => entry.Code == langCode);
+                                    existingEntry.Value = "";
+                                }
+                            }
+                            resourceKeys.Remove(keyName);
+                            //実ファイルも保存
+                            ResourceCacheController.Save(baseFolderPath, resFolderName, DevelopType);
+                        }
+                    }
+                    ResourceKeyBox.Text = "";
+
+
+                }
+                else
+                    ResourceKeyBox.Text = "";
+            }
         }
 
         private void TextBox_KeyDown(object sender, KeyEventArgs e)
@@ -421,7 +615,14 @@ namespace ResourceMaker.UI
             if (entry != null) entry.Value = string.Empty;
         });
 
-
+        private void ResourceKeyBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox textBox)
+            {
+                if (textBox.Tag is null && !SuggestionPopup.IsOpen)
+                    textBox.Tag = textBox.Text;
+            }
+        }
 
         //リソースの名前を定義するボックス
         private void ResourceKeyBox_LostFocus(object sender, RoutedEventArgs e)
@@ -432,7 +633,7 @@ namespace ResourceMaker.UI
                     return;
 
                 //if (textBox.Tag is string oldValue && textBox.Text != oldValue)
-                    ResouceKeyUpdate(textBox);// テキストが変わっていたらね
+                ResouceKeyUpdate(textBox);// テキストが変わっていたらね
 
             }
         }
@@ -441,20 +642,12 @@ namespace ResourceMaker.UI
             SaveResource.IsEnabled = true;
             Feedback.IsChecked = true;
             textBox.Tag = null;
-            bool isExist = false;
             var text = textBox.Text;
             string value;
-            foreach (var entry in cacheList)
+            var dic = cacheList["en-US"];
+            if (dic.TryGetValue(text, out value))
             {
-                var dic = entry.Value;
-                if (dic.TryGetValue(text, out value))
-                {
-                    isExist = true;
-                    break;
-                }
-            }
-            if (isExist)
-            {//既に存在している値ならテキストを表示する
+                //既に存在している値ならテキストを表示する
                 foreach (var langCode in allCodes)
                 {
                     if (cacheList.TryGetValue(langCode, out var dict) &&
@@ -469,6 +662,10 @@ namespace ResourceMaker.UI
                     }
                 }
             }
+
+            if (isEditOnly)
+                return;
+
             //変換テキストの作成
             string targetName = BaseTexts.Text;
 
@@ -492,15 +689,25 @@ namespace ResourceMaker.UI
                 }
                 else if (EditorType == "xaml")
                 {
+                    var baseStr = ResultText.Text;
                     var tmp = ResourceKeyBox.Text.Split('.');
-                    var resText = $"=\"{tmp[0]}\"";
-                    ResultText.Text = ResultText.Text.Replace("=\"NoNameElement\"", resText);
+                    if (string.IsNullOrEmpty(xUid))
+                        xUid = tmp[0];
+
+                    string pattern = @"(x:" + (isUWP ? "Uid" : "Name") + @"\s*=\s*"")[^""]+("")";
+                    string replacement = "$1" + tmp[0] + "$2";
+
+                    isUpdating = true;
+                    ResultText.Text = Regex.Replace(baseStr, pattern, replacement);
+                    isUpdating = false;
+
                 }
             }
 
         }
         private string GetUid(string name)
         {
+
             return element?.Attribute(x + name)?.Value ?? string.Empty;
         }
 
@@ -564,6 +771,7 @@ namespace ResourceMaker.UI
                             isUpdating = false;
                             BaseTexts.SelectedIndex = 0;
                             Feedback.IsChecked = false;
+                            ResourceKeyBox.IsReadOnly = true;
                             return;
                         }
                     }
@@ -641,7 +849,7 @@ namespace ResourceMaker.UI
                 else
                 {
                     if (isToolTip)
-                        ResultText.Text = $"x:{searchWord}=\"{resultText}\" {LineText.Replace(BaseTexts.Text, "ResourceAdder.csに出力されます")}";
+                        ResultText.Text = $"x:{searchWord}=\"{resultText}\" {LineText.Replace(BaseTexts.Text, loader.GetString("NoteOutputToResourceAdder"))}";
                     else
                         ResultText.Text = $"x:{searchWord}=\"{resultText}\" {LineText.Replace(BaseTexts.Text, "")}";
                 }
@@ -649,7 +857,8 @@ namespace ResourceMaker.UI
             else
             {
                 if (isToolTip)
-                    ResultText.Text = $"ToolTipService.SetToolTip({uidName}, {ResourceGetterBox.Text}(\"{ResourceKeyBox.Text}\")); //" + "ResourceAdder.cs に出力します";
+                    ResultText.Text = $"ToolTipService.SetToolTip({uidName}, {ResourceGetterBox.Text}(\"{ResourceKeyBox.Text}\")); //" + 
+                        loader.GetString("NoteOutputToResourceAdder");
 
                 else
                     ResultText.Text = LineText;
@@ -689,7 +898,30 @@ namespace ResourceMaker.UI
             }
         }
 
+        private void ResultText_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (isUpdating || EditorType != "xaml")
+                return;
 
+            if (sender is TextBox textBox && textBox.Tag is string oldValue && textBox.Text != oldValue)
+            {
+                var tmp = ResourceKeyBox.Text.Split('.');
+                var text = textBox.Text;
+
+                string pattern = @"x:" + (isUWP ? "Uid" : "Name") + @"\s*=\s*""([^""]+)""";
+
+                Match match = Regex.Match(text, pattern);
+
+                if (match.Success)
+                    tmp[0] = match.Groups[1].Value;  // ← これで "NoNameElement" のような値だけ取得できます
+
+                isUpdating = true;
+                ResourceKeyBox.Text = string.Join(".", tmp);
+                isUpdating = false;
+
+
+            }
+        }
 
         private void ResourceGetterBox_LostFocus(object sender, RoutedEventArgs e)
         {
@@ -710,12 +942,26 @@ namespace ResourceMaker.UI
             langWindow.DevelopType = DevelopType;
             langWindow.EditorType = EditorType;
             langWindow.LineText = LineText;
+            langWindow.Language = Language;
+            langWindow.isEditOnly = isEditOnly;
             langWindow.BaseFolderPath = BaseFolderPath;
             var result = langWindow.ShowDialog();
             FeedbackText = string.Empty;
+
+            if (result == true)
+                this.Close();
+
+            //言語テキストをクリアする
+            foreach (var entry in LanguageEntries)
+            {
+                entry.Value = string.Empty;
+            }
+
+            isUpdating = true;
+            ResourceKeyBox.Text = "";
+            isUpdating = false;
+
             ResourceCacheController.Clear();
-            
-            this.Close();
         }
 
         //置き換え候補コンボ
@@ -744,9 +990,8 @@ namespace ResourceMaker.UI
             {
                 string keyName = string.Empty;
                 if (isUidMode)
-                {
                     keyName = $"{xUid}.{text}";
-                }
+
                 else
                 {
                     string matchedProperty = GetXmlKeyname(text);
@@ -776,6 +1021,8 @@ namespace ResourceMaker.UI
         {
             string matchedProperty = element?.Attributes()
                 .FirstOrDefault(attr => attr.Value == target)?.Name.LocalName;
+            if (string.IsNullOrEmpty(matchedProperty))
+                return string.Empty;
             return matchedProperty;
         }
 
@@ -783,7 +1030,16 @@ namespace ResourceMaker.UI
         {
             Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             // "ResourceGetterBox" の ToolTip を取得
-            var tooltip = ResourceGetterBox.ToolTip?.ToString().Replace("\r\n    ", "") ?? loader.GetString("NotSetTooltip");
+
+            //loaderの設定
+            string loaderGuide;
+            if (isUWP)
+                loaderGuide = $"Windows.ApplicationModel.Resources.ResourceLoader loader = ResourceLoader.GetForViewIndependentUse();";
+
+            else
+                loaderGuide = $"System.Resources.ResourceManager loader = new ResourceManager(\"{ProjectName}.{resFolderName}.{resName}\", GetType().Assembly);";
+
+            var tooltip = loaderGuide;
 
             // クリップボードにコピー
             Clipboard.SetText(tooltip);
@@ -798,12 +1054,26 @@ namespace ResourceMaker.UI
         }
         private void ResourceKeyBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            string query = ResourceKeyBox.Text.ToLower();
+            if (isUpdating || !isEditOnly )
+                return;
+
+            string query = ResourceKeyBox.Text;
             if (query == "")
             {
                 SuggestionPopup.IsOpen = false;
                 return;
             }
+            if (query == "*")
+                query = "";
+            else if (query[0] == '*')
+            {
+                query = query.Substring(1);
+                ResourceKeyBox.Text = query;
+                ResourceKeyBox.Select(query.Length, 0);
+
+                return;
+            }
+            query = query.ToLower();
             var matches = resourceKeys
                 .Where(k => k.ToLower().Contains(query)).OrderBy(k => k)
                 .ToList();
@@ -822,21 +1092,34 @@ namespace ResourceMaker.UI
                 SuggestionPopup.IsOpen = false;
         }
 
-        private void SuggestionList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void SuggestionList_KeyDown(object sender, KeyEventArgs e)
         {
-            if (SuggestionList.SelectedItem is string selected)
-            {
-                ResourceKeyBox.Text = selected;
-                SuggestionPopup.IsOpen = false;
-                ResourceKeyBox.Focus();
-                ResourceKeyBox.CaretIndex = ResourceKeyBox.Text.Length;
-            }
+            if (e.Key == Key.Enter && SuggestionList.SelectedItem is string selected)
+                SelectTextFromList(selected);
+            else if( e.Key == Key.Escape)
+                SelectTextFromList(ResourceKeyBox.Text);
+
         }
 
+        private void SelectTextFromList(string selected)
+        {
+            SuggestionPopup.IsOpen = false;
+            SuggestionList.SelectedItem = null;
+            ResourceKeyBox.Focus();
+            ResourceKeyBox.Text = selected;
+            ResourceKeyBox.CaretIndex = selected.Length;
+            ResouceKeyUpdate(ResourceKeyBox);
+        }
+        private void SuggestionList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (Mouse.LeftButton == MouseButtonState.Pressed && SuggestionList.SelectedItem is string selected)
+                SelectTextFromList(selected);
+
+        }
         private void ResourceKeyBox_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
-            {
+            {// エンターキー名なら、ポップアップの０番アイテムをテキストに送る
                 if (SuggestionPopup.IsOpen)
                 {
                     string selected = string.Empty;
@@ -853,23 +1136,25 @@ namespace ResourceMaker.UI
                         SuggestionPopup.IsOpen = false;
                         ResourceKeyBox.CaretIndex = ResourceKeyBox.Text.Length;
                         e.Handled = true;
-
                     }
                 }
                 // 次のフォーカス可能な要素に移動
+                e.Handled = true;
                 TraversalRequest request = new TraversalRequest(FocusNavigationDirection.Next);
                 UIElement focusedElement = Keyboard.FocusedElement as UIElement;
                 if (focusedElement != null)
                     focusedElement.MoveFocus(request);
             }
-        }
+            else if (e.Key == Key.Down)
+            {//下矢印なら、ポップアップにフォーカスを移動する
+                if (SuggestionPopup.IsOpen)
+                {
+                    e.Handled = true;
+                    SuggestionList.SelectedIndex = 0;
+                    var item = SuggestionList.ItemContainerGenerator.ContainerFromIndex(0) as ListBoxItem;
+                    item.Focus(); // ListBoxItem に直接フォーカス
 
-        private void ResourceKeyBox_GotFocus(object sender, RoutedEventArgs e)
-        {
-            if (sender is TextBox textBox)
-            {
-                if (textBox.Tag is null && !SuggestionPopup.IsOpen)
-                    textBox.Tag = textBox.Text;
+                }
             }
         }
 
@@ -878,15 +1163,28 @@ namespace ResourceMaker.UI
             if (sender is Button button)
             {
                 button.Tag = button.Content;
-                button.Content = "Click me";
+                button.Content = loader.GetString("BtnClickme");
             }
         }
 
         private void Button_MouseLeave(object sender, MouseEventArgs e)
         {
             if (sender is Button button)
-            {
                 button.Content = button.Tag;
+        }
+
+        private void LangBox_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            if (sender is TextBox tb)
+                tb.SelectAll();
+        }
+
+        private void LangBox_GotMouseButton(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is TextBox tb && !tb.IsKeyboardFocusWithin)
+            {
+                tb.Focus();
+                e.Handled = true; // マウスクリックで選択解除されるのを防ぐ
             }
         }
     }

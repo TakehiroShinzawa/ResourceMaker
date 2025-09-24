@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="ResourceMaker.c247936d-a5f2-4c53-a393-5017c1811a99" Version="1.0" Language="en-US" Publisher="Shinsawata" />
+        <Identity Id="ResourceMaker.c247936d-a5f2-4c53-a393-5017c1811a99" Version="1.1" Language="en-US" Publisher="Shinsawata" />
         <DisplayName>ResourceMaker – 言語リソース化支援ツール</DisplayName>
-        <Description xml:space="preserve">ResourceMaker is a localization-friendly extension for Visual Studio that streamlines multi-language resource management.
-多言語化支援ツールです。コードやXAMLエディタ上の文字列を抽出し、リソースファイルに書き込みます。</Description>
+        <Description xml:space="preserve">A Global Marketplace, Just a Right-Click Away
+～　右クリックから始まる世界市場　～ </Description>
         <MoreInfo>https://note.com/alert_zephyr9426/n/n57f10b4add5d</MoreInfo>
         <License >license.txt</License>
         <ReleaseNotes>ReleaseNotes.txt</ReleaseNotes>

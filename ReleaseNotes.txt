@@ -1,9 +1,14 @@
-## Version 1.0.0 - 2025-08-31
+## Version 1.1.0 - 2025-09-12
 
-### 🚀 Initial Release
-- First public release of the extension.
-- Supports multi-language resource management for WPF, WinUI, and VSIX projects.
+### 🚀 Release Note
+- Added project-level caching support.
+- Introduced tooltip resource-assist functionality.
+- Added tooltips to improve usability and clarify operations.
+- The resource file folder and name can now be customized.
 
-### 🌐 日本語補足
-- 拡張機能の初回公開バージョンです。
-- UWP、WPF、WinUI、VSIX向けの多言語リソース管理に対応。
+
+### 🌐 日本語
+- プロジェクトキャッシュを追加しました。
+- ツールチップのリソース化支援機能を追加しました。
+- ツールチップを追加し、操作が分かりやすくなりました。
+- リソースファイルのフォルダと名前をカスタマイズ出来るようになりました。

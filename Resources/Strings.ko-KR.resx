@@ -133,7 +133,7 @@
     <value>리소스 이름을 입력하세요</value>
   </data>
   <data name="ResourceGetterExpression.Content" xml:space="preserve">
-    <value>리소스 가져오기 식</value>
+    <value>식 가져오기</value>
   </data>
   <data name="Feedback.Content" xml:space="preserve">
     <value>되쓰기</value>
@@ -156,9 +156,6 @@
   <data name="LoaderDeclaration" xml:space="preserve">
     <value>loader 선언이 클립보드에 복사되었습니다</value>
   </data>
-  <data name="NotSetTooltip" xml:space="preserve">
-    <value>툴팁이 설정되지 않았습니다</value>
-  </data>
   <data name="ClearCache.Content" xml:space="preserve">
     <value>캐시 지우기</value>
   </data>
@@ -176,5 +173,332 @@
   </data>
   <data name="BtnAdd.Content" xml:space="preserve">
     <value>추가</value>
+  </data>
+  <data name="BtnCreateToolTip" xml:space="preserve">
+    <value>체크된 항목의 언어 파일을 생성합니다. 기존 파일은 건너뜁니다.</value>
+  </data>
+  <data name="BtnCancelToolTip" xml:space="preserve">
+    <value>언어 파일 추가나 리소스 편집 없이 취소합니다.</value>
+  </data>
+  <data name="BtnCloseToolTip" xml:space="preserve">
+    <value>언어 창을 닫은 후 리소스를 편집합니다.</value>
+  </data>
+  <data name="BtnAddToolTip" xml:space="preserve">
+    <value>리소스 언어를 추가합니다. Enter 키로도 추가할 수 있습니다.</value>
+  </data>
+  <data name="ResultTextToolTip" xml:space="preserve">
+    <value>선택한 행으로 대체됩니다.</value>
+  </data>
+  <data name="BaseTextsToolTip" xml:space="preserve">
+    <value>리소스로 등록할 텍스트를 선택하세요. 
+리소스 키가 표시되면 등록된 값이 표시됩니다.</value>
+  </data>
+  <data name="ResourceKeyToolTip" xml:space="preserve">
+    <value>请输入键名。在 XAML 中将定义为“键名.目标名”。请勿更改目标名。</value>
+  </data>
+  <data name="ResourceGetterBoxToolTip" xml:space="preserve">
+    <value>이 코드는 자동 생성되지만, 가져오기 메서드(loader.GetString)는 사용자 정의할 수 있습니다.</value>
+  </data>
+  <data name="FeedbackToolTip" xml:space="preserve">
+    <value>체크되어 있으면, 리소스를 생성한 후 소스 텍스트가 다시 작성됩니다.</value>
+  </data>
+  <data name="SaveResourceToolTip" xml:space="preserve">
+    <value>편집 중인 리소스를 캐시에 저장합니다. 계속 편집할 수 있습니다.</value>
+  </data>
+  <data name="SaveAndCloseToolTip" xml:space="preserve">
+    <value>편집된 리소스를 전체에 반영합니다. 편집을 종료하고 창을 닫습니다.</value>
+  </data>
+  <data name="AddLanguageToolTip" xml:space="preserve">
+    <value>언어 리소스를 추가하거나 삭제합니다. 설정 적용 후 창이 닫힙니다.</value>
+  </data>
+  <data name="ClearCacheToolTip" xml:space="preserve">
+    <value>캐시된 데이터를 지웁니다. 외부에서 리소스를 편집한 경우 반드시 눌러주세요.</value>
+  </data>
+  <data name="ApplyButton.Content" xml:space="preserve">
+    <value>적용</value>
+  </data>
+  <data name="BtnCsvOut.Content" xml:space="preserve">
+    <value>CSV 내보내기</value>
+  </data>
+  <data name="BtnMakeLoaderCode.Content" xml:space="preserve">
+    <value>로더 코드 내보내기</value>
+  </data>
+  <data name="BtnMakeLoaderCodeToolTip" xml:space="preserve">
+    <value>ResourceAdder.cs에 코드를 작성합니다</value>
+  </data>
+  <data name="MessageResourceFileNotFound" xml:space="preserve">
+    <value>리소스 설정이 변경되었습니다. 
+예상된 리소스 파일을 찾을 수 없습니다.</value>
+  </data>
+  <data name="TitleResourceRetrievalFailed" xml:space="preserve">
+    <value>리소스 가져오기 실패</value>
+  </data>
+  <data name="MessageTooltipConflict" xml:space="preserve">
+    <value>툴팁 값이 다른 속성과 중복되어 리소스화할 수 없습니다. 
+다른 속성과는 별도의 줄에 작성해 주세요.</value>
+  </data>
+  <data name="TitleTooltipConflict" xml:space="preserve">
+    <value>툴팁은 좀 특별해요</value>
+  </data>
+  <data name="TitleResourceEditingMode" xml:space="preserve">
+    <value>리소스 편집 모드</value>
+  </data>
+  <data name="MessageGenerateResourceCode" xml:space="preserve">
+    <value>모든 언어 리소스를 로드하는 코드가 생성됩니다. 
+'ResourceAdder.cs'의 내용이 덮어쓰기됩니다.</value>
+  </data>
+  <data name="TitleGenerateResourceCode" xml:space="preserve">
+    <value>덮어쓰기 확인</value>
+  </data>
+  <data name="MessageResourceAdderOutputError" xml:space="preserve">
+    <value>ResourceAdder.cs를 생성하는 중 오류가 발생했습니다. 
+{0}</value>
+  </data>
+  <data name="TitleFileWriteError" xml:space="preserve">
+    <value>파일 쓰기 오류</value>
+  </data>
+  <data name="MessageConfirmKeyDeletionAllLanguages" xml:space="preserve">
+    <value>모든 언어 리소스에서 키 '{0}'를 삭제하시겠습니까?</value>
+  </data>
+  <data name="TitleConfirmResourceDeletion" xml:space="preserve">
+    <value>삭제</value>
+  </data>
+  <data name="NoteOutputToResourceAdder" xml:space="preserve">
+    <value>ResourceAdder.cs로 출력됩니다</value>
+  </data>
+  <data name="BtnClickme" xml:space="preserve">
+    <value>클릭하여 복사</value>
+  </data>
+  <data name="ManageLanguage.Content" xml:space="preserve">
+    <value>리소스 관리</value>
+  </data>
+  <data name="ResSeparatedByFolder" xml:space="preserve">
+    <value>{0} (폴더로 분리됨)</value>
+  </data>
+  <data name="ResIntoFilename" xml:space="preserve">
+    <value>{0} (파일 이름에 삽입됨)</value>
+  </data>
+  <data name="MissingResource_enUS" xml:space="preserve">
+    <value>en-US 리소스를 찾을 수 없습니다</value>
+  </data>
+  <data name="NoLanguageSelected" xml:space="preserve">
+    <value>출력 대상 없음</value>
+  </data>
+  <data name="NoLanguageSelection" xml:space="preserve">
+    <value>내보낼 언어를 선택하세요</value>
+  </data>
+  <data name="CsvExportSuccess" xml:space="preserve">
+    <value>CSV가 출력되었습니다</value>
+  </data>
+  <data name="CsvExportCompleted" xml:space="preserve">
+    <value>출력 완료</value>
+  </data>
+  <data name="SelectCsvExportSettings" xml:space="preserve">
+    <value>CSV 출력 설정을 선택하세요</value>
+  </data>
+  <data name="MissingCsvExportSettings" xml:space="preserve">
+    <value>출력 설정 누락</value>
+  </data>
+  <data name="SelectSingleLanguageForImport" xml:space="preserve">
+    <value>하나의 언어만 선택하여 가져오세요</value>
+  </data>
+  <data name="LanguageSelectionRequired" xml:space="preserve">
+    <value>언어 선택이 필요합니다</value>
+  </data>
+  <data name="InvalidCultureCodeEntered" xml:space="preserve">
+    <value>문화 코드가 올바르지 않습니다</value>
+  </data>
+  <data name="InvalidCultureCode" xml:space="preserve">
+    <value>문화 코드 오류</value>
+  </data>
+  <data name="NoTextInClipboard" xml:space="preserve">
+    <value>클립보드에 텍스트가 없습니다</value>
+  </data>
+  <data name="ClipboardEmpty" xml:space="preserve">
+    <value>클립보드 비어 있음</value>
+  </data>
+  <data name="SelectCsvFile" xml:space="preserve">
+    <value>CSV 파일 선택</value>
+  </data>
+  <data name="CsvFileFilter" xml:space="preserve">
+    <value>CSV 파일 (*.csv)|*.csv</value>
+  </data>
+  <data name="NoCultureCodeDetectedInFile" xml:space="preserve">
+    <value>파일에서 문화 코드를 식별할 수 없습니다</value>
+  </data>
+  <data name="CultureCodeNotFound" xml:space="preserve">
+    <value>문화 코드 없음</value>
+  </data>
+  <data name="LanguageResourceAddedToTarget" xml:space="preserve">
+    <value>언어 리소스 {0}이(가) 추가되었습니다</value>
+  </data>
+  <data name="LanguageResourceAdded" xml:space="preserve">
+    <value>언어 리소스 추가됨</value>
+  </data>
+  <data name="TargetCountMismatchWithDefinitions" xml:space="preserve">
+    <value>대상 수가 현재 정의 수와 일치하지 않습니다</value>
+  </data>
+  <data name="UnableToRetrieve" xml:space="preserve">
+    <value>가져올 수 없음</value>
+  </data>
+  <data name="SelectLanguageForRelocation" xml:space="preserve">
+    <value>재배치할 언어를 선택하세요</value>
+  </data>
+  <data name="LanguageRelocationRequired" xml:space="preserve">
+    <value>언어가 선택되지 않았습니다</value>
+  </data>
+  <data name="RelocationRootFolderNotSet" xml:space="preserve">
+    <value>재배치 루트 폴더가 설정되지 않았습니다</value>
+  </data>
+  <data name="RelocationRootFolderDoesNotExist" xml:space="preserve">
+    <value>재배치 루트 폴더가 존재하지 않습니다</value>
+  </data>
+  <data name="InvalidRelocationFolderName" xml:space="preserve">
+    <value>재배치 리소스 폴더 이름이 잘못되었습니다</value>
+  </data>
+  <data name="InvalidRelocationFileName" xml:space="preserve">
+    <value>재배치 리소스 파일 이름이 잘못되었습니다</value>
+  </data>
+  <data name="RelocationFormatNotSelected" xml:space="preserve">
+    <value>재배치 리소스 형식이 선택되지 않았습니다</value>
+  </data>
+  <data name="RelocationDefinitionError" xml:space="preserve">
+    <value>재배치 정의 오류</value>
+  </data>
+  <data name="RelocationErrorOccurred" xml:space="preserve">
+    <value>재배치 중 오류가 발생했습니다.
+{0}</value>
+  </data>
+  <data name="RelocationRuntimeError" xml:space="preserve">
+    <value>재배치 실행 오류</value>
+  </data>
+  <data name="ChkCustom.Content" xml:space="preserve">
+    <value>사용자 설정</value>
+  </data>
+  <data name="CustomResFolder.Text" xml:space="preserve">
+    <value>리소스 폴더 ./</value>
+  </data>
+  <data name="CustmResourceName.Text" xml:space="preserve">
+    <value>리소스 파일 이름 (확장자 제외)</value>
+  </data>
+  <data name="CustomResPtn.Text" xml:space="preserve">
+    <value>리소스 패턴</value>
+  </data>
+  <data name="ChkResw.Content" xml:space="preserve">
+    <value>resw (폴더로 분리)</value>
+  </data>
+  <data name="ChkResx.Content" xml:space="preserve">
+    <value>resx (파일 이름에 삽입)</value>
+  </data>
+  <data name="IsNewResource.Text" xml:space="preserve">
+    <value>(새로 만들기)</value>
+  </data>
+  <data name="BtnSelectAllLanguage.Content" xml:space="preserve">
+    <value>모두 선택</value>
+  </data>
+  <data name="CsvOutputItem.Text" xml:space="preserve">
+    <value>CSV 출력 항목:</value>
+  </data>
+  <data name="optVOnly.Content" xml:space="preserve">
+    <value>키만</value>
+  </data>
+  <data name="optKOnly.Content" xml:space="preserve">
+    <value>값만</value>
+  </data>
+  <data name="optKVP.Content" xml:space="preserve">
+    <value>키와 값</value>
+  </data>
+  <data name="CsvOutputPath.Text" xml:space="preserve">
+    <value>출력 위치 선택:</value>
+  </data>
+  <data name="RBSameFolder.Content" xml:space="preserve">
+    <value>동일 폴더</value>
+  </data>
+  <data name="RBPrjTop.Content" xml:space="preserve">
+    <value>프로젝트 루트</value>
+  </data>
+  <data name="RBClipboard.Content" xml:space="preserve">
+    <value>클립보드</value>
+  </data>
+  <data name="ChkWithHeader.Content" xml:space="preserve">
+    <value>하나의 파일로 병합</value>
+  </data>
+  <data name="ChkWithHeaderToolTip" xml:space="preserve">
+    <value>체크하면 헤더 행이 추가됩니다</value>
+  </data>
+  <data name="GetCsv.Content" xml:space="preserve">
+    <value>CSV 가져오기</value>
+  </data>
+  <data name="ImportFromClipboard.Content" xml:space="preserve">
+    <value>클립보드에서 가져오기</value>
+  </data>
+  <data name="ClipLangCodeToolTip" xml:space="preserve">
+    <value>가져올 대상의 문화 코드를 입력하세요.</value>
+  </data>
+  <data name="LblCultureCode.Text" xml:space="preserve">
+    <value>문화 코드</value>
+  </data>
+  <data name="RelocateGroup.Header" xml:space="preserve">
+    <value>리소스 재배치</value>
+  </data>
+  <data name="LblCurrentResource.Text" xml:space="preserve">
+    <value>현재 리소스</value>
+  </data>
+  <data name="LblResourceFolder.Text" xml:space="preserve">
+    <value>리소스 폴더</value>
+  </data>
+  <data name="LblResourceName.Text" xml:space="preserve">
+    <value>리소스 이름</value>
+  </data>
+  <data name="LblFileFormat.Text" xml:space="preserve">
+    <value>파일 형식</value>
+  </data>
+  <data name="LblRelocatedResource.Text" xml:space="preserve">
+    <value>재배치된 리소스</value>
+  </data>
+  <data name="LblRelResourceFolder.Text" xml:space="preserve">
+    <value>리소스 폴더</value>
+  </data>
+  <data name="LblRelResourceName.Text" xml:space="preserve">
+    <value>리소스 이름</value>
+  </data>
+  <data name="FileFormatResx.Content" xml:space="preserve">
+    <value>RESX 형식 (.resx)</value>
+  </data>
+  <data name="FileFormatResw.Content" xml:space="preserve">
+    <value>RESW 형식 (.resw)</value>
+  </data>
+  <data name="LblRelocationProjectFolder.Text" xml:space="preserve">
+    <value>재배치 프로젝트 폴더</value>
+  </data>
+  <data name="BtnBrowseFolder.Content" xml:space="preserve">
+    <value>찾아보기...</value>
+  </data>
+  <data name="BtnRelocateResource.Content" xml:space="preserve">
+    <value>재배치 실행</value>
+  </data>
+  <data name="LblSelectFolder.Title" xml:space="preserve">
+    <value>폴더 선택</value>
+  </data>
+  <data name="BtnMoveUpFolder.Content" xml:space="preserve">
+    <value>↑ 위로</value>
+  </data>
+  <data name="BtnCancelFolderSelection.Content" xml:space="preserve">
+    <value>취소</value>
+  </data>
+  <data name="BtnConfirmFolderSelection.Content" xml:space="preserve">
+    <value>선택</value>
+  </data>
+  <data name="LblRelFileFormat.Text" xml:space="preserve">
+    <value>파일 형식</value>
+  </data>
+  <data name="ResourceGetterExpressionToolTip" xml:space="preserve">
+    <value>리소스 로더 선언을 클립보드에 복사합니다</value>
+  </data>
+  <data name="LanguageSelectionWindowName" xml:space="preserve">
+    <value>언어 관리자</value>
+  </data>
+  <data name="LblResourceWindow" xml:space="preserve">
+    <value>리소스 관리</value>
   </data>
 </root>

@@ -72,6 +72,7 @@ namespace ResourceMaker
                         var reswFilePath = string.Empty;
                         if (resSuffix == "resw")
                             reswFilePath = Path.Combine(langFolder, $"{resName}.{resSuffix}");
+
                         else
                             reswFilePath = Path.Combine(langFolder, $"{resName}.{langCode}.{resSuffix}");
 
@@ -105,6 +106,12 @@ namespace ResourceMaker
             cachedProjectPath = string.Empty;
             cachedNodes = null;
         }
+
+        public static Dictionary<string, Dictionary<string, string>> Get()
+        {
+            return cachedResources;
+        }
+
         public static Dictionary<string, Dictionary<string, string>> Get(string currentProjectPath, string ResourceFolder, string developType)
         {
             if (cachedProjectPath == currentProjectPath && cachedResources != null && cachedResources.Count != 0)
@@ -123,6 +130,7 @@ namespace ResourceMaker
             var result = new Dictionary<string, Dictionary<string, string>>();
 
             bool isFirst = true;
+            bool isUWP = false;
 
             var tmp = developType.Split('.');
             var resFolderName = tmp[0];
@@ -131,8 +139,10 @@ namespace ResourceMaker
 
             string[] resCodes = new string[1];
             if (resSuffix == "resw")
+            {
+                isUWP = true;
                 resCodes = Directory.GetDirectories(baseFolderPath);
-
+            }
             else
                 resCodes[0] = baseFolderPath;
 
@@ -141,12 +151,12 @@ namespace ResourceMaker
             foreach (var reswFolder in resCodes)
             {
                 // すべての .resx ファイル取得
-                var resxFiles = Directory.GetFiles(reswFolder, resFilename, SearchOption.AllDirectories);
+                var resxFiles = Directory.GetFiles(reswFolder, resFilename, isUWP ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
 
                 foreach (var file in resxFiles)
                 {
                     string langCode;
-                    if (resSuffix == "resw")
+                    if (isUWP)
                         langCode = reswFolder.Substring(baseFolderPath.Length + 1); // "ja", "en" などを取得
 
                     else

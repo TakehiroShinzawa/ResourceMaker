@@ -5,58 +5,100 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ResourceMaker.UI"
         mc:Ignorable="d"
-        Title="LanguageSelectionWindow" Height="450" Width="800">
+        SizeToContent="WidthAndHeight"
+        Name="LanguageManageWindow" Title="" MinHeight="450" MinWidth="800">
     <Grid>
-        <StackPanel Margin="20">
-            <StackPanel x:Name="ProjectTypePanel" Visibility="Collapsed" Margin="10">
-                <!-- ラベル -->
-                <TextBlock x:Name="ProjectSelector" Text="プロジェクトタイプ"
-               FontWeight="Bold"
-               Margin="0,0,0,8"
-               HorizontalAlignment="Left" />
+        <StackPanel Orientation="Vertical">
+            <StackPanel x:Name="ProjectTypePanel" >
+                <TextBlock x:Name="ProjectSelector" Text="プロジェクトタイプを選択してください"
+                    FontWeight="Bold" />
 
-                <!-- 横並びラジオボタン -->
-                <StackPanel Orientation="Vertical"  HorizontalAlignment="Left">
-                    <RadioButton Content="resw (UWP) ./String/{country}/Resources.resw"
-                     GroupName="ProjectType"
-                     Tag="Strings.Resources.resw"
-                     Checked="ProjectType_Checked"
-                     Margin="0,0,20,0" />
+                <StackPanel Margin="20">
+                    <Grid Margin="10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
 
-                    <RadioButton Content="resx (WinUI3/WPF) ./Resources/Strings.{country}.resx"
-                     Tag="Resources.Strings.resx"
-                     Checked="ProjectType_Checked"
-                    GroupName="ProjectType" />
-                    
-                    <RadioButton Content="resx (WinForms) ./Properties/Resources.{country}.resx"
-                     Tag="Properties.Resources.resx"
-                     Checked="ProjectType_Checked"
-                    GroupName="ProjectType" />
+                        <!-- 左側：プロジェクトタイプ選択 -->
+                        <StackPanel x:Name="ProjectOptions" Grid.Column="0" Margin="0,0,20,0">
+                            <RadioButton Content="resw (UWP) ./String/{country}/Resources.resw"
+                                Margin="0,0,0,5"
+                                GroupName="ProjectType"
+                                Tag="Strings.Resources.resw"
+                                Checked="ProjectType_Checked" />
+                            <RadioButton Content="resx (WinUI3/WPF) ./Resources/Strings.{country}.resx"
+                                Margin="0,0,0,5"
+                                GroupName="ProjectType"
+                                Tag="Resources.Strings.resx"
+                                Checked="ProjectType_Checked" />
+                            <RadioButton Content="resx (WinForms) ./Properties/Resources.{country}.resx"
+                            GroupName="ProjectType"
+                                Margin="0,0,0,5"
+                                Tag="Properties.Resources.resx"
+                                Checked="ProjectType_Checked" />
 
-                    <RadioButton Content="resx (VSIX) ./Resources/Strings.{country}.resx"
-                     Tag="Resources.Strings.resx"
-                     Checked="ProjectType_Checked"
-                    GroupName="ProjectType" />
+                            <Button x:Name="ApplyButton" Content="決定" Width="45" 
+                                Click="ApplyButton_Click"
+                                IsEnabled="False"
+                                Margin="0,10,0,0" />
+                        </StackPanel>
 
+                        <!-- 右側：カスタム設定 -->
+                        <StackPanel x:Name="CustomSettingsPanel" Grid.Column="1">
+                            <RadioButton x:Name="ChkCustom" Content="カスタム設定"
+                                GroupName="ProjectType"
+                                Checked="CustomType_Checked"
+                                Tag="Custom" />
+                            <StackPanel x:Name="CustomInfo" Margin="20,0,0,0"  IsEnabled="False" >
+                                <StackPanel Orientation="Horizontal" Margin="0,4,0,8">
+                                    <TextBlock x:Name="CustomResFolder" Text="リソースフォルダ ./" FontWeight="Bold" VerticalAlignment="Center" />
+                                    <TextBox x:Name="ResourceFolderBox" Width="200" 
+                                             LostFocus="ResourceLeave"
+                                             KeyDown="KeyDownHandeler"
+                                             VerticalAlignment="Center" Margin="0,0,10,0" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock x:Name="CustmResourceName" Text="リソースファイル名(拡張子不要)" FontWeight="Bold" VerticalAlignment="Center"  />
+                                    <TextBox x:Name="ResourceFileNameBox" Width="150" 
+                                             LostFocus="ResourceLeave"
+                                             KeyDown="KeyDownHandeler"
+                                             VerticalAlignment="Center" Margin="5,0,0,0" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,4,0,8">
+                                    <TextBlock x:Name="CustomResPtn" Text="リソースパターン" FontWeight="Bold" />
+                                    <RadioButton x:Name="ChkResw"
+                                        Checked="ResouceChk"
+                                        Content="resw (フォルダで分離)" GroupName="ResourceType" />
+                                    <RadioButton x:Name="ChkResx"
+                                        Checked="ResouceChk"
+                                        Content="resx (ファイル名に挿入)" GroupName="ResourceType" Margin="20,0,0,0" />
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
                 </StackPanel>
             </StackPanel>
-            <StackPanel x:Name="LanguagePanel" >
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock x:Name="SelectLanguagesGuide" Text="語を選択してください" FontSize="14" Margin="0,0,20,10"/>
+            <StackPanel x:Name="LanguagePanel" Margin="10,0,0,0">
+                <StackPanel x:Name="LanguageCommands" Orientation="Horizontal">
+                    <TextBlock x:Name="SelectLanguagesGuide" Text="語を選択してください" FontSize="14" Margin="0,0,0,10"/>
+                    <TextBlock x:Name="IsNewResource" Text="(新規作成)" Visibility="Collapsed" FontSize="14" Margin="5,0,20,10"/>
                     <Button 
-                         x:Name="BtnCreate" Content="Create"
+                        x:Name="BtnCreate" Content="Create"
                         VerticalAlignment="Center"
-                        ToolTipService.ToolTip="チェックの付いている言語ファイルを作成します。既存の場合はスキップします。"
-                        Click="MakeFolders_Click" Margin="0,0,20,10"/>
+                        ToolTipService.ToolTip="BtnCreateToolTip"
+                        Click="MakeFolders_Click" Margin="20,0,20,10"/>
                     
                     <Button 
-                         x:Name="BtnCancel" Content="Cancel"
+                        x:Name="BtnCancel" Content="Cancel"
                         VerticalAlignment="Center"
+                        ToolTipService.ToolTip="BtnCancelToolTip"
                         Click="MakeFoldersCancel_Click" Margin="0,0,20,10"/>
 
                     <Button 
-                         x:Name="BtnClose" Content="Close"
+                        x:Name="BtnClose" Content="Close"
                         VerticalAlignment="Center"
+                        ToolTipService.ToolTip="BtnCloseToolTip"
                         Click="BtnClose_Click" Margin="0,0,20,10"/>
 
                 </StackPanel>
@@ -64,12 +106,13 @@
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <CheckBox Content="{Binding DisplayName}" 
-                                      IsEnabled="{Binding IsEnabled}"
-                                      IsChecked="{Binding IsSelected, Mode=TwoWay}" />
+                                        IsEnabled="{Binding IsEnabled}"
+                                        IsChecked="{Binding IsSelected, Mode=TwoWay}" />
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
-                <StackPanel>
+                <Button x:Name="BtnSelectAllLanguage" Content="全て選択" Click="SelectAllLanguage" Width="120" Visibility="Collapsed"/>
+                <StackPanel x:Name="LanguageAdder">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock x:Name="AdditionalLanguageCode" Text="追加言語コード（例: it-IT）"/>
                         <TextBox Text="{Binding NewLanguageInput,  UpdateSourceTrigger=PropertyChanged}" Width="150">
@@ -78,7 +121,9 @@
                                     Command="{Binding AddNewLanguageCommand}" />
                             </TextBox.InputBindings>
                         </TextBox>
-                        <Button x:Name="BtnAdd" Content="Add" Command="{Binding AddNewLanguageCommand}" Margin="5,0,0,0" />
+                        <Button x:Name="BtnAdd" 
+                                ToolTipService.ToolTip="BtnAddToolTip"
+                                Content="Add" Command="{Binding AddNewLanguageCommand}" Margin="5,0,0,0" />
                     </StackPanel>
                     <Separator Margin="5" Height="2" Background="Gray" />
                     <ItemsControl ItemsSource="{Binding CustomLanguages}">
@@ -92,9 +137,9 @@
 
                                     <StackPanel Orientation="Horizontal" Grid.Column="0">
                                     <TextBox 
-                                         Text="{Binding Code, Mode=TwoWay}"
-                                         Width="150"
-                                         Margin="0,0,5,0"/>
+                                            Text="{Binding Code, Mode=TwoWay}"
+                                            Width="150"
+                                            Margin="0,0,5,0"/>
 
                                     <Button 
                                         Content="X"
@@ -107,6 +152,123 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                 </StackPanel>
+            </StackPanel>
+            <StackPanel x:Name="FileControl" Orientation="Horizontal" Margin="10" HorizontalAlignment="Left">
+
+                <!-- CSV出力 -->
+                <GroupBox Header="CSV" Margin="0,0,10,0" Width="300">
+                    <StackPanel Orientation="Vertical" Margin="10">
+
+                        <!-- 出力形式と出力先を横並びに -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+
+                            <!-- 出力形式 -->
+                            <StackPanel Orientation="Vertical" Margin="0,0,20,0">
+                                <TextBlock x:Name="CsvOutputItem" Text="出力形式を選択：" FontWeight="Bold" Margin="0,0,0,5"/>
+                                <RadioButton x:Name="optVOnly" Content="キーのみ" GroupName="CsvExportMode" Tag="1"
+                                    Click="CsvRadioButton_Click" Margin="5,2"/>
+                                <RadioButton x:Name="optKOnly" Content="値のみ" GroupName="CsvExportMode" Tag="2" 
+                                     Click="CsvRadioButton_Click" Margin="5,2"/>
+                                <RadioButton x:Name="optKVP" Content="キーと値" GroupName="CsvExportMode" Tag="3"
+                                     Click="CsvRadioButton_Click" Margin="5,2"/>
+                            </StackPanel>
+
+                            <!-- 出力先 -->
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock x:Name="CsvOutputPath" Text="出力先を選択：" FontWeight="Bold" Margin="0,0,0,5"/>
+                                <RadioButton x:Name="RBSameFolder" Content="同じフォルダ" GroupName="CsvTarget" Click="CsvRadioButton_Click" Margin="5,2"/>
+                                <RadioButton x:Name="RBPrjTop" Content="プロジェクトトップ" GroupName="CsvTarget" Click="CsvRadioButton_Click" Margin="5,2"/>
+                                <RadioButton x:Name="RBClipboard" Content="クリップボード" GroupName="CsvTarget" Tag="Clipboard" Click="CsvRadioButton_Click" Margin="5,2"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- 出力ボタンとオプション -->
+                        <StackPanel Orientation="Vertical">
+                            <Button x:Name="BtnCsvOut" Content="CSV出力" Margin="0,10,0,0" HorizontalAlignment="Left"
+                                Click="BtnCsvOut_Click"/>
+                            <CheckBox x:Name="ChkWithHeader" Content="一つのファイルにまとめる" Click="CsvRadioButton2_Click"
+                                ToolTipService.ToolTip="ChkWithHeaderToolTip"/>
+                        </StackPanel>
+
+                        <!-- CSV取り込み -->
+                        <StackPanel Orientation="Vertical">
+                            <Button x:Name="GetCsv" Content="CSV取り込み" Margin="0,10,10,0" Click="BtnCsvGet" HorizontalAlignment="Left"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Button x:Name="ImportFromClipboard" Content="クリップボードから取り込み" Margin="0,5,10,0" Tag="Clip" Click="BtnCsvGet" HorizontalAlignment="Left"/>
+                                <TextBlock x:Name="LblCultureCode" Text="カルチャコード" Margin="0,5,5,0" VerticalAlignment="Center"/>
+                                <TextBox Name="ClipLangCode" 
+                                         ToolTipService.ToolTip="ClipLangCodeToolTip" 
+                                         VerticalAlignment="Center" Width="50"/>
+                                
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+
+                <GroupBox x:Name="RelocateGroup" Header="リソース再配置" Margin="0,0,10,0">
+                    <StackPanel Orientation="Vertical" Margin="10">
+
+                        <!-- 出力形式と出力先を横並びに -->
+                        <Grid Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- 左：現在のリソース -->
+                            <StackPanel Grid.Column="0" Orientation="Vertical" Margin="0,0,20,0">
+                                <TextBlock x:Name="LblCurrentResource" Text="現在のリソース：" FontWeight="Bold" Margin="0,0,0,5"/>
+                                <TextBlock x:Name="LblResourceFolder" Text="リソースフォルダ" />
+                                <TextBox x:Name="CurResourceFolder" IsReadOnly="True" Margin="0,5,0,10" Width="180" />
+                                <TextBlock x:Name="LblResourceName" Text="リソース名" />
+                                <TextBox x:Name="CurResourceName" IsReadOnly="True" Margin="0,5,0,10" Width="180" />
+                                <TextBlock x:Name="LblFileFormat" Text="識別子" />
+                                <TextBox x:Name="CurResourceIdt" IsReadOnly="True" Margin="0,5,0,0" Width="180" />
+                            </StackPanel>
+
+                            <!-- 右：再配置先リソース -->
+                            <StackPanel Grid.Column="1" Orientation="Vertical">
+                                <TextBlock x:Name="LblRelocatedResource" Text="再配置先リソース：" FontWeight="Bold" Margin="0,0,0,5"/>
+                                
+                                <TextBlock x:Name="LblRelResourceFolder" Text="リソースフォルダ" />
+                                <TextBox x:Name="MovedResourceFolder"
+                                         LostFocus="MovedResourceFolder_LostFocus"
+                                         GotKeyboardFocus="MovedResourceFolder_GotKeyboardFocus"
+                                         PreviewMouseLeftButtonDown="MovedResourceFolder_PreviewMouseLeftButtonDown"
+                                         Margin="0,5,0,10" Width="180" />
+                                
+                                <TextBlock x:Name="LblRelResourceName" Text="リソース名" />
+                                <TextBox x:Name="MovedResourceName" 
+                                         GotKeyboardFocus="MovedResourceFolder_GotKeyboardFocus"
+                                         PreviewMouseLeftButtonDown="MovedResourceFolder_PreviewMouseLeftButtonDown"
+                                         LostFocus="MovedResourceFolder_LostFocus"
+                                         Margin="0,5,0,10" Width="180" />
+                                
+                                <TextBlock x:Name="LblRelFileFormat" Text="識別子" />
+                                <ComboBox x:Name="ResExtension" Width="180" Margin="0,5,0,0" VerticalAlignment="Center">
+                                    <ComboBoxItem x:Name="FileFormatResx" Content="RESX形式（.resx）" Tag=".resx" />
+                                    <ComboBoxItem x:Name="FileFormatResw" Content="RESW形式（.resw）" Tag=".resw" />
+                                </ComboBox>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- 出力ボタンとオプション -->
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock x:Name="LblRelocationProjectFolder" Text="再配置プロジェクトフォルダ" FontWeight="Bold" Margin="0,0,0,5"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                <TextBox x:Name="NewFolderTextBox" TextWrapping="Wrap"  Width="300"/>
+                                <Button x:Name="BtnBrowseFolder" Content="参照..." Width="60" Margin="10,0,0,0" Click="OnBrowseFolderClick"/>
+                            </StackPanel>
+                            <Button x:Name="BtnRelocateResource" Content="配置変更を実行" Click="RelocateResource_Click" Width="140" HorizontalAlignment="Left" Margin="0,0,0,10"/>
+                            <CheckBox x:Name="DelOriginal"
+                                  Content="元のリソースを削除する"
+                                  Margin="0,0,0,0" Visibility="Collapsed"
+                                  VerticalAlignment="Center"/>
+                            <TextBlock x:Name="LoaderGuideText" TextWrapping="WrapWithOverflow" />
+                        </StackPanel>
+
+                    </StackPanel>
+                </GroupBox>
             </StackPanel>
         </StackPanel>
     </Grid>
