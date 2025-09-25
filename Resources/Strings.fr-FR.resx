@@ -225,7 +225,7 @@ Dans XAML, il sera défini comme 'NomClé.NomCible'. Ne modifiez pas le nom cibl
     <value>Exporter le code du chargeur</value>
   </data>
   <data name="BtnMakeLoaderCodeToolTip" xml:space="preserve">
-    <value>Écrit du code dans ResourceAdder.cs</value>
+    <value>Écrit le code de chargement des ressources linguistiques dans ResourceAdder.cs</value>
   </data>
   <data name="MessageResourceFileNotFound" xml:space="preserve">
     <value>Les paramètres de ressource ont été modifiés. 
@@ -500,5 +500,11 @@ Le contenu de 'ResourceAdder.cs' sera remplacé.</value>
   </data>
   <data name="LblResourceWindow" xml:space="preserve">
     <value>Gestion des ressources</value>
+  </data>
+  <data name="HelpLinkText.Text" xml:space="preserve">
+    <value>Ouvrir la page d’aide</value>
+  </data>
+  <data name="HelpLinkLangToolTip" xml:space="preserve">
+    <value>Seul le japonais est disponible pour le moment.</value>
   </data>
 </root>

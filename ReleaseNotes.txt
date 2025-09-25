@@ -1,10 +1,13 @@
-## Version 1.1.0 - 2025-09-12
+## Version 1.1.0 - 2025-09-24
 
 ### 🚀 Release Note
 - Added project-level caching support.
 - Introduced tooltip resource-assist functionality.
 - Added tooltips to improve usability and clarify operations.
 - The resource file folder and name can now be customized.
+- CSV export is now supported.
+- CSV import is now supported.
+- Resource files can now be relocated to any folder and converted between .resx and .resw formats.
 
 
 ### 🌐 日本語
@@ -12,3 +15,6 @@
 - ツールチップのリソース化支援機能を追加しました。
 - ツールチップを追加し、操作が分かりやすくなりました。
 - リソースファイルのフォルダと名前をカスタマイズ出来るようになりました。
+- CSVを出力できるようになりました。
+- CSVを取り込めるようになりました。
+- リソースファイルを任意の場所に移動したり、リソースの種別(resw/resx)を変換できるようになりました。

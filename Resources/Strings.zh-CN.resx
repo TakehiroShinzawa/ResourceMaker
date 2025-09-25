@@ -224,7 +224,7 @@
     <value>导出加载器代码</value>
   </data>
   <data name="BtnMakeLoaderCodeToolTip" xml:space="preserve">
-    <value>将代码写入 ResourceAdder.cs</value>
+    <value>将界面语言资源的加载器代码写入 ResourceAdder.cs 文件</value>
   </data>
   <data name="MessageResourceFileNotFound" xml:space="preserve">
     <value>资源设置已更改。
@@ -500,5 +500,11 @@
   </data>
   <data name="LblResourceWindow" xml:space="preserve">
     <value>资源管理</value>
+  </data>
+  <data name="HelpLinkText.Text" xml:space="preserve">
+    <value>打开帮助页面</value>
+  </data>
+  <data name="HelpLinkLangToolTip" xml:space="preserve">
+    <value>目前仅提供日语。</value>
   </data>
 </root>

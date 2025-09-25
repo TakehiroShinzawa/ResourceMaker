@@ -16,6 +16,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Resources;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -23,7 +24,6 @@ using System.Windows.Input;
 using System.Windows.Markup;
 using System.Windows.Media.Animation;
 using System.Xml.Linq;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace ResourceMaker.UI
 {
@@ -180,6 +180,7 @@ namespace ResourceMaker.UI
             ToolTipService.SetToolTip(AddLanguage, loader.GetString("AddLanguageToolTip"));
             ToolTipService.SetToolTip(ClearCache, loader.GetString("ClearCacheToolTip"));
             ToolTipService.SetToolTip(ResourceGetterExpression, loader.GetString("ResourceGetterExpressionToolTip"));
+            ToolTipService.SetToolTip(BtnMakeLoaderCode, loader.GetString("BtnMakeLoaderCodeToolTip"));
 
         }
 #endif
@@ -392,6 +393,13 @@ namespace ResourceMaker.UI
             return replaced;
         }
 
+        private bool IsScreenResource(string resourceName)
+        {
+            if (resourceName.EndsWith("ToolTip") || resourceName.Contains('.'))
+                return true;
+
+            return false;
+        }
         //LoaderCodeの作成
         private void MakeLoaderText_Click(object sender, RoutedEventArgs e)
         {
@@ -407,17 +415,26 @@ namespace ResourceMaker.UI
                     );
                     if (dialogRes == MessageBoxResult.OK)
                     {
-                        File.Delete(resourcerFilename);
+                        StringBuilder sb = new StringBuilder();
                         var keyList = cacheList["en-US"].Keys.OrderBy(k => k).ToArray();
                         foreach (var key in keyList)
                         {
-                            File.AppendAllText(resourcerFilename, MakeLoaderText(key));
+                            var code = MakeLoaderText(key);
+                            if( !string.IsNullOrEmpty(code) )
+                                sb.AppendLine(key);
+
                         }
+                        File.WriteAllText(resourcerFilename, sb.ToString());
                     }
 
                 }
                 else
-                    File.AppendAllText(resourcerFilename, MakeLoaderText(keyName));
+                {
+                    var code = MakeLoaderText(keyName);
+                    if(!string.IsNullOrEmpty(code))
+                        File.AppendAllText(resourcerFilename, code);
+
+                }
             }
             catch (Exception ex)
             {
@@ -432,16 +449,18 @@ namespace ResourceMaker.UI
         }
         private string MakeLoaderText(string keyName)
         {
-            string result;
-            if( keyName.EndsWith("ToolTip"))
+            string result = string.Empty;
+            if (keyName.EndsWith("ToolTip"))
             {
                 // ToolTipService.SetToolTip(ClearCache, loader.GetString("ClearCacheToolTip"));
                 var key = keyName.Replace("ToolTip", "");
                 result = $"ToolTipService.SetToolTip({key}, {ResourceGetterBox.Text}(\"{keyName}\"));{Environment.NewLine}";
             }
-            else
+            else if(keyName.Contains('.'))
+            {
                 // BtnCsvOut.Content = loader.GetString("BtnCsvOut.Content");
                 result = $"{keyName} = {ResourceGetterBox.Text}(\"{keyName}\");{Environment.NewLine}";
+            }
             return result;
         }
 
@@ -661,6 +680,8 @@ namespace ResourceMaker.UI
 
                     }
                 }
+                //BtnMakeLoaderCodeのコントロール追加
+                BtnMakeLoaderCode.IsEnabled = IsScreenResource(text);
             }
 
             if (isEditOnly)

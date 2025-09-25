@@ -168,8 +168,10 @@
                                 ToolTipService.ToolTip="ClearCacheToolTip"
                                 Click="ClearCache_Click" Margin="25,0,0,0"/>
                         <Button x:Name="BtnMakeLoaderCode" Content="ローダーテキストの出力" 
-                                ToolTipService.ToolTip="ResourceAdder.csに書き込みます。"
-                                Click="MakeLoaderText_Click" Margin="25,0,0,0" Visibility="Collapsed"/>
+                                ToolTipService.ToolTip="BtnMakeLoaderCodeToolTip"
+                                Click="MakeLoaderText_Click" Margin="25,0,0,0" 
+                                IsEnabled="False"
+                                Visibility="Collapsed"/>
                     </StackPanel>
 
                     <StackPanel x:Name="InformationPanel" HorizontalAlignment="Center" Margin="0,10,0,0">

@@ -224,7 +224,7 @@
     <value>로더 코드 내보내기</value>
   </data>
   <data name="BtnMakeLoaderCodeToolTip" xml:space="preserve">
-    <value>ResourceAdder.cs에 코드를 작성합니다</value>
+    <value>화면 언어 리소스 로더 코드를 ResourceAdder.cs에 작성합니다</value>
   </data>
   <data name="MessageResourceFileNotFound" xml:space="preserve">
     <value>리소스 설정이 변경되었습니다. 
@@ -500,5 +500,11 @@
   </data>
   <data name="LblResourceWindow" xml:space="preserve">
     <value>리소스 관리</value>
+  </data>
+  <data name="HelpLinkText.Text" xml:space="preserve">
+    <value>도움말 페이지 열기</value>
+  </data>
+  <data name="HelpLinkLangToolTip" xml:space="preserve">
+    <value>현재는 일본어만 제공됩니다.</value>
   </data>
 </root>

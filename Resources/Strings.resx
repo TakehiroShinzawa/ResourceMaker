@@ -225,7 +225,7 @@ In XAML, it will be defined as 'KeyName.TargetName'. Do not change the target na
     <value>Export Loader Code</value>
   </data>
   <data name="BtnMakeLoaderCodeToolTip" xml:space="preserve">
-    <value>Writes code to ResourceAdder.cs</value>
+    <value>Writes the loader code for UI language resources to ResourceAdder.cs</value>
   </data>
   <data name="MessageResourceFileNotFound" xml:space="preserve">
     <value>Resource settings have changed. 
@@ -501,5 +501,11 @@ The contents of 'ResourceAdder.cs' will be overwritten.</value>
   </data>
   <data name="LblResourceWindow" xml:space="preserve">
     <value>Resource Management</value>
+  </data>
+  <data name="HelpLinkText.Text" xml:space="preserve">
+    <value>Open Help Page</value>
+  </data>
+  <data name="HelpLinkLangToolTip" xml:space="preserve">
+    <value>Only Japanese is available for now.</value>
   </data>
 </root>

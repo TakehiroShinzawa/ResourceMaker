@@ -143,6 +143,7 @@ namespace ResourceMaker.UI
             BtnRelocateResource.Content = loader.GetString("BtnRelocateResource.Content");
             LblRelFileFormat.Text = loader.GetString("LblRelFileFormat.Text");
             LanguageManageWindow.Title = loader.GetString("LanguageSelectionWindowName");
+            HelpLinkText.Text = loader.GetString("HelpLinkText.Text");
 
             ToolTipService.SetToolTip(BtnCreate, loader.GetString("BtnCreateToolTip"));
             ToolTipService.SetToolTip(BtnCancel, loader.GetString("BtnCancelToolTip"));
@@ -150,6 +151,7 @@ namespace ResourceMaker.UI
             ToolTipService.SetToolTip(BtnAdd, loader.GetString("BtnAddToolTip"));
             ToolTipService.SetToolTip(ChkWithHeader, loader.GetString("ChkWithHeaderToolTip"));
             ToolTipService.SetToolTip(ClipLangCode, loader.GetString("ClipLangCodeToolTip"));
+            ToolTipService.SetToolTip(HelpLinkLang, loader.GetString("HelpLinkLangToolTip"));
 
         }
 
@@ -1205,8 +1207,14 @@ namespace ResourceMaker.UI
             }
         }
 
-        private void MovedResourceFolder_GotMouseCapture_1(object sender, MouseEventArgs e)
+        private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
         {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = e.Uri.AbsoluteUri,
+                UseShellExecute = true
+            });
+            e.Handled = true;
 
         }
     }

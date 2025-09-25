@@ -225,7 +225,7 @@ XAML에서는 '키이름.대상이름'으로 정의됩니다. 대상 이름은 �
     <value>ローダーコードの出力</value>
   </data>
   <data name="BtnMakeLoaderCodeToolTip" xml:space="preserve">
-    <value>ResourceAdder.cs にコードを書き込みます</value>
+    <value>画面用言語リソースのローダーコードを、ResourceAdder.cs に書き込みます</value>
   </data>
   <data name="MessageResourceFileNotFound" xml:space="preserve">
     <value>リソース設定が変更されました。
@@ -501,5 +501,11 @@ XAML에서는 '키이름.대상이름'으로 정의됩니다. 대상 이름은 �
   </data>
   <data name="LblResourceWindow" xml:space="preserve">
     <value>リソース管理</value>
+  </data>
+  <data name="HelpLinkText.Text" xml:space="preserve">
+    <value>ヘルプページを開く</value>
+  </data>
+  <data name="HelpLinkLangToolTip" xml:space="preserve">
+    <value>日本語ページです</value>
   </data>
 </root>
