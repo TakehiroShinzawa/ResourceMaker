@@ -1,4 +1,55 @@
-## Version 1.1.0 - 2025-09-24
+## Version 1.3.7 - 2025-10-10
+
+### 🚀 Release Note
+- Fixed minor bugs
+- Fixed CSV input/output handling.
+- Added bulk export functionality for loader code
+
+### 🌐 日本語
+- 軽微なバグを修正
+- CSVの入出力を修正
+- ローダーコードの一括出力機能追加
+
+
+
+## Version 1.3.5 - 2025-10-01
+
+### 🚀 Release Note
+- Fixed minor bugs
+- Improved UI usability in certain areas
+- Updated the help page link
+
+### 🌐 日本語
+- 軽微なバグを修正
+- UIの操作性を一部改善
+- ヘルプページリンクを更新
+
+
+
+## Version 1.3.2 - 2025-09-27
+
+### 🚀 Release Note
+- Fixed minor bugs
+
+
+### 🌐 日本語
+- 軽微なバグを修正
+- ヘルプページリンクを更新
+
+
+### 🚀 Release Note
+- Fixed minor bugs
+- Improved UI usability in certain areas
+- Added IntelliSense support during resource creation
+
+
+### 🌐 日本語
+- 軽微なバグを修正
+- UIの操作性を一部改善
+- リソース作成時にインテリセンス機能を追加
+
+
+## Version 1.2.0 - 2025-09-24
 
 ### 🚀 Release Note
 - Added project-level caching support.

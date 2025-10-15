@@ -23,7 +23,9 @@ namespace ResourceMaker
         {
             if (cachedResources.Count > 0)
             {
+#if !DEBUG
                 try
+#endif
                 {
                     var tmp = developType.Split('.');
                     var resFolderName = tmp[0];
@@ -59,6 +61,8 @@ namespace ResourceMaker
                     {
                         var langCode = langEntry.Key;
                         var kvps = langEntry.Value;
+                        if( string.IsNullOrEmpty( langCode))
+                            continue; 
 
                         string langFolder = string.Empty;
                         if (resSuffix == "resw")
@@ -76,7 +80,9 @@ namespace ResourceMaker
                         else
                             reswFilePath = Path.Combine(langFolder, $"{resName}.{langCode}.{resSuffix}");
 
-                        var newDataElements = kvps.Select(kvp =>
+                        var newDataElements = kvps
+                            .OrderBy(kvp => kvp.Key)
+                            .Select(kvp =>
                             new XElement("data",
                                 new XAttribute("name", kvp.Key),
                                 new XAttribute(XNamespace.Xml + "space", "preserve"),
@@ -92,12 +98,14 @@ namespace ResourceMaker
                         );
 
                         doc.Save(reswFilePath);
-                        if ( resSuffix != "resw" && langCode == "en-US")
+                        if (resSuffix != "resw" && langCode == "en-US")
                             File.Copy(reswFilePath, reswFilePath.Replace("en-US.", ""), overwrite: true);
 
                     }
                 }
-                catch { throw; }
+ #if !DEBUG
+               catch { }
+#endif
             }
         }
         public static void Clear()
@@ -170,7 +178,9 @@ namespace ResourceMaker
                     }
                     var kvps = new Dictionary<string, string>();
 
-                    //try
+#if !DEBUG
+                    try
+#endif
                     {
                         var doc = XDocument.Load(file);
                         var dataElements = doc.Root?.Elements("data");
@@ -221,7 +231,9 @@ namespace ResourceMaker
                         }
 
                     }
-                    //catch { }
+#if !DEBUG
+                    catch { }
+#endif
                 }
             }
             return result;

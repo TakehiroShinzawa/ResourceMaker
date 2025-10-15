@@ -117,106 +117,57 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ResourceizeText" xml:space="preserve">
-    <value>Ressourcisation</value>
-  </data>
-  <data name="LabelTargetText.Text" xml:space="preserve">
-    <value>Texte cible</value>
-  </data>
-  <data name="LabelUpdatedText.Text" xml:space="preserve">
-    <value>Texte réécrit</value>
-  </data>
-  <data name="OriginalText.Text" xml:space="preserve">
-    <value>Texte original</value>
-  </data>
-  <data name="ResourceKey.Text" xml:space="preserve">
-    <value>Entrez le nom de la ressource</value>
-  </data>
-  <data name="ResourceGetterExpression.Content" xml:space="preserve">
-    <value>Expr.</value>
-  </data>
-  <data name="Feedback.Content" xml:space="preserve">
-    <value>Réécrire</value>
-  </data>
-  <data name="SaveResource.Content" xml:space="preserve">
-    <value>Appliquer</value>
-  </data>
-  <data name="SaveAndClose.Content" xml:space="preserve">
-    <value>Enregistrer</value>
+  <data name="AdditionalLanguageCode.Text" xml:space="preserve">
+    <value>Code langue supplémentaire (ex : it-IT)</value>
   </data>
   <data name="AddLanguage.Content" xml:space="preserve">
     <value>Ajouter une langue</value>
   </data>
-  <data name="SelectLanguagesGuide.Text" xml:space="preserve">
-    <value>Veuillez sélectionner la langue à utiliser</value>
+  <data name="AddLanguageToolTip" xml:space="preserve">
+    <value>Ajoutez ou supprimez des ressources linguistiques. La fenêtre se fermera après l’application des paramètres.</value>
   </data>
-  <data name="AdditionalLanguageCode.Text" xml:space="preserve">
-    <value>Code langue supplémentaire (ex : it-IT)</value>
-  </data>
-  <data name="LoaderDeclaration" xml:space="preserve">
-    <value>Déclaration du loader copiée dans le presse-papiers</value>
-  </data>
-  <data name="ClearCache.Content" xml:space="preserve">
-    <value>Vider le cache</value>
-  </data>
-  <data name="ProjectSelector.Text" xml:space="preserve">
-    <value>Veuillez sélectionner un type de projet.</value>
-  </data>
-  <data name="BtnCreate.Content" xml:space="preserve">
-    <value>Créer</value>
-  </data>
-  <data name="BtnCancel.Content" xml:space="preserve">
-    <value>Annuler</value>
-  </data>
-  <data name="BtnClose.Content" xml:space="preserve">
-    <value>Fermer</value>
-  </data>
-  <data name="BtnAdd.Content" xml:space="preserve">
-    <value>Ajouter</value>
-  </data>
-  <data name="BtnCreateToolTip" xml:space="preserve">
-    <value>Créez les fichiers de langue cochés. Ignorer s’ils existent déjà.</value>
-  </data>
-  <data name="BtnCancelToolTip" xml:space="preserve">
-    <value>Annuler sans ajouter de fichiers de langue ni modifier les ressources.</value>
-  </data>
-  <data name="BtnCloseToolTip" xml:space="preserve">
-    <value>Fermez la fenêtre de langue, puis modifiez les ressources.</value>
-  </data>
-  <data name="BtnAddToolTip" xml:space="preserve">
-    <value>Ajoutez une langue de ressource. Vous pouvez aussi appuyer sur Entrée.</value>
-  </data>
-  <data name="ResultTextToolTip" xml:space="preserve">
-    <value>Remplace la ligne sélectionnée.</value>
+  <data name="ApplyButton.Content" xml:space="preserve">
+    <value>Valider</value>
   </data>
   <data name="BaseTextsToolTip" xml:space="preserve">
     <value>Sélectionnez le texte à convertir en ressource. 
 Si une clé est affichée, la valeur enregistrée s’affichera.</value>
   </data>
-  <data name="ResourceKeyToolTip" xml:space="preserve">
-    <value>Saisissez le nom de la clé. 
-Dans XAML, il sera défini comme 'NomClé.NomCible'. Ne modifiez pas le nom cible.</value>
+  <data name="BtnAdd.Content" xml:space="preserve">
+    <value>Ajouter</value>
   </data>
-  <data name="ResourceGetterBoxToolTip" xml:space="preserve">
-    <value>Ce code est généré automatiquement, mais la méthode d’accès (loader.GetString) est personnalisable.</value>
+  <data name="BtnAddToolTip" xml:space="preserve">
+    <value>Ajoutez une langue de ressource. Vous pouvez aussi appuyer sur Entrée.</value>
   </data>
-  <data name="FeedbackToolTip" xml:space="preserve">
-    <value>Si la case est cochée, le texte source sera réécrit après la création de la ressource.</value>
+  <data name="BtnBrowseFolder.Content" xml:space="preserve">
+    <value>Parcourir...</value>
   </data>
-  <data name="SaveResourceToolTip" xml:space="preserve">
-    <value>Enregistre la ressource en cours dans le cache. Vous pouvez continuer la modification.</value>
+  <data name="BtnCancel.Content" xml:space="preserve">
+    <value>Annuler</value>
   </data>
-  <data name="SaveAndCloseToolTip" xml:space="preserve">
-    <value>Applique la ressource modifiée à l’ensemble. Termine l’édition et ferme la fenêtre.</value>
+  <data name="BtnCancelFolderSelection.Content" xml:space="preserve">
+    <value>Annuler</value>
   </data>
-  <data name="AddLanguageToolTip" xml:space="preserve">
-    <value>Ajoutez ou supprimez des ressources linguistiques. La fenêtre se fermera après l’application des paramètres.</value>
+  <data name="BtnCancelToolTip" xml:space="preserve">
+    <value>Annuler sans ajouter de fichiers de langue ni modifier les ressources.</value>
   </data>
-  <data name="ClearCacheToolTip" xml:space="preserve">
-    <value>Efface les données en cache. Veuillez appuyer ici si les ressources ont été modifiées en externe.</value>
+  <data name="BtnClickme" xml:space="preserve">
+    <value>Cliquez pour copier</value>
   </data>
-  <data name="ApplyButton.Content" xml:space="preserve">
-    <value>Valider</value>
+  <data name="BtnClose.Content" xml:space="preserve">
+    <value>Fermer</value>
+  </data>
+  <data name="BtnCloseToolTip" xml:space="preserve">
+    <value>Fermez la fenêtre de langue, puis modifiez les ressources.</value>
+  </data>
+  <data name="BtnConfirmFolderSelection.Content" xml:space="preserve">
+    <value>Sélectionner</value>
+  </data>
+  <data name="BtnCreate.Content" xml:space="preserve">
+    <value>Créer</value>
+  </data>
+  <data name="BtnCreateToolTip" xml:space="preserve">
+    <value>Créez les fichiers de langue cochés. Ignorer s’ils existent déjà.</value>
   </data>
   <data name="BtnCsvOut.Content" xml:space="preserve">
     <value>Export CSV</value>
@@ -227,59 +178,228 @@ Dans XAML, il sera défini comme 'NomClé.NomCible'. Ne modifiez pas le nom cibl
   <data name="BtnMakeLoaderCodeToolTip" xml:space="preserve">
     <value>Écrit le code de chargement des ressources linguistiques dans ResourceAdder.cs</value>
   </data>
-  <data name="MessageResourceFileNotFound" xml:space="preserve">
-    <value>Les paramètres de ressource ont été modifiés. 
-Le fichier de ressource attendu est introuvable.</value>
+  <data name="BtnMoveUpFolder.Content" xml:space="preserve">
+    <value>↑ Monter</value>
   </data>
-  <data name="TitleResourceRetrievalFailed" xml:space="preserve">
-    <value>Échec de récupération des ressources</value>
+  <data name="BtnRelocateResource.Content" xml:space="preserve">
+    <value>Exécuter la réaffectation</value>
   </data>
-  <data name="MessageTooltipConflict" xml:space="preserve">
-    <value>La valeur de l'infobulle est identique à une autre propriété et ne peut pas être localisée. Veuillez la placer sur une ligne distincte.</value>
+  <data name="BtnResourceGetter.Content" xml:space="preserve">
+    <value>Expr.</value>
   </data>
-  <data name="TitleTooltipConflict" xml:space="preserve">
-    <value>Les info-bulles sont un peu spéciales</value>
+  <data name="BtnResourceGetterToolTip" xml:space="preserve">
+    <value>Copie la déclaration du chargeur de ressources dans le presse-papiers</value>
   </data>
-  <data name="TitleResourceEditingMode" xml:space="preserve">
-    <value>Mode d’édition des ressources</value>
+  <data name="BtnSelectAllLanguage.Content" xml:space="preserve">
+    <value>Tout sélectionner</value>
+  </data>
+  <data name="ChkCustom.Content" xml:space="preserve">
+    <value>Paramètres personnalisés</value>
+  </data>
+  <data name="ChkResw.Content" xml:space="preserve">
+    <value>resw (séparé par dossier)</value>
+  </data>
+  <data name="ChkResx.Content" xml:space="preserve">
+    <value>resx (inséré dans le nom de fichier)</value>
+  </data>
+  <data name="ChkWithHeader.Content" xml:space="preserve">
+    <value>Fusionner dans un seul fichier</value>
+  </data>
+  <data name="ChkWithHeaderToolTip" xml:space="preserve">
+    <value>"Key" et les codes de culture seront utilisés comme en-têtes.</value>
+  </data>
+  <data name="ClearCache.Content" xml:space="preserve">
+    <value>Vider le cache</value>
+  </data>
+  <data name="ClearCacheToolTip" xml:space="preserve">
+    <value>Efface les données en cache. Veuillez appuyer ici si les ressources ont été modifiées en externe.</value>
+  </data>
+  <data name="ClipboardEmpty" xml:space="preserve">
+    <value>Presse-papiers vide</value>
+  </data>
+  <data name="ClipLangCodeToolTip" xml:space="preserve">
+    <value>Saisissez le code de culture à importer.</value>
+  </data>
+  <data name="CsvExportCompleted" xml:space="preserve">
+    <value>Exportation terminée</value>
+  </data>
+  <data name="CsvExportSuccess" xml:space="preserve">
+    <value>Le fichier CSV a été exporté</value>
+  </data>
+  <data name="CsvFileFilter" xml:space="preserve">
+    <value>Fichier CSV (*.csv)|*.csv</value>
+  </data>
+  <data name="CsvOutEditToolTip" xml:space="preserve">
+    <value>Ajoutez les ressources linguistiques affichées au fichier {0} situé à la racine du projet.</value>
+  </data>
+  <data name="CsvOutputItem.Text" xml:space="preserve">
+    <value>Élément à exporter en CSV :</value>
+  </data>
+  <data name="CsvOutputPath.Text" xml:space="preserve">
+    <value>Sélectionner la destination de sortie :</value>
+  </data>
+  <data name="CsvSaveFilter" xml:space="preserve">
+    <value>Fichier CSV (*.csv)|*.csv</value>
+  </data>
+  <data name="CsvSaveTilte" xml:space="preserve">
+    <value>Spécifier l’emplacement de sortie du fichier CSV</value>
+  </data>
+  <data name="CultureCodeNotFound" xml:space="preserve">
+    <value>Code culture introuvable</value>
+  </data>
+  <data name="CustmResourceName.Text" xml:space="preserve">
+    <value>Nom du fichier de ressource (sans extension)</value>
+  </data>
+  <data name="CustomResFolder.Text" xml:space="preserve">
+    <value>Dossier de ressources ./</value>
+  </data>
+  <data name="CustomResPtn.Text" xml:space="preserve">
+    <value>Modèle de ressource</value>
+  </data>
+  <data name="Feedback.Content" xml:space="preserve">
+    <value>Réécrire</value>
+  </data>
+  <data name="FeedbackToolTip" xml:space="preserve">
+    <value>Si la case est cochée, le texte source sera réécrit après la création de la ressource.</value>
+  </data>
+  <data name="FileFormatResw.Content" xml:space="preserve">
+    <value>Format RESW (.resw)</value>
+  </data>
+  <data name="FileFormatResx.Content" xml:space="preserve">
+    <value>Format RESX (.resx)</value>
+  </data>
+  <data name="GetCsv.Content" xml:space="preserve">
+    <value>Importer CSV</value>
+  </data>
+  <data name="HelpLinkLangToolTip" xml:space="preserve">
+    <value>Seul le japonais est disponible pour le moment.</value>
+  </data>
+  <data name="HelpLinkText.Text" xml:space="preserve">
+    <value>Ouvrir la page d’aide</value>
+  </data>
+  <data name="ImportFromClipboard.Content" xml:space="preserve">
+    <value>Importer depuis le presse-papiers</value>
+  </data>
+  <data name="InvalidCultureCode" xml:space="preserve">
+    <value>Erreur de code culture</value>
+  </data>
+  <data name="InvalidCultureCodeEntered" xml:space="preserve">
+    <value>Le code culture est invalide</value>
+  </data>
+  <data name="InvalidRelocationFileName" xml:space="preserve">
+    <value>Le nom du fichier de réaffectation est invalide</value>
+  </data>
+  <data name="InvalidRelocationFolderName" xml:space="preserve">
+    <value>Le nom du dossier de réaffectation est invalide</value>
+  </data>
+  <data name="IsNewResource.Text" xml:space="preserve">
+    <value>(Créer nouveau)</value>
+  </data>
+  <data name="LabelTargetText.Text" xml:space="preserve">
+    <value>Texte cible</value>
+  </data>
+  <data name="LabelUpdatedText.Text" xml:space="preserve">
+    <value>Texte réécrit</value>
+  </data>
+  <data name="LanguageRelocationRequired" xml:space="preserve">
+    <value>Aucune langue sélectionnée</value>
+  </data>
+  <data name="LanguageResourceAdded" xml:space="preserve">
+    <value>Ressource linguistique ajoutée</value>
+  </data>
+  <data name="LanguageResourceAddedToTarget" xml:space="preserve">
+    <value>Les ressources linguistiques {0} ont été ajoutées</value>
+  </data>
+  <data name="LanguageSelectionRequired" xml:space="preserve">
+    <value>Sélection de langue requise</value>
+  </data>
+  <data name="LanguageSelectionWindowName" xml:space="preserve">
+    <value>Gestionnaire de langues</value>
+  </data>
+  <data name="LblCultureCode.Text" xml:space="preserve">
+    <value>Code de culture</value>
+  </data>
+  <data name="LblCurrentResource.Text" xml:space="preserve">
+    <value>Ressource actuelle</value>
+  </data>
+  <data name="LblFileFormat.Text" xml:space="preserve">
+    <value>Format de fichier</value>
+  </data>
+  <data name="LblRelFileFormat.Text" xml:space="preserve">
+    <value>Format de fichier</value>
+  </data>
+  <data name="LblRelocatedResource.Text" xml:space="preserve">
+    <value>Ressource réaffectée</value>
+  </data>
+  <data name="LblRelocationProjectFolder.Text" xml:space="preserve">
+    <value>Dossier de projet de réaffectation</value>
+  </data>
+  <data name="LblRelResourceFolder.Text" xml:space="preserve">
+    <value>Dossier de ressources</value>
+  </data>
+  <data name="LblRelResourceName.Text" xml:space="preserve">
+    <value>Nom de ressource</value>
+  </data>
+  <data name="LblResourceFolder.Text" xml:space="preserve">
+    <value>Dossier de ressources</value>
+  </data>
+  <data name="LblResourceName.Text" xml:space="preserve">
+    <value>Nom de ressource</value>
+  </data>
+  <data name="LblResourceWindow" xml:space="preserve">
+    <value>Gestion des ressources</value>
+  </data>
+  <data name="LblSelectFolder.Title" xml:space="preserve">
+    <value>Sélectionner un dossier</value>
+  </data>
+  <data name="LoaderDeclaration" xml:space="preserve">
+    <value>Déclaration du loader copiée dans le presse-papiers</value>
+  </data>
+  <data name="ManageLanguage.Content" xml:space="preserve">
+    <value>Gérer les ressources</value>
+  </data>
+  <data name="ManageLanguageToolTip" xml:space="preserve">
+    <value>Effectue l’exportation de fichiers, le déplacement et autres opérations.</value>
+  </data>
+  <data name="MessageConfirmKeyDeletionAllLanguages" xml:space="preserve">
+    <value>Voulez-vous supprimer la clé « {0} » de toutes les ressources linguistiques ?</value>
+  </data>
+  <data name="MessageCsvAlreadyExported" xml:space="preserve">
+    <value>La clé correspondante a déjà été exportée dans le fichier CSV.</value>
+  </data>
+  <data name="MessageErrorOnCsvExporting" xml:space="preserve">
+    <value>Une erreur s'est produite lors du processus d'exportation CSV.</value>
   </data>
   <data name="MessageGenerateResourceCode" xml:space="preserve">
     <value>Le code de chargement de toutes les ressources linguistiques sera généré.
 Le contenu de 'ResourceAdder.cs' sera remplacé.</value>
   </data>
-  <data name="TitleGenerateResourceCode" xml:space="preserve">
-    <value>Confirmation d’écrasement</value>
+  <data name="MessageMakeDiscCsv" xml:space="preserve">
+    <value>'{0}' a été écrit dans le fichier CSV.</value>
   </data>
   <data name="MessageResourceAdderOutputError" xml:space="preserve">
     <value>Une erreur s’est produite lors de la génération de ResourceAdder.cs. 
 {0}</value>
   </data>
-  <data name="TitleFileWriteError" xml:space="preserve">
-    <value>Erreur d’écriture de fichier</value>
+  <data name="MessageResourceFileNotFound" xml:space="preserve">
+    <value>Les paramètres de ressource ont été modifiés. 
+Le fichier de ressource attendu est introuvable.</value>
   </data>
-  <data name="MessageConfirmKeyDeletionAllLanguages" xml:space="preserve">
-    <value>Voulez-vous supprimer la clé « {0} » de toutes les ressources linguistiques ?</value>
+  <data name="MessageTooltipConflict" xml:space="preserve">
+    <value>L'emplacement de définition de l'infobulle chevauche d'autres propriétés, ce qui empêche sa conversion en ressource.
+Veuillez la placer sur une ligne distincte.</value>
   </data>
-  <data name="TitleConfirmResourceDeletion" xml:space="preserve">
-    <value>Suppression</value>
-  </data>
-  <data name="NoteOutputToResourceAdder" xml:space="preserve">
-    <value>Sera exporté vers ResourceAdder.cs</value>
-  </data>
-  <data name="BtnClickme" xml:space="preserve">
-    <value>Cliquez pour copier</value>
-  </data>
-  <data name="ManageLanguage.Content" xml:space="preserve">
-    <value>Gérer les ressources</value>
-  </data>
-  <data name="ResSeparatedByFolder" xml:space="preserve">
-    <value>{0} (séparé par dossier)</value>
-  </data>
-  <data name="ResIntoFilename" xml:space="preserve">
-    <value>{0} (inséré dans le nom de fichier)</value>
+  <data name="MissingCsvExportSettings" xml:space="preserve">
+    <value>Paramètres d’exportation manquants</value>
   </data>
   <data name="MissingResource_enUS" xml:space="preserve">
     <value>La ressource en-US est introuvable</value>
+  </data>
+  <data name="MsgResourceEditInfo" xml:space="preserve">
+    <value>Le code du chargeur de ressources linguistiques a été écrit dans ResourceAdder.cs</value>
+  </data>
+  <data name="NoCultureCodeDetectedInFile" xml:space="preserve">
+    <value>Aucun code culture détecté dans le fichier</value>
   </data>
   <data name="NoLanguageSelected" xml:space="preserve">
     <value>Aucun élément de sortie</value>
@@ -287,80 +407,41 @@ Le contenu de 'ResourceAdder.cs' sera remplacé.</value>
   <data name="NoLanguageSelection" xml:space="preserve">
     <value>Veuillez sélectionner une langue à exporter</value>
   </data>
-  <data name="CsvExportSuccess" xml:space="preserve">
-    <value>Le fichier CSV a été exporté</value>
-  </data>
-  <data name="CsvExportCompleted" xml:space="preserve">
-    <value>Exportation terminée</value>
-  </data>
-  <data name="SelectCsvExportSettings" xml:space="preserve">
-    <value>Veuillez sélectionner les paramètres d’exportation CSV</value>
-  </data>
-  <data name="MissingCsvExportSettings" xml:space="preserve">
-    <value>Paramètres d’exportation manquants</value>
-  </data>
-  <data name="SelectSingleLanguageForImport" xml:space="preserve">
-    <value>Veuillez sélectionner une seule langue à importer</value>
-  </data>
-  <data name="LanguageSelectionRequired" xml:space="preserve">
-    <value>Sélection de langue requise</value>
-  </data>
-  <data name="InvalidCultureCodeEntered" xml:space="preserve">
-    <value>Le code culture est invalide</value>
-  </data>
-  <data name="InvalidCultureCode" xml:space="preserve">
-    <value>Erreur de code culture</value>
+  <data name="NoteOutputToResourceAdder" xml:space="preserve">
+    <value>Sera exporté vers ResourceAdder.cs</value>
   </data>
   <data name="NoTextInClipboard" xml:space="preserve">
     <value>Aucun texte trouvé dans le presse-papiers</value>
   </data>
-  <data name="ClipboardEmpty" xml:space="preserve">
-    <value>Presse-papiers vide</value>
+  <data name="optKOnly.Content" xml:space="preserve">
+    <value>Valeur uniquement</value>
   </data>
-  <data name="SelectCsvFile" xml:space="preserve">
-    <value>Sélectionner le fichier CSV</value>
+  <data name="optKVP.Content" xml:space="preserve">
+    <value>Clé et valeur</value>
   </data>
-  <data name="CsvFileFilter" xml:space="preserve">
-    <value>Fichier CSV (*.csv)|*.csv</value>
+  <data name="optVOnly.Content" xml:space="preserve">
+    <value>Clé uniquement</value>
   </data>
-  <data name="NoCultureCodeDetectedInFile" xml:space="preserve">
-    <value>Aucun code culture détecté dans le fichier</value>
+  <data name="OriginalText.Text" xml:space="preserve">
+    <value>Texte original</value>
   </data>
-  <data name="CultureCodeNotFound" xml:space="preserve">
-    <value>Code culture introuvable</value>
+  <data name="ProjectSelector.Text" xml:space="preserve">
+    <value>Veuillez sélectionner un type de projet.</value>
   </data>
-  <data name="LanguageResourceAddedToTarget" xml:space="preserve">
-    <value>Les ressources linguistiques {0} ont été ajoutées</value>
+  <data name="RBClipboard.Content" xml:space="preserve">
+    <value>Presse-papiers</value>
   </data>
-  <data name="LanguageResourceAdded" xml:space="preserve">
-    <value>Ressource linguistique ajoutée</value>
+  <data name="RBPrjTop.Content" xml:space="preserve">
+    <value>Racine du projet</value>
   </data>
-  <data name="TargetCountMismatchWithDefinitions" xml:space="preserve">
-    <value>Le nombre de cibles ne correspond pas au nombre de définitions actuel</value>
+  <data name="RBSameFolder.Content" xml:space="preserve">
+    <value>Dossier identique</value>
   </data>
-  <data name="UnableToRetrieve" xml:space="preserve">
-    <value>Impossible d’obtenir</value>
+  <data name="RBSlectFile.Content" xml:space="preserve">
+    <value>Spécifier l’emplacement de sortie</value>
   </data>
-  <data name="SelectLanguageForRelocation" xml:space="preserve">
-    <value>Veuillez sélectionner une langue à réaffecter</value>
-  </data>
-  <data name="LanguageRelocationRequired" xml:space="preserve">
-    <value>Aucune langue sélectionnée</value>
-  </data>
-  <data name="RelocationRootFolderNotSet" xml:space="preserve">
-    <value>Le dossier racine de réaffectation n’a pas été défini</value>
-  </data>
-  <data name="RelocationRootFolderDoesNotExist" xml:space="preserve">
-    <value>Le dossier racine de réaffectation n’existe pas</value>
-  </data>
-  <data name="InvalidRelocationFolderName" xml:space="preserve">
-    <value>Le nom du dossier de réaffectation est invalide</value>
-  </data>
-  <data name="InvalidRelocationFileName" xml:space="preserve">
-    <value>Le nom du fichier de réaffectation est invalide</value>
-  </data>
-  <data name="RelocationFormatNotSelected" xml:space="preserve">
-    <value>Aucun format de ressource de réaffectation n’a été sélectionné</value>
+  <data name="RelocateGroup.Header" xml:space="preserve">
+    <value>Réaffectation des ressources</value>
   </data>
   <data name="RelocationDefinitionError" xml:space="preserve">
     <value>Erreur de définition de réaffectation</value>
@@ -369,142 +450,92 @@ Le contenu de 'ResourceAdder.cs' sera remplacé.</value>
     <value>An error occurred during relocation.
 {0}</value>
   </data>
+  <data name="RelocationFormatNotSelected" xml:space="preserve">
+    <value>Aucun format de ressource de réaffectation n’a été sélectionné</value>
+  </data>
+  <data name="RelocationRootFolderDoesNotExist" xml:space="preserve">
+    <value>Le dossier racine de réaffectation n’existe pas</value>
+  </data>
+  <data name="RelocationRootFolderNotSet" xml:space="preserve">
+    <value>Le dossier racine de réaffectation n’a pas été défini</value>
+  </data>
   <data name="RelocationRuntimeError" xml:space="preserve">
     <value>Erreur d’exécution de réaffectation</value>
   </data>
-  <data name="ChkCustom.Content" xml:space="preserve">
-    <value>Paramètres personnalisés</value>
+  <data name="ResIntoFilename" xml:space="preserve">
+    <value>{0} (inséré dans le nom de fichier)</value>
   </data>
-  <data name="CustomResFolder.Text" xml:space="preserve">
-    <value>Dossier de ressources ./</value>
+  <data name="ResourceEditorWindow.Title" xml:space="preserve">
+    <value>Créer une ressource</value>
   </data>
-  <data name="CustmResourceName.Text" xml:space="preserve">
-    <value>Nom du fichier de ressource (sans extension)</value>
+  <data name="ResourceGetterBoxToolTip" xml:space="preserve">
+    <value>Ce code est généré automatiquement, mais la méthode d’accès (loader.GetString) est personnalisable.</value>
   </data>
-  <data name="CustomResPtn.Text" xml:space="preserve">
-    <value>Modèle de ressource</value>
+  <data name="ResourceizeText" xml:space="preserve">
+    <value>Ressourcisation</value>
   </data>
-  <data name="ChkResw.Content" xml:space="preserve">
-    <value>resw (séparé par dossier)</value>
+  <data name="ResourceKey.Text" xml:space="preserve">
+    <value>Entrez le nom de la ressource</value>
   </data>
-  <data name="ChkResx.Content" xml:space="preserve">
-    <value>resx (inséré dans le nom de fichier)</value>
+  <data name="ResourceKeyToolTip" xml:space="preserve">
+    <value>Saisissez le nom de la clé. 
+Dans XAML, il sera défini comme 'NomClé.NomCible'. Ne modifiez pas le nom cible.</value>
   </data>
-  <data name="IsNewResource.Text" xml:space="preserve">
-    <value>(Créer nouveau)</value>
+  <data name="ResSeparatedByFolder" xml:space="preserve">
+    <value>{0} (séparé par dossier)</value>
   </data>
-  <data name="BtnSelectAllLanguage.Content" xml:space="preserve">
-    <value>Tout sélectionner</value>
+  <data name="ResultTextToolTip" xml:space="preserve">
+    <value>Remplace la ligne sélectionnée.</value>
   </data>
-  <data name="CsvOutputItem.Text" xml:space="preserve">
-    <value>Élément à exporter en CSV :</value>
+  <data name="SaveAndClose.Content" xml:space="preserve">
+    <value>Enregistrer</value>
   </data>
-  <data name="optVOnly.Content" xml:space="preserve">
-    <value>Clé uniquement</value>
+  <data name="SaveAndCloseToolTip" xml:space="preserve">
+    <value>Applique la ressource modifiée à l’ensemble. Termine l’édition et ferme la fenêtre.</value>
   </data>
-  <data name="optKOnly.Content" xml:space="preserve">
-    <value>Valeur uniquement</value>
+  <data name="SaveResource.Content" xml:space="preserve">
+    <value>Appliquer</value>
   </data>
-  <data name="optKVP.Content" xml:space="preserve">
-    <value>Clé et valeur</value>
+  <data name="SaveResourceToolTip" xml:space="preserve">
+    <value>Enregistre la ressource en cours dans le cache. Vous pouvez continuer la modification.</value>
   </data>
-  <data name="CsvOutputPath.Text" xml:space="preserve">
-    <value>Sélectionner la destination de sortie :</value>
+  <data name="SelectCsvExportSettings" xml:space="preserve">
+    <value>Veuillez sélectionner les paramètres d’exportation CSV</value>
   </data>
-  <data name="RBSameFolder.Content" xml:space="preserve">
-    <value>Dossier identique</value>
+  <data name="SelectCsvFile" xml:space="preserve">
+    <value>Sélectionner le fichier CSV</value>
   </data>
-  <data name="RBPrjTop.Content" xml:space="preserve">
-    <value>Racine du projet</value>
+  <data name="SelectLanguageForRelocation" xml:space="preserve">
+    <value>Veuillez sélectionner une langue à réaffecter</value>
   </data>
-  <data name="RBClipboard.Content" xml:space="preserve">
-    <value>Presse-papiers</value>
+  <data name="SelectLanguagesGuide.Text" xml:space="preserve">
+    <value>Veuillez sélectionner la langue à utiliser</value>
   </data>
-  <data name="ChkWithHeader.Content" xml:space="preserve">
-    <value>Fusionner dans un seul fichier</value>
+  <data name="SelectSingleLanguageForImport" xml:space="preserve">
+    <value>Veuillez sélectionner une seule langue à importer</value>
   </data>
-  <data name="ChkWithHeaderToolTip" xml:space="preserve">
-    <value>Ajoute une ligne d’en-tête si coché</value>
+  <data name="TargetCountMismatchWithDefinitions" xml:space="preserve">
+    <value>Le nombre de cibles ne correspond pas au nombre de définitions actuel</value>
   </data>
-  <data name="GetCsv.Content" xml:space="preserve">
-    <value>Importer CSV</value>
+  <data name="TitleConfirmResourceDeletion" xml:space="preserve">
+    <value>Suppression</value>
   </data>
-  <data name="ImportFromClipboard.Content" xml:space="preserve">
-    <value>Importer depuis le presse-papiers</value>
+  <data name="TitleFileWriteError" xml:space="preserve">
+    <value>Erreur d’écriture de fichier</value>
   </data>
-  <data name="ClipLangCodeToolTip" xml:space="preserve">
-    <value>Saisissez le code de culture à importer.</value>
+  <data name="TitleGenerateResourceCode" xml:space="preserve">
+    <value>Confirmation d’écrasement</value>
   </data>
-  <data name="LblCultureCode.Text" xml:space="preserve">
-    <value>Code de culture</value>
+  <data name="TitleResourceEditingMode" xml:space="preserve">
+    <value>Mode d’édition des ressources</value>
   </data>
-  <data name="RelocateGroup.Header" xml:space="preserve">
-    <value>Réaffectation des ressources</value>
+  <data name="TitleResourceRetrievalFailed" xml:space="preserve">
+    <value>Échec de récupération des ressources</value>
   </data>
-  <data name="LblCurrentResource.Text" xml:space="preserve">
-    <value>Ressource actuelle</value>
+  <data name="TitleTooltipConflict" xml:space="preserve">
+    <value>Les info-bulles sont un peu spéciales</value>
   </data>
-  <data name="LblResourceFolder.Text" xml:space="preserve">
-    <value>Dossier de ressources</value>
-  </data>
-  <data name="LblResourceName.Text" xml:space="preserve">
-    <value>Nom de ressource</value>
-  </data>
-  <data name="LblFileFormat.Text" xml:space="preserve">
-    <value>Format de fichier</value>
-  </data>
-  <data name="LblRelocatedResource.Text" xml:space="preserve">
-    <value>Ressource réaffectée</value>
-  </data>
-  <data name="LblRelResourceFolder.Text" xml:space="preserve">
-    <value>Dossier de ressources</value>
-  </data>
-  <data name="LblRelResourceName.Text" xml:space="preserve">
-    <value>Nom de ressource</value>
-  </data>
-  <data name="FileFormatResx.Content" xml:space="preserve">
-    <value>Format RESX (.resx)</value>
-  </data>
-  <data name="FileFormatResw.Content" xml:space="preserve">
-    <value>Format RESW (.resw)</value>
-  </data>
-  <data name="LblRelocationProjectFolder.Text" xml:space="preserve">
-    <value>Dossier de projet de réaffectation</value>
-  </data>
-  <data name="BtnBrowseFolder.Content" xml:space="preserve">
-    <value>Parcourir...</value>
-  </data>
-  <data name="BtnRelocateResource.Content" xml:space="preserve">
-    <value>Exécuter la réaffectation</value>
-  </data>
-  <data name="LblSelectFolder.Title" xml:space="preserve">
-    <value>Sélectionner un dossier</value>
-  </data>
-  <data name="BtnMoveUpFolder.Content" xml:space="preserve">
-    <value>↑ Monter</value>
-  </data>
-  <data name="BtnCancelFolderSelection.Content" xml:space="preserve">
-    <value>Annuler</value>
-  </data>
-  <data name="BtnConfirmFolderSelection.Content" xml:space="preserve">
-    <value>Sélectionner</value>
-  </data>
-  <data name="LblRelFileFormat.Text" xml:space="preserve">
-    <value>Format de fichier</value>
-  </data>
-  <data name="ResourceGetterExpressionToolTip" xml:space="preserve">
-    <value>Copie la déclaration du chargeur de ressources dans le presse-papiers</value>
-  </data>
-  <data name="LanguageSelectionWindowName" xml:space="preserve">
-    <value>Gestionnaire de langues</value>
-  </data>
-  <data name="LblResourceWindow" xml:space="preserve">
-    <value>Gestion des ressources</value>
-  </data>
-  <data name="HelpLinkText.Text" xml:space="preserve">
-    <value>Ouvrir la page d’aide</value>
-  </data>
-  <data name="HelpLinkLangToolTip" xml:space="preserve">
-    <value>Seul le japonais est disponible pour le moment.</value>
+  <data name="UnableToRetrieve" xml:space="preserve">
+    <value>Impossible d’obtenir</value>
   </data>
 </root>

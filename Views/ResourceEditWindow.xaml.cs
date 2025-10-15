@@ -1,11 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.Input;
-#if UI
-#else
+using CsvHelper;
+using CsvHelper.Configuration;
+using Microsoft.ServiceHub.Resources;
+using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Settings;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Shell.Settings;
-#endif
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -15,6 +17,7 @@ using System.Diagnostics.Eventing.Reader;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Resources;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -24,6 +27,7 @@ using System.Windows.Input;
 using System.Windows.Markup;
 using System.Windows.Media.Animation;
 using System.Xml.Linq;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace ResourceMaker.UI
 {
@@ -43,7 +47,7 @@ namespace ResourceMaker.UI
 
         public string DevelopType { get; set; } = string.Empty;
         public string ProjectName { get; set; } = string.Empty;
-        
+
         private HashSet<string> resourceKeys = new HashSet<string>();
 
         private string resourcerFilename = string.Empty;
@@ -69,6 +73,7 @@ namespace ResourceMaker.UI
 
         private string lastKeyName = string.Empty;
         private Dictionary<string, Dictionary<string, string>> cacheList = new Dictionary<string, Dictionary<string, string>>();
+        private Dictionary<string, string> baseCache = new Dictionary<string, string>();
 
         private XNamespace x = "http://schemas.microsoft.com/winfx/2006/xaml";
 
@@ -98,15 +103,6 @@ namespace ResourceMaker.UI
         public ObservableCollection<LanguageEntry> LanguageEntries { get; } = new ObservableCollection<LanguageEntry>();
         public string AccessMethod = string.Empty;
 
-#if UI
-        private void SaveSettings()
-        {
-            AccessMethod = ResourceGetterBox.Text;
-            Properties.Settings.Default.AccessMethod = AccessMethod;
-            Properties.Settings.Default.Save();
-
-        }
-#else
         private readonly System.IServiceProvider _serviceProvider;
 
         public ResourceEditWindow(System.IServiceProvider serviceProvider)
@@ -168,7 +164,9 @@ namespace ResourceMaker.UI
             ClearCache.Content = loader.GetString("ClearCache.Content");
             BtnMakeLoaderCode.Content = loader.GetString("BtnMakeLoaderCode.Content");
             ManageLanguage.Content = loader.GetString("ManageLanguage.Content");
-            ResourceGetterExpression.Content = loader.GetString("ResourceGetterExpression.Content");
+            BtnResourceGetter.Content = loader.GetString("BtnResourceGetter.Content");
+            HelpLinkText.Text = loader.GetString("HelpLinkText.Text");
+            CsvOutEdit.Content = loader.GetString("BtnCsvOut.Content");
 
             ToolTipService.SetToolTip(ResultText, loader.GetString("ResultTextToolTip"));
             ToolTipService.SetToolTip(BaseTexts, loader.GetString("BaseTextsToolTip"));
@@ -179,18 +177,16 @@ namespace ResourceMaker.UI
             ToolTipService.SetToolTip(SaveAndClose, loader.GetString("SaveAndCloseToolTip"));
             ToolTipService.SetToolTip(AddLanguage, loader.GetString("AddLanguageToolTip"));
             ToolTipService.SetToolTip(ClearCache, loader.GetString("ClearCacheToolTip"));
-            ToolTipService.SetToolTip(ResourceGetterExpression, loader.GetString("ResourceGetterExpressionToolTip"));
+            ToolTipService.SetToolTip(BtnResourceGetter, loader.GetString("BtnResourceGetterToolTip"));
             ToolTipService.SetToolTip(BtnMakeLoaderCode, loader.GetString("BtnMakeLoaderCodeToolTip"));
+            ToolTipService.SetToolTip(HelpLinkEdit, loader.GetString("HelpLinkLangToolTip"));
+            ToolTipService.SetToolTip(CsvOutEdit,string.Format( loader.GetString("CsvOutEditToolTip"), resName + ".csv"));
 
         }
-#endif
         public ResourceEditWindow()
         {
             InitializeComponent();
             this.DataContext = this; // ← これが必要！
-#if UI
-            AccessMethod = Properties.Settings.Default.AccessMethod;
-#endif
             loader = new ResourceManager("ResourceMaker.Resources.Strings", GetType().Assembly);
 
         }
@@ -206,8 +202,6 @@ namespace ResourceMaker.UI
             resourcerFilename = Path.Combine(basePath, "ResourceAdder.cs");
 
             ResourceGetterBox.Text = AccessMethod;
-
-            ClearButton.Tag = "Testing";
 
             var resourcesRoot = Path.Combine(baseFolderPath, resFolderName);
             if (!Directory.Exists(resourcesRoot))
@@ -256,24 +250,33 @@ namespace ResourceMaker.UI
             {
                 itemName = match.Groups[1].Value;
 
-                if (!string.IsNullOrEmpty(itemName)) // → Strings
-                    BaseTexts.Items.Add(itemName);
-
+                if (!string.IsNullOrEmpty(itemName))
+                {
+                    ComboBoxItem item = new ComboBoxItem
+                    {
+                        Content = itemName,           // 表示される文字列
+                        Tag = ""                    // リソースキーなどの識別情報
+                    };
+                    BaseTexts.Items.Add(item);
+                }
             }
+
             //取得できていれば、先頭を表示
             if (BaseTexts.Items.Count > 0)
             {
                 isUpdating = true;
                 BaseTexts.SelectedIndex = 0;
-                targetName = BaseTexts.Text;
+                targetName = (BaseTexts.Items[0] as ComboBoxItem)?.Content?.ToString();
+
                 isUpdating = false;
             }
             cacheList = ResourceCacheController.Get(baseFolderPath, resFolderName, DevelopType);
+  
+            if (!cacheList.TryGetValue("en-US", out baseCache))
+                baseCache = cacheList.FirstOrDefault().Value;
 
             //キャッシュからキーの一覧を作成する
-
-            if (allCodes.Count > 0 && cacheList.TryGetValue(allCodes[0], out var innerDict))
-                resourceKeys = innerDict.Keys.ToHashSet();
+            resourceKeys = baseCache.Keys.ToHashSet();
 
             //言語セットを作成する
             LanguageEntries.Clear();
@@ -302,29 +305,33 @@ namespace ResourceMaker.UI
                     return;
 
                 }
-                if( element == null)
-                {
 
-                }
                 MakeXamlForm();
+                //ヘルプページを設定する
+                HelpUrlEdit.NavigateUri = new Uri("https://note.com/alert_zephyr9426/n/nd6f3dfd25828");
                 //なんか変
                 //targetName = BaseTexts.Text;
                 targetName = ResourceKeyBox.Text;
-                if (isUidMode) return;
+                //if (isUidMode) return;
             }
             else
             {
                 ResultText.Text = LineText;
                 ResourceKeyBox.Text = targetName;
+                SuggestionPopup.IsOpen = false;
             }
             noValue = true;
             LangCulture = CultureInfo.CurrentUICulture.Name;
+
+            string keyWithTip = targetName;
+            if (targetName.EndsWith(".ToolTip"))
+                keyWithTip = targetName.Replace(".ToolTip", "ToolTip");
 
             foreach (var code in allCodes)
             {
                 try
                 {
-                    var val = cacheList[code][targetName];
+                    var val = cacheList[code][keyWithTip];
 
                     var existingEntry = LanguageEntries
                         .FirstOrDefault(entry => entry.Code == code);
@@ -333,9 +340,12 @@ namespace ResourceMaker.UI
                 }
                 catch
                 {
-                    var existingEntry = LanguageEntries
-                        .FirstOrDefault(entry => entry.Code == code);
-                    existingEntry.Value = BaseTexts.Text;
+                    if (BaseTexts.SelectedItem is ComboBoxItem selectedItem)
+                    {
+                        var existingEntry = LanguageEntries
+                            .FirstOrDefault(entry => entry.Code == code);
+                        existingEntry.Value = selectedItem.Content.ToString();
+                    }
                 }
             }
             Feedback.IsChecked = noValue;
@@ -350,15 +360,19 @@ namespace ResourceMaker.UI
                 SaveResource.IsEnabled = false;
             }
 
-            if( BaseTexts.Items.Count == 0)
+            this.Title = loader.GetString("ResourceEditorWindow.Title");
+
+            if (BaseTexts.Items.Count == 0)
             {
                 CodeTextArea.Visibility = Visibility.Collapsed;
                 Getters.Visibility = Visibility.Collapsed;
                 Feedback.IsChecked = false;
                 this.Title = loader.GetString("TitleResourceEditingMode");
+                //リソース編集ガイド設定
+                HelpUrlEdit.NavigateUri = new Uri("https://note.com/alert_zephyr9426/n/nf639401aa695");
                 ResourceKeyBox.Text = "";
                 ResourceScroll.MaxHeight = 300;
-                InformationPanel.Visibility = Visibility.Collapsed;
+                //InformationPanel.Visibility = Visibility.Collapsed;
                 AddLanguage.Visibility = Visibility.Collapsed;
                 ManageLanguage.Visibility = Visibility.Visible;
                 BtnMakeLoaderCode.Visibility = Visibility.Visible;
@@ -393,13 +407,6 @@ namespace ResourceMaker.UI
             return replaced;
         }
 
-        private bool IsScreenResource(string resourceName)
-        {
-            if (resourceName.EndsWith("ToolTip") || resourceName.Contains('.'))
-                return true;
-
-            return false;
-        }
         //LoaderCodeの作成
         private void MakeLoaderText_Click(object sender, RoutedEventArgs e)
         {
@@ -415,30 +422,49 @@ namespace ResourceMaker.UI
                     );
                     if (dialogRes == MessageBoxResult.OK)
                     {
+                        string getter = ResourceGetterBox.Text;
+                        List<string> tooltips = new List<string>();
+                        List<string> getStrings = new List<string>();
+                        
                         StringBuilder sb = new StringBuilder();
-                        var keyList = cacheList["en-US"].Keys.OrderBy(k => k).ToArray();
+                        var keyList = baseCache.Keys.OrderBy(k => k).ToArray();
                         foreach (var key in keyList)
                         {
                             var code = MakeLoaderText(key);
-                            if( !string.IsNullOrEmpty(code) )
-                                sb.AppendLine(key);
+                            if(code.StartsWith("ToolTipService."))
+                                tooltips.Add(code);
+                            
+                            else if(code.StartsWith(getter))
+                                getStrings.Add(code);
+                            
+                            else
+                                sb.AppendLine(code);
 
                         }
-                        File.WriteAllText(resourcerFilename, sb.ToString());
-                    }
+                        foreach (var item in tooltips)
+                            sb.AppendLine(item);
 
+                        foreach (var item in getStrings)
+                            sb.AppendLine(item);
+
+                        File.WriteAllText(resourcerFilename, sb.ToString());
+                        Infomation.Text = loader.GetString("MsgResourceEditInfo");
+                    }
                 }
                 else
                 {
                     var code = MakeLoaderText(keyName);
-                    if(!string.IsNullOrEmpty(code))
-                        File.AppendAllText(resourcerFilename, code);
+                    if (!string.IsNullOrEmpty(code))
+                        File.AppendAllText(resourcerFilename, code + Environment.NewLine);
 
+                    ClipText.Text = code;
+                    Clipboard.SetText(code);
+                    Infomation.Text = loader.GetString("LoaderDeclaration");
                 }
             }
             catch (Exception ex)
             {
-                var msg = string.Format( loader.GetString("MessageResourceAdderOutputError"), ex.Message);
+                var msg = string.Format(loader.GetString("MessageResourceAdderOutputError"), ex.Message);
                 MessageBox.Show(
                     msg,
                     loader.GetString("TitleFileWriteError"),
@@ -454,12 +480,16 @@ namespace ResourceMaker.UI
             {
                 // ToolTipService.SetToolTip(ClearCache, loader.GetString("ClearCacheToolTip"));
                 var key = keyName.Replace("ToolTip", "");
-                result = $"ToolTipService.SetToolTip({key}, {ResourceGetterBox.Text}(\"{keyName}\"));{Environment.NewLine}";
+                result = $"ToolTipService.SetToolTip({key}, {ResourceGetterBox.Text}(\"{keyName}\"));";
             }
-            else if(keyName.Contains('.'))
+            else if (keyName.Contains('.'))
             {
                 // BtnCsvOut.Content = loader.GetString("BtnCsvOut.Content");
-                result = $"{keyName} = {ResourceGetterBox.Text}(\"{keyName}\");{Environment.NewLine}";
+                result = $"{keyName} = {ResourceGetterBox.Text}(\"{keyName}\");";
+            }
+            else
+            {
+                result = $"{ResourceGetterBox.Text}(\"{keyName}\");";
             }
             return result;
         }
@@ -472,6 +502,7 @@ namespace ResourceMaker.UI
                 try
                 {
                     string keyName = ResourceKeyBox.Text;
+                    isToolTip = keyName.EndsWith(".ToolTip");
                     if (!string.IsNullOrEmpty(keyName))
                     {
                         if (!isUWP && !isToolTip && !isEditOnly && EditorType == "xaml")
@@ -573,46 +604,58 @@ namespace ResourceMaker.UI
         {
             var keyName = ResourceKeyBox.Text;
 
-            if ( !string.IsNullOrEmpty(keyName))
+            if (!string.IsNullOrEmpty(keyName))
             {
-                if (isEditOnly)
+                if (!isEditOnly)
                 {
-                    var innerDict = cacheList["en-US"];
-                    if (innerDict.ContainsKey(keyName))
-                    {
-                        string msg = string.Format(loader.GetString("MessageConfirmKeyDeletionAllLanguages"), keyName);
-
-                        var result = System.Windows.MessageBox.Show(
-                            msg,
-                            loader.GetString("TitleConfirmResourceDeletion"),
-                            MessageBoxButton.YesNo,
-                            MessageBoxImage.Question
-                        );
-                        if (result == MessageBoxResult.Yes)
-                        {
-                            // Yesが押されたときの処理
-                            foreach (var langCode in allCodes)
-                            {
-                                if (cacheList.ContainsKey(langCode))
-                                {
-                                    innerDict = cacheList[langCode];
-                                    innerDict.Remove(keyName);
-                                    var existingEntry = LanguageEntries
-                                        .FirstOrDefault(entry => entry.Code == langCode);
-                                    existingEntry.Value = "";
-                                }
-                            }
-                            resourceKeys.Remove(keyName);
-                            //実ファイルも保存
-                            ResourceCacheController.Save(baseFolderPath, resFolderName, DevelopType);
-                        }
-                    }
-                    ResourceKeyBox.Text = "";
-
-
+                    string replaceText = $"{ResourceGetterBox.Text}(\"{keyName}\")";
+                    var mes = $"\"{LanguageEntries[0].Value}\"";
+                    ResultText.Text = ResultText.Text.Replace(replaceText, mes);
+                    Feedback.IsChecked = true;
                 }
-                else
-                    ResourceKeyBox.Text = "";
+
+                var innerDict = baseCache;
+                if (innerDict.ContainsKey(keyName))
+                {
+                    string msg = string.Format(loader.GetString("MessageConfirmKeyDeletionAllLanguages"), keyName);
+
+                    var result = System.Windows.MessageBox.Show(
+                        msg,
+                        loader.GetString("TitleConfirmResourceDeletion"),
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Question
+                    );
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        // Yesが押されたときの処理
+                        foreach (var langCode in allCodes)
+                        {
+                            if (cacheList.ContainsKey(langCode))
+                            {
+                                innerDict = cacheList[langCode];
+                                innerDict.Remove(keyName);
+                                var existingEntry = LanguageEntries
+                                    .FirstOrDefault(entry => entry.Code == langCode);
+                                existingEntry.Value = "";
+                            }
+                        }
+                        resourceKeys.Remove(keyName);
+                        //実ファイルも保存
+                        ResourceKeyBox.Text = "";
+                        if (isEditOnly)
+                            ResourceCacheController.Save(baseFolderPath, resFolderName, DevelopType);
+
+                        else
+                        {
+                            FeedbackText = ResultText.Text;
+                            this.Close();
+                        }
+
+                    }
+                }
+
+
+
             }
         }
 
@@ -634,98 +677,6 @@ namespace ResourceMaker.UI
             if (entry != null) entry.Value = string.Empty;
         });
 
-        private void ResourceKeyBox_GotFocus(object sender, RoutedEventArgs e)
-        {
-            if (sender is TextBox textBox)
-            {
-                if (textBox.Tag is null && !SuggestionPopup.IsOpen)
-                    textBox.Tag = textBox.Text;
-            }
-        }
-
-        //リソースの名前を定義するボックス
-        private void ResourceKeyBox_LostFocus(object sender, RoutedEventArgs e)
-        {
-            if (sender is TextBox textBox)
-            {
-                if (SuggestionPopup.IsOpen)
-                    return;
-
-                //if (textBox.Tag is string oldValue && textBox.Text != oldValue)
-                ResouceKeyUpdate(textBox);// テキストが変わっていたらね
-
-            }
-        }
-        private void ResouceKeyUpdate(TextBox textBox)
-        {
-            SaveResource.IsEnabled = true;
-            Feedback.IsChecked = true;
-            textBox.Tag = null;
-            var text = textBox.Text;
-            string value;
-            var dic = cacheList["en-US"];
-            if (dic.TryGetValue(text, out value))
-            {
-                //既に存在している値ならテキストを表示する
-                foreach (var langCode in allCodes)
-                {
-                    if (cacheList.TryGetValue(langCode, out var dict) &&
-                        dict.TryGetValue(text, out var localizedValue))
-                    {
-                        var existingEntry = LanguageEntries
-                            .FirstOrDefault(entry => entry.Code == langCode);
-
-                        if (existingEntry != null)
-                            existingEntry.Value = localizedValue;
-
-                    }
-                }
-                //BtnMakeLoaderCodeのコントロール追加
-                BtnMakeLoaderCode.IsEnabled = IsScreenResource(text);
-            }
-
-            if (isEditOnly)
-                return;
-
-            //変換テキストの作成
-            string targetName = BaseTexts.Text;
-
-            if (!string.IsNullOrEmpty(targetName) && Feedback.IsChecked == true)
-            {
-                string modifiedString = string.Empty;
-                if (EditorType == "code")
-                {
-                    if (noValue)
-                        modifiedString = ResourceGetterBox.Text + "(\"" + ResourceKeyBox.Text + "\")";
-                    else
-                        modifiedString = "\"" + ResourceKeyBox.Text + "\"";
-
-                    var resText = string.Empty;
-                    if (BaseTexts.Items.Count == 1)
-                        resText = LineText.Replace("\"" + targetName + "\"", modifiedString);
-                    else
-                        resText = ResultText.Text.Replace("\"" + targetName + "\"", modifiedString);
-
-                    ResultText.Text = resText;
-                }
-                else if (EditorType == "xaml")
-                {
-                    var baseStr = ResultText.Text;
-                    var tmp = ResourceKeyBox.Text.Split('.');
-                    if (string.IsNullOrEmpty(xUid))
-                        xUid = tmp[0];
-
-                    string pattern = @"(x:" + (isUWP ? "Uid" : "Name") + @"\s*=\s*"")[^""]+("")";
-                    string replacement = "$1" + tmp[0] + "$2";
-
-                    isUpdating = true;
-                    ResultText.Text = Regex.Replace(baseStr, pattern, replacement);
-                    isUpdating = false;
-
-                }
-            }
-
-        }
         private string GetUid(string name)
         {
 
@@ -769,15 +720,19 @@ namespace ResourceMaker.UI
                 if (!string.IsNullOrEmpty(keyname))
                 // uidなら設定済みデータを登録
                 {
-                    Dictionary<string, string> firstInnerDict = cacheList.Values.FirstOrDefault();
                     string prefix = keyname + ".";
-                    if (firstInnerDict != null)
+                    if (baseCache != null && BaseTexts.Items.Count == 1)
                     {
                         xUid = keyname;
-                        var filteredKeys = firstInnerDict.Keys
+                        var filteredKeys = baseCache.Keys
                             .Where(k => k.StartsWith(prefix))
                             .Select(k => k.Substring(prefix.Length))
                             .ToList();
+
+                        //ツールチップを追加する
+                        var tooltip = xUid + "ToolTip";
+                        if (baseCache.ContainsKey(tooltip))
+                            filteredKeys.Add("ToolTip");
 
                         if (filteredKeys.Count != 0)
                         {
@@ -787,7 +742,12 @@ namespace ResourceMaker.UI
 
                             foreach (var key in filteredKeys)
                             {
-                                BaseTexts.Items.Add(key);
+                                ComboBoxItem item = new ComboBoxItem
+                                {
+                                    Content = key,           // 表示される文字列
+                                    Tag = ""                    // リソースキーなどの識別情報
+                                };
+                                BaseTexts.Items.Add(item);
                             }
                             isUpdating = false;
                             BaseTexts.SelectedIndex = 0;
@@ -825,8 +785,9 @@ namespace ResourceMaker.UI
             if (!noName)
             {
                 var itemToRemove = BaseTexts.Items
-                .Cast<object>()
-                .FirstOrDefault(item => item?.ToString() == uidName);
+                    .Cast<object>()
+                    .OfType<ComboBoxItem>()
+                    .FirstOrDefault(item => item.Content?.ToString() == uidName);
 
                 if (itemToRemove != null)
                 {
@@ -836,7 +797,8 @@ namespace ResourceMaker.UI
                     isUpdating = false;
                 }
             }
-            itemsKey = GetXmlKeyname(BaseTexts.Text);
+
+            itemsKey = GetXmlKeyname((BaseTexts.SelectedItem as ComboBoxItem)?.Content?.ToString());
             if (itemsKey == "ToolTipService.ToolTip")
             {
                 isToolTip = true;
@@ -857,6 +819,7 @@ namespace ResourceMaker.UI
             {
                 xUid = uidName;
                 ResourceKeyBox.Text = $"{uidName}.{itemsKey}";
+                ResourceKeyBox.IsReadOnly = true;
             }
             //結果置き場
             if ((!isUWP && string.IsNullOrEmpty(uidName) && string.IsNullOrEmpty(xName)) || needXUid)
@@ -869,16 +832,17 @@ namespace ResourceMaker.UI
 
                 else
                 {
+                    var baseText = (BaseTexts.Items[0] as ComboBoxItem)?.Content?.ToString();
                     if (isToolTip)
-                        ResultText.Text = $"x:{searchWord}=\"{resultText}\" {LineText.Replace(BaseTexts.Text, loader.GetString("NoteOutputToResourceAdder"))}";
+                        ResultText.Text = $"x:{searchWord}=\"{resultText}\" {LineText.Replace(baseText, loader.GetString("NoteOutputToResourceAdder"))}";
                     else
-                        ResultText.Text = $"x:{searchWord}=\"{resultText}\" {LineText.Replace(BaseTexts.Text, "")}";
+                        ResultText.Text = $"x:{searchWord}=\"{resultText}\" {LineText}";
                 }
             }
             else
             {
                 if (isToolTip)
-                    ResultText.Text = $"ToolTipService.SetToolTip({uidName}, {ResourceGetterBox.Text}(\"{ResourceKeyBox.Text}\")); //" + 
+                    ResultText.Text = $"ToolTipService.SetToolTip({uidName}, {ResourceGetterBox.Text}(\"{ResourceKeyBox.Text}\")); //" +
                         loader.GetString("NoteOutputToResourceAdder");
 
                 else
@@ -983,16 +947,34 @@ namespace ResourceMaker.UI
             isUpdating = false;
 
             ResourceCacheController.Clear();
+            cacheList = ResourceCacheController.Get(baseFolderPath, resFolderName, DevelopType);
+
+            if (!cacheList.TryGetValue("en-US", out baseCache))
+                baseCache = cacheList.FirstOrDefault().Value;
+
+            //キャッシュからキーの一覧を作成する
+            resourceKeys = baseCache.Keys.ToHashSet();
+
+
         }
 
         //置き換え候補コンボ
         private void BaseTexts_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (isUpdating) return;
-            string text = BaseTexts.SelectedItem.ToString();
+
+            //コンボボックスの値
+            string text = (BaseTexts.SelectedItem as ComboBoxItem)?.Content?.ToString();
             if (EditorType == "code")
             {
+                if (sender is ComboBox comboBox && comboBox.SelectedItem is ComboBoxItem selectedItem)
+                {
+                    if (selectedItem.Tag is string tagValue && !string.IsNullOrEmpty(tagValue))
+                        text = tagValue;
+
+                }
                 ResourceKeyBox.Text = text;
+
                 foreach (var langCode in allCodes)
                 {
                     if (cacheList.TryGetValue(langCode, out var dict) &&
@@ -1010,13 +992,22 @@ namespace ResourceMaker.UI
             else
             {
                 string keyName = string.Empty;
+                string keyWithTip = string.Empty;
                 if (isUidMode)
+                {
                     keyName = $"{xUid}.{text}";
+                    if (text == "ToolTip")
+                        keyWithTip = xUid + text;
 
+                    else
+                        keyWithTip = keyName;
+
+                }
                 else
                 {
                     string matchedProperty = GetXmlKeyname(text);
                     keyName = $"{xUid}.{matchedProperty}";
+                    keyWithTip = keyName;
                 }
                 ResourceKeyBox.Text = keyName;
                 foreach (var langCode in allCodes)
@@ -1024,7 +1015,7 @@ namespace ResourceMaker.UI
                     var existingEntry = LanguageEntries
                         .FirstOrDefault(entry => entry.Code == langCode);
                     if (cacheList.TryGetValue(langCode, out var dict) &&
-                        dict.TryGetValue(keyName, out var localizedValue))
+                        dict.TryGetValue(keyWithTip, out var localizedValue))
                     {
 
                         if (existingEntry != null)
@@ -1053,14 +1044,19 @@ namespace ResourceMaker.UI
             // "ResourceGetterBox" の ToolTip を取得
 
             //loaderの設定
+            string loaderName;
             string loaderGuide;
+
+            loaderName = ResourceGetterBox.Text.Split('.')[0];
+
+
             if (isUWP)
-                loaderGuide = $"Windows.ApplicationModel.Resources.ResourceLoader loader = ResourceLoader.GetForViewIndependentUse();";
+                loaderGuide = $"Windows.ApplicationModel.Resources.ResourceLoader {loaderName} = ResourceLoader.GetForViewIndependentUse();";
 
             else
-                loaderGuide = $"System.Resources.ResourceManager loader = new ResourceManager(\"{ProjectName}.{resFolderName}.{resName}\", GetType().Assembly);";
+                loaderGuide = $"System.Resources.ResourceManager {loaderName} = new ResourceManager(\"{ProjectName}.{resFolderName}.{resName}\", GetType().Assembly);";
 
-            var tooltip = loaderGuide;
+            var tooltip = loaderGuide.Replace("..", ".");
 
             // クリップボードにコピー
             Clipboard.SetText(tooltip);
@@ -1073,15 +1069,17 @@ namespace ResourceMaker.UI
             ResourceCacheController.Clear();
             this.Close();
         }
+
         private void ResourceKeyBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (isUpdating || !isEditOnly )
+            if (isUpdating)
                 return;
 
             string query = ResourceKeyBox.Text;
             if (query == "")
             {
                 SuggestionPopup.IsOpen = false;
+                BtnMakeLoaderCode.IsEnabled = true;
                 return;
             }
             if (query == "*")
@@ -1115,9 +1113,10 @@ namespace ResourceMaker.UI
 
         private void SuggestionList_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter && SuggestionList.SelectedItem is string selected)
+            if ((e.Key == Key.Tab || e.Key == Key.Enter) && SuggestionList.SelectedItem is string selected)
                 SelectTextFromList(selected);
-            else if( e.Key == Key.Escape)
+
+            else if (e.Key == Key.Escape)
                 SelectTextFromList(ResourceKeyBox.Text);
 
         }
@@ -1131,15 +1130,119 @@ namespace ResourceMaker.UI
             ResourceKeyBox.CaretIndex = selected.Length;
             ResouceKeyUpdate(ResourceKeyBox);
         }
+
         private void SuggestionList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (Mouse.LeftButton == MouseButtonState.Pressed && SuggestionList.SelectedItem is string selected)
                 SelectTextFromList(selected);
 
         }
+
+        private void ResourceKeyBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox textBox)
+            {
+                if (textBox.Tag is null && !SuggestionPopup.IsOpen)
+                    textBox.Tag = textBox.Text;
+            }
+        }
+
+        //リソースの名前を定義するボックス
+        private void ResourceKeyBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox textBox)
+            {
+                ClipText.Text = "";
+                if (SuggestionPopup.IsOpen)
+                    return;
+
+                //if (textBox.Tag is string oldValue && textBox.Text != oldValue)
+                ResouceKeyUpdate(textBox);// テキストが変わっていたらね
+                SuggestionPopup.IsOpen = false;
+            }
+        }
+        private void ResouceKeyUpdate(TextBox textBox)
+        {
+            SaveResource.IsEnabled = true;
+            Feedback.IsChecked = true;
+            textBox.Tag = null;
+            var text = textBox.Text;
+            string value;
+            bool isExist = false;
+            if (baseCache.TryGetValue(text, out value))
+            {
+                //既に存在している値ならテキストを表示する
+                foreach (var langCode in allCodes)
+                {
+                    if (cacheList.TryGetValue(langCode, out var dict) &&
+                        dict.TryGetValue(text, out var localizedValue))
+                    {
+                        var existingEntry = LanguageEntries
+                            .FirstOrDefault(entry => entry.Code == langCode);
+
+                        if (existingEntry != null)
+                            existingEntry.Value = localizedValue;
+
+                    }
+                }
+                isExist = true;
+            }
+            //BtnMakeLoaderCodeの制御追加
+            BtnMakeLoaderCode.IsEnabled = (string.IsNullOrEmpty(text) || isExist);
+
+            if (isEditOnly)
+                return;
+
+            //変換テキストの作成
+            string targetName = (BaseTexts.SelectedItem as ComboBoxItem)?.Content?.ToString();
+
+            if (!string.IsNullOrEmpty(targetName) && Feedback.IsChecked == true)
+            {
+                string modifiedString = string.Empty;
+
+                if (EditorType == "code")
+                {
+                    if (ResultText.Text.Contains(targetName)) //変換対象の文字がまだ結果に残ってる
+                    {
+                        if (baseCache.ContainsKey(targetName) || ResultText.Text.Contains(ResourceGetterBox.Text + "(\"" + targetName + "\")"))
+                            modifiedString = "\"" + ResourceKeyBox.Text + "\"";
+
+                        else
+                            modifiedString = ResourceGetterBox.Text + "(\"" + ResourceKeyBox.Text + "\")";
+                    }
+                    else
+                    {
+                        targetName = (BaseTexts.SelectedItem as ComboBoxItem).Tag.ToString();
+                        modifiedString = "\"" + ResourceKeyBox.Text + "\"";
+                    }
+
+                    ResultText.Text = ResultText.Text.Replace("\"" + targetName + "\"", modifiedString);
+                    if (BaseTexts.SelectedItem is ComboBoxItem selectedItem)
+                        selectedItem.Tag = ResourceKeyBox.Text; //キーの名称をキャッシュ
+
+                }
+                else if (EditorType == "xaml")
+                {
+                    var baseStr = ResultText.Text;
+                    var tmp = ResourceKeyBox.Text.Split('.');
+                    if (string.IsNullOrEmpty(xUid))
+                        xUid = tmp[0];
+
+                    string pattern = @"(x:" + (isUWP ? "Uid" : "Name") + @"\s*=\s*"")[^""]+("")";
+                    string replacement = "$1" + tmp[0] + "$2";
+
+                    isUpdating = true;
+                    ResultText.Text = Regex.Replace(baseStr, pattern, replacement);
+                    isUpdating = false;
+
+                }
+            }
+
+        }
+
         private void ResourceKeyBox_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter)
+            if (e.Key == Key.Enter || e.Key == Key.Tab)
             {// エンターキー名なら、ポップアップの０番アイテムをテキストに送る
                 if (SuggestionPopup.IsOpen)
                 {
@@ -1156,15 +1259,17 @@ namespace ResourceMaker.UI
                         ResourceKeyBox.Text = selected;
                         SuggestionPopup.IsOpen = false;
                         ResourceKeyBox.CaretIndex = ResourceKeyBox.Text.Length;
-                        e.Handled = true;
                     }
                 }
-                // 次のフォーカス可能な要素に移動
-                e.Handled = true;
-                TraversalRequest request = new TraversalRequest(FocusNavigationDirection.Next);
-                UIElement focusedElement = Keyboard.FocusedElement as UIElement;
-                if (focusedElement != null)
-                    focusedElement.MoveFocus(request);
+                if (e.Key == Key.Enter)
+                {
+                    // 次のフォーカス可能な要素に移動
+                    e.Handled = true;
+                    TraversalRequest request = new TraversalRequest(FocusNavigationDirection.Next);
+                    UIElement focusedElement = Keyboard.FocusedElement as UIElement;
+                    if (focusedElement != null)
+                        focusedElement.MoveFocus(request);
+                }
             }
             else if (e.Key == Key.Down)
             {//下矢印なら、ポップアップにフォーカスを移動する
@@ -1177,6 +1282,9 @@ namespace ResourceMaker.UI
 
                 }
             }
+            else if (e.Key == Key.Escape)
+                SuggestionPopup.IsOpen = false;
+
         }
 
         private void Button_MouseEnter(object sender, MouseEventArgs e)
@@ -1197,7 +1305,16 @@ namespace ResourceMaker.UI
         private void LangBox_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
             if (sender is TextBox tb)
+            {
                 tb.SelectAll();
+                SuggestionPopup.IsOpen = false;
+
+                //BtnMakeLoaderCodeのコントロール追加
+                var text = ResourceKeyBox.Text;
+                var isExist = baseCache.ContainsKey(text);
+
+                BtnMakeLoaderCode.IsEnabled = (string.IsNullOrEmpty(text) || isExist);
+            }
         }
 
         private void LangBox_GotMouseButton(object sender, MouseButtonEventArgs e)
@@ -1207,6 +1324,143 @@ namespace ResourceMaker.UI
                 tb.Focus();
                 e.Handled = true; // マウスクリックで選択解除されるのを防ぐ
             }
+        }
+
+        private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = e.Uri.AbsoluteUri,
+                UseShellExecute = true
+            });
+            e.Handled = true;
+
+        }
+
+        private void CsvOutEdit_Click(object sender, RoutedEventArgs e)
+        {
+            string csvName;
+            string[] headers = new string[0];
+            string keyText = ResourceKeyBox.Text;
+
+            int langCount = 0;
+            string langName = string.Empty;
+
+            foreach (var lang in LanguageEntries)
+            {
+                if (!string.IsNullOrEmpty(lang.Value))
+                {
+                    langCount++;
+                    langName = lang.Code;
+                }
+
+            }
+            if (langCount == 1)
+                csvName = Path.Combine(baseFolderPath, $"{resName}.{langName}.csv");
+
+            else
+                csvName = Path.Combine(baseFolderPath, resName + ".csv");
+
+#if !DEBUG
+            try
+#endif
+            {
+                var fileExist = File.Exists(csvName);
+
+                if (fileExist)
+                {
+                    string csvText = File.ReadAllText(csvName);
+                    if (!string.IsNullOrEmpty(csvText))
+                    {
+                        using (var reader = new StringReader(csvText))
+                        using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+                        {
+                            csv.Read();
+                            csv.ReadHeader();
+                            headers = csv.HeaderRecord;
+                            fileExist = (headers.Length > 1);
+                            if (fileExist)
+                            {
+
+                                while (csv.Read())
+                                {
+                                    var key = csv.GetField("Key");
+                                    if (key == keyText)
+                                    {
+                                        ClipText.Text = loader.GetString("MessageCsvAlreadyExported");
+                                        return; // 見つかったら即終了
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else
+                        fileExist = false;
+                }
+                var sb = new StringBuilder();
+                using (var writer = new StringWriter(sb))
+                using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+                {
+                    // ヘッダー行
+                    if (!fileExist)
+                    {
+                        csv.WriteField("Key");
+                        foreach (var lang in LanguageEntries)
+                        {
+                            if (!string.IsNullOrEmpty(lang.Value))
+                                csv.WriteField(lang.Code);
+
+                        }
+                        csv.NextRecord();
+                    }
+                    //中身
+                    if (fileExist)
+                    {
+                        foreach (var langCode in headers)
+                        {
+                            if (langCode == "Key")
+                                csv.WriteField(keyText);
+
+                            else
+                            {
+                                var existingEntry = LanguageEntries
+                                    .FirstOrDefault(entry => entry.Code == langCode);
+
+                                if (existingEntry == null)
+                                    csv.WriteField("");
+
+                                else
+                                    csv.WriteField(existingEntry.Value);
+                            }
+
+                        }
+
+                    }
+                    else
+                    { //ファイルがなかったり
+                        csv.WriteField(keyText);
+                        foreach (var lang in LanguageEntries)
+                        {
+                            if (!string.IsNullOrEmpty(lang.Value))
+                                csv.WriteField(lang.Value);
+
+                        }
+                    }
+                    csv.NextRecord();
+                    if (!fileExist)
+                        File.WriteAllText(csvName, "", new UTF8Encoding(true)); // BOM付きで空ファイル作成
+
+                    File.AppendAllText(csvName, sb.ToString(), new UTF8Encoding(false)); // BOMなしで追記
+                }
+                ClipText.Text = string.Format(loader.GetString("MessageMakeDiscCsv"), ResourceKeyBox.Text);
+
+            }
+#if !DEBUG
+            catch
+            {
+                ClipText.Text = loader.GetString("MessageErrorOnCsvExporting");
+            }
+#endif
         }
     }
 }

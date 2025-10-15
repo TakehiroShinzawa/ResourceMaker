@@ -211,7 +211,7 @@ namespace ResourceMaker
                         return null;
 
                     // 開始タグ行から、">"が見つかるまで文字列を構築
-                    
+
                     while (!lineText.Contains(">"))
                     {
                         builder.AppendLine(lineText.Trim());
@@ -229,27 +229,23 @@ namespace ResourceMaker
                     Debug.WriteLine(builder.ToString());
                 }
                 // XMLとしてパース
-                var xmlText = builder.ToString();
+                var xmlText = builder.ToString().TrimEnd('\r', '\n',' ');
                 if (!xmlText.Contains("xmlns:x=\""))
-                    xmlText = xmlText.Replace("/>", " " + x + " />");
+                {
+                    if (xmlText.EndsWith("/>"))
+                        xmlText = xmlText.Replace("/>", " " + x + " />");
+
+                    else if (xmlText.EndsWith(">"))
+                        xmlText = xmlText.Replace(">", " " + x + " />");
+
+                }
+                else if ( !xmlText.EndsWith("/>") && lineText.EndsWith(">"))
+                    xmlText = xmlText.Replace(">", " />");
 
                 return XElement.Parse(xmlText);
             }
-            catch (Exception ex)
+            catch
             {
-                if( lineText.EndsWith(">") )
-                {
-                    try
-                    {//パネル系はヘッダだけで終了させちゃう
-                        return XElement.Parse(builder.ToString().Replace(">", "/>"));
-                    }
-                    catch (Exception)
-                    {
-                        return null;
-                    }
-                }
-                // パース失敗時の処理（ログ or null）
-                Debug.WriteLine(ex.Message);
                 return null;
             }
         }

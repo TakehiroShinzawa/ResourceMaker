@@ -1,27 +1,24 @@
 ﻿using CommunityToolkit.Mvvm.Input;
-using EnvDTE80;
-using Microsoft.VisualStudio.OLE.Interop;
+using CsvHelper;
 using Microsoft.VisualStudio.Shell.Interop;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Diagnostics.Eventing.Reader;
+using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Net.Configuration;
 using System.Resources;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Xml;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace ResourceMaker.UI
 {
@@ -144,6 +141,8 @@ namespace ResourceMaker.UI
             LblRelFileFormat.Text = loader.GetString("LblRelFileFormat.Text");
             LanguageManageWindow.Title = loader.GetString("LanguageSelectionWindowName");
             HelpLinkText.Text = loader.GetString("HelpLinkText.Text");
+            HelpUrlLang.NavigateUri = new Uri("https://note.com/alert_zephyr9426/n/n406bf8aa482c");
+            RBSlectFile.Content = loader.GetString("RBSlectFile.Content");
 
             ToolTipService.SetToolTip(BtnCreate, loader.GetString("BtnCreateToolTip"));
             ToolTipService.SetToolTip(BtnCancel, loader.GetString("BtnCancelToolTip"));
@@ -303,6 +302,7 @@ namespace ResourceMaker.UI
                 BtnSelectAllLanguage.Visibility = Visibility.Visible;
                 //値設定開始
                 LanguageManageWindow.Title = loader.GetString("LblResourceWindow");
+                HelpUrlLang.NavigateUri = new Uri("https://note.com/alert_zephyr9426/n/ncff532b32ada");
                 //再配置
                 CurResourceFolder.Text = "./" + resFolderName;
                 CurResourceName.Text = resName;
@@ -571,25 +571,6 @@ namespace ResourceMaker.UI
                 NewFolderTextBox.Text = picker.SelectedFolderPath;
 
         }
-        private void CsvRadioButton2_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is CheckBox checkBox)
-            {
-                if (!(checkBox.IsChecked == true))
-                {
-                    optVOnly.IsEnabled = true;
-                    optKOnly.IsEnabled = true;
-                    return;
-                }
-                else
-                {
-                    optKVP.IsChecked = true;
-                    optVOnly.IsEnabled = false;
-                    optKOnly.IsEnabled = false;
-                }
-            }
-
-        }
 
         private void CsvRadioButton_Click(object sender, RoutedEventArgs e)
         {
@@ -627,10 +608,31 @@ namespace ResourceMaker.UI
             string target;
             List<string> outputPath = new List<string>();
 
-            //出力先の定義
-            if (ChkWithHeader.IsChecked == true || (csvOutFolder == "Clipboard" && countries.Count > 1))
+            //出力先の定義 ヘッダー付きかクリップボード行で複数言語なら単一ファイル pickerならピッカーを開く
+            if (ChkWithHeader.IsChecked == true || csvOutFolder == "Picker" || (csvOutFolder == "Clipboard" && countries.Count > 1))
             {
-                outputPath.Add($"{csvOutFolder}\\{resName}.csv");
+                if (csvOutFolder == "Picker")
+                {
+                    var dialog = new Microsoft.Win32.SaveFileDialog
+                    {
+                        Title = loader.GetString("CsvSaveTilte"),
+                        Filter = loader.GetString("CsvSaveFilter"),
+                        DefaultExt = ".csv",
+                        FileName = "resources.csv",
+                        InitialDirectory = baseFolderPath,
+                        OverwritePrompt = true
+                    };
+
+                    bool? result = dialog.ShowDialog();
+
+                    if (result == true)
+                        outputPath.Add( dialog.FileName);
+
+                    else
+                        return true;
+                }
+                else
+                    outputPath.Add($"{csvOutFolder}\\{resName}.csv");
                 isNormal = false;
             }
             else
@@ -639,8 +641,8 @@ namespace ResourceMaker.UI
                 {
                     if (isUWP)
                     {
-                        if(RBPrjTop.IsChecked == true)
-                            target = $"{csvOutFolder}\\{resName}.csv";
+                        if(RBPrjTop.IsChecked == true) //プロジェクトップのUWPはカルチャをファイル名に含める
+                            target = $"{csvOutFolder}\\{resName}.{country}.csv";
 
                         else
                             target = $"{csvOutFolder}\\{country}\\{resName}.csv";
@@ -665,9 +667,9 @@ namespace ResourceMaker.UI
                     foreach (var country in countries)
                     {
                         var innerDic = allResource[country];
-                        var csvData = ReadResourceToCsv(innerDic);
+                        var csvData = WriteResourceToCsv(innerDic, country);
                         if (csvOutFolder != "Clipboard")
-                            File.WriteAllText(outputPath[i++], csvData, new UTF8Encoding(false));
+                            File.WriteAllText(outputPath[i++], csvData, new UTF8Encoding(true));
     
                         else
                             Clipboard.SetText(csvData);
@@ -677,9 +679,9 @@ namespace ResourceMaker.UI
                 }
                 else
                 {
-                    var csvData = ReadMultiLangResourceToCsv(allResource, countries);
+                    var csvData = WriteMultiLangResourceToCsv(allResource, countries);
                     if(csvOutFolder != "Clipboard")
-                        File.WriteAllText(outputPath[0], csvData, new UTF8Encoding(false));
+                        File.WriteAllText(outputPath[0], csvData, new UTF8Encoding(true));
 
                     else
                         Clipboard.SetText(csvData);
@@ -692,62 +694,90 @@ namespace ResourceMaker.UI
                 return true;
             }
         }
-        private string ReadMultiLangResourceToCsv(Dictionary<string, Dictionary<string, string>> cache, List<string> languages)
+        private string WriteMultiLangResourceToCsv(Dictionary<string, Dictionary<string, string>> cache, List<string> languages)
         {
+            var cultureDicts = languages
+                .Select(culture => new { Culture = culture, Dict = cache[culture] })
+                .ToList();
+
             var sb = new StringBuilder();
-
-            // ヘッダー行
-            sb.Append("Key");
-            foreach (var lang in languages)
-                sb.Append($",{lang}");
-            sb.AppendLine();
-
-            // 基準言語（en-US）からキー一覧を取得
-            if (!cache.TryGetValue("en-US", out var baseDict))
-                throw new InvalidOperationException(loader.GetString("MissingResource_enUS"));
-
-            foreach (var key in baseDict.Keys)
+            using (var writer = new StringWriter(sb))
+            using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             {
-                sb.Append(key);
-                foreach (var lang in languages)
-                {
-                    string value = cache.TryGetValue(lang, out var langDict) && langDict.TryGetValue(key, out var v)
-                        ? v : "";
-                    sb.Append($",\"{EscapeCsv(value)}\"");
-                }
-                sb.AppendLine();
-            }
+                bool withKey = (csvOutMode == 1 || csvOutMode == 3);
+                // ヘッダー行
+                if (withKey)
+                    csv.WriteField("Key");
 
+                foreach (var lang in languages)
+                    csv.WriteField(lang);
+
+                csv.NextRecord();
+
+
+                // 基準言語（en-US）からキー一覧を取得
+                if (!cache.TryGetValue("en-US", out var baseDict))
+                    baseDict = cache.FirstOrDefault().Value;
+
+                var allKeys = baseDict.Keys.ToArray();
+
+                foreach (var key in allKeys)
+                {
+                    if( withKey)
+                        csv.WriteField(key);
+
+                    foreach (var c in cultureDicts)
+                    {
+                        c.Dict.TryGetValue(key, out var value);
+                        csv.WriteField(value ?? "");
+                    }
+                    csv.NextRecord();
+                }
+            }
             return sb.ToString();
         }
 
-        // CSVエスケープ処理（カンマやダブルクォート対策）
-        private string EscapeCsv(string input)
-        {
-            if (string.IsNullOrEmpty(input)) return "";
-            return input.Contains(",") || input.Contains("\"") || input.Contains("\n")
-                ? "\"" + input.Replace("\"", "\"\"") + "\""
-                : input;
-        }
-        private string ReadResourceToCsv(Dictionary< string,string> Resource)
+        private string WriteResourceToCsv(Dictionary<string, string> Resource, string lang)
         {
             StringBuilder sb = new StringBuilder();
-
-            foreach (var kvp in Resource)
+            using (var writer = new StringWriter(sb))
+            using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             {
+                // ヘッダー行
                 switch (csvOutMode)
                 {
                     case 1:
-                        sb.AppendLine(kvp.Key);
+                        csv.WriteField("Key");
                         break;
                     case 2:
-                        sb.AppendLine(kvp.Value);
+                        csv.WriteField(lang);
                         break;
                     case 3:
-                        sb.AppendLine($"{kvp.Key},{kvp.Value}");
+                        csv.WriteField("Key");
+                        csv.WriteField(lang);
                         break;
                 }
+                csv.NextRecord();
+
+                foreach (var kvp in Resource)
+                {
+                    switch (csvOutMode)
+                    {
+                        case 1:
+                            csv.WriteField(kvp.Key);
+                            break;
+                        case 2:
+                            csv.WriteField(kvp.Value);
+                            break;
+                        case 3:
+                            csv.WriteField(kvp.Key);
+                            csv.WriteField(kvp.Value);
+                            break;
+                    }
+                    csv.NextRecord();
+                }
             }
+
             return sb.ToString();
 
         }
@@ -766,19 +796,21 @@ namespace ResourceMaker.UI
                 if (outList.Count == 0)
                 {
                     MessageBox.Show(
-                        loader.GetString(loader.GetString("NoLanguageSelection")), loader.GetString("NoLanguageSelected"),
+                        loader.GetString("NoLanguageSelection"), loader.GetString("NoLanguageSelected"),
                         MessageBoxButton.OK,
                         MessageBoxImage.Exclamation
                     );
                     return;
                 }
 
-                CsvOutput(outList);
-                MessageBox.Show(
-                    loader.GetString("CsvExportSuccess"), loader.GetString("CsvExportCompleted"),
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information
-                );
+                if (!CsvOutput(outList))
+                {
+                    MessageBox.Show(
+                        loader.GetString("CsvExportSuccess"), loader.GetString("CsvExportCompleted"),
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information
+                    );
+                }
             }
             else
             {
@@ -801,43 +833,8 @@ namespace ResourceMaker.UI
                 {//クリップボードの言語取得
                     var clipLang = ClipLangCode.Text;
                     if (Clipboard.ContainsText())
-                    {
-
-                        if (string.IsNullOrEmpty(clipLang))
-                        {
-                            foreach (var lo in LanguageOptions)
-                            {
-                                if (lo.IsSelected)
-                                    inputList.Add(lo.DisplayName, "");
-
-                            }
-                            if (inputList.Count != 1)
-                            {
-                                MessageBox.Show(
-                                    loader.GetString("SelectSingleLanguageForImport"),
-                                    loader.GetString("LanguageSelectionRequired"),
-                                    MessageBoxButton.OK,
-                                    MessageBoxImage.Exclamation
-                                );
-                                return;
-                            }
-                        }
-                        else
-                        {
-                            if (IsCultureCode(clipLang))
-                                inputList.Add(clipLang, "");
-                            else
-                            {
-                                MessageBox.Show(
-                                    loader.GetString("InvalidCultureCodeEntered"),
-                                    loader.GetString("InvalidCultureCode"),
-                                    MessageBoxButton.OK,
-                                    MessageBoxImage.Exclamation
-                                );
-                                return;
-                            }
-                        }
-                    }
+                        inputList.Add("Any", "");
+ 
                     else
                     {
                         MessageBox.Show(
@@ -850,7 +847,7 @@ namespace ResourceMaker.UI
                     }
                 }
                 else
-                {
+                {//ファイルからの読み取り
                     var dialog = new Microsoft.Win32.OpenFileDialog
                     {
                         Title = loader.GetString("SelectCsvFile"),
@@ -876,16 +873,9 @@ namespace ResourceMaker.UI
                                 string cultureCode = match.Groups[1].Value;
                                 inputList[cultureCode] = file; // cultureCode をキー、file（フルパス）を値
                             }
-                        }
-                        if (inputList.Count == 0)
-                        {
-                            MessageBox.Show(
-                                loader.GetString("NoCultureCodeDetectedInFile"),
-                                loader.GetString("CultureCodeNotFound"),
-                                MessageBoxButton.OK,
-                                MessageBoxImage.Exclamation
-                            );
-                            return;
+                            else
+                                inputList["Any"] = file;
+
                         }
                     }
                     else
@@ -898,22 +888,48 @@ namespace ResourceMaker.UI
                     allResource = ResourceCacheController.Get(baseFolderPath, resFolderName, DevelopType);
 
                 string resultCultures = string.Empty;
-
+                Dictionary<string, string> resDic;
                 foreach (var tar in inputList)
                 {
                     var tarKey = tar.Key;
-                    var resDic = LoadCsvToDictionary(tar.Value, allResource["en-US"]);
-                    if (resDic == null)
-                        continue;
-
-                    resultCultures += $",{tarKey}";
-
-                    if (!allResource.ContainsKey(tarKey))
-                        allResource[tarKey] = new Dictionary<string, string>();
-
-                    foreach (var kvp in resDic)
+                    if (tarKey == "Any")
                     {
-                        allResource[tarKey][kvp.Key] = kvp.Value; // 既存キーは上書き、新規キーは追加
+                        var resp = LoadCsvToDictionaryAll(tar.Value, allResource["en-US"]);
+                        resultCultures += $",{string.Join(",", resp.Keys)}";
+                        foreach (var outer in resp)
+                        {
+                            string culture = outer.Key;
+                            var innerDict = outer.Value;
+
+                            if (!allResource.ContainsKey(culture))
+                                allResource[culture] = new Dictionary<string, string>();
+
+                            foreach (var kvp in innerDict)
+                            {
+                                // 上書き or 新規追加
+                                allResource[culture][kvp.Key] = kvp.Value;
+                            }
+
+                        }
+                    }
+                    else
+                    {
+                        resDic = LoadCsvToDictionary(tar.Value, allResource["en-US"]);
+                        if (resDic == null)
+                            continue;
+
+                        resultCultures += $",{tarKey}";
+
+                        if (!allResource.ContainsKey(tarKey))
+                            allResource[tarKey] = resDic;
+
+                        else
+                        {
+                            foreach (var kvp in resDic)
+                            {
+                                allResource[tarKey][kvp.Key] = kvp.Value; // 既存キーは上書き、新規キーは追加
+                            }
+                        }
                     }
                 }
                 if (!string.IsNullOrEmpty(resultCultures))
@@ -937,82 +953,120 @@ namespace ResourceMaker.UI
             return Regex.IsMatch(target, @"^[a-z]{2}-[A-Z]{2}$", RegexOptions.Compiled);
         }
 
-        private bool IsKeyValueFormat(string[] lines)
+        private Dictionary<string, Dictionary<string, string>> LoadCsvToDictionaryAll(string filePath , Dictionary<string, string> baseResource)
         {
-            if (lines.Length == 0) return false;
+            var dict = new Dictionary<string, Dictionary<string, string>>();
+            string csvText;
 
-            // 1行目が "Key,ja-JP" のようなヘッダー
-            var first = lines[0].Split(',');
-            if (first.Length >= 2 && first[0].Trim() == "Key" && IsCultureCode(first[1].Trim()))
-                return true;
-
-            // 2行目が "key,value" のような形式かどうか
-            if (lines.Length > 1)
-            {
-                var second = lines[1].Split(',');
-                if (second.Length >= 2 && !string.IsNullOrWhiteSpace(second[0]))
-                    return true;
-            }
-            return false;
-        }
-
-        private Dictionary<string, string> LoadCsvToDictionary(string filePath ,Dictionary<string,string> baseResource)
-        {
-            var dict = new Dictionary<string, string>();
-            string[] lines;
+            var keyList = baseResource.Keys.ToArray();
+            bool isKvp = false;
+            int i = 0;
 
             if (string.IsNullOrEmpty(filePath))
-            {
-                var text = Clipboard.GetText().TrimEnd('\r', '\n');
-                lines = text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+            {//クリップボードから行を取得
+                csvText = Clipboard.GetText().TrimEnd('\r', '\n');
+
             }
             else
-                lines = File.ReadAllLines(filePath, Encoding.UTF8);
+                csvText = File.ReadAllText(filePath, Encoding.UTF8);
 
-            if (IsKeyValueFormat(lines))
+            using (var reader = new StringReader(csvText))
+            using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
             {
-                // ヘッダー判定（1行目が "Key,<カルチャコード>" ならスキップ）
-                if (lines.Length > 0)
-                {
-                    var first = lines[0].Split(',');
-                    if (first.Length >= 2 && first[0].Trim() == "Key" && IsCultureCode(first[1].Trim()))
-                        lines = lines.Skip(1).ToArray();
-                }
+                csv.Read();
+                csv.ReadHeader();
+                var headers = csv.HeaderRecord;
+                string keyName = string.Empty;
+                isKvp = (headers.Length > 1);
 
-                foreach (var line in lines)
+                // キーと値
+                while (csv.Read())
                 {
-                    var parts = line.Split(new char[] { ',' }, 2);
-                    if (parts.Length == 2)
+                    foreach (var header in headers)
                     {
-                        string key = parts[0].Trim();
-                        string value = parts[1].Trim();
-                        if (!string.IsNullOrEmpty(key))
-                            dict[key] = value;
+                        if( !isKvp)
+                            keyName = keyList[i++];
+
+                        if (header == "Key")
+                            keyName = csv.GetField(header);
+
+                        else
+                        {
+                            if (!dict.ContainsKey(header))
+                                dict[header] = new Dictionary<string, string>();
+
+
+                            dict[header][keyName] = csv.GetField(header);
+                        }
                     }
                 }
             }
-            else
+            if (!isKvp && keyList.Length != dict[dict.Keys.First()].Keys.Count)
             {
-                //値のみ
-                var baseKeys = baseResource.Keys.ToArray();
-                if (baseKeys.Length != lines.Length)
+                MessageBox.Show(
+                    loader.GetString("TargetCountMismatchWithDefinitions"),
+                    loader.GetString("UnableToRetrieve"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Exclamation
+                );
+                return null;
+            }
+
+            return dict;
+        }
+
+
+        private Dictionary<string, string> LoadCsvToDictionary(string filePath, Dictionary<string, string> baseResource)
+        {
+            var dict = new Dictionary<string, string>();
+            string csvText;
+
+            if (string.IsNullOrEmpty(filePath))
+            {//クリップボードから行を取得
+                csvText = Clipboard.GetText().TrimEnd('\r', '\n');
+
+            }
+            else
+                csvText = File.ReadAllText(filePath, Encoding.UTF8);
+
+            var keyList = baseResource.Keys.ToArray();
+            bool isKvp = false;
+
+            using (var reader = new StringReader(csvText))
+            using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+            {
+                csv.Read();
+                csv.ReadHeader();
+                var headers = csv.HeaderRecord;
+                isKvp = (headers.Length == 2);
+                int i = 0;
+                // キーと値
+                while (csv.Read())
                 {
-                    MessageBox.Show(
-                        loader.GetString("TargetCountMismatchWithDefinitions"),
-                        loader.GetString("UnableToRetrieve"),
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Exclamation
-                    );
-                    return null;
-                }
-                int iMax = baseKeys.Length;
-                for (int i = 0; i < iMax; i++)
-                {
-                    string key = baseKeys[i];
-                    string value = string.IsNullOrWhiteSpace(lines[i]) ? "TODO" : lines[i];
-                    dict[baseKeys[i]] = value;
+                    if (isKvp)
+                    {
+                        foreach (var header in headers)
+                        {
+                            dict[csv.GetField("Key")] = csv.GetField(header);
+
+                        }
+                    }
+                    else
+                        dict[keyList[i++]] = csv.GetField(0);
+
                 }
             }
+            if (!isKvp && keyList.Length != dict.Count)
+            {
+                MessageBox.Show(
+                    loader.GetString("TargetCountMismatchWithDefinitions"),
+                    loader.GetString("UnableToRetrieve"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Exclamation
+                );
+                return null;
+            }
+
             return dict;
         }
 
@@ -1160,13 +1214,13 @@ namespace ResourceMaker.UI
                 }
                 string loaderGuide;
                 if (isUWP)
-                    loaderGuide = $"Windows.ApplicationModel.Resources.ResourceLoader loader = ResourceLoader.GetForViewIndependentUse();";
+                    loaderGuide = $"Windows.ApplicationModel.Resources.ResourceLoader loader = \r\n    ResourceLoader.GetForViewIndependentUse();";
 
                 else
-                    loaderGuide = $"System.Resources.ResourceManager loader =  new ResourceManager(\"{Path.GetFileName(NewFolderTextBox.Text)}.{MovedResourceFolder.Text}.{resourceBaseName}\", GetType().Assembly);";
+                    loaderGuide = $"System.Resources.ResourceManager loader = \r\n    new ResourceManager(\"{Path.GetFileName(NewFolderTextBox.Text)}.{MovedResourceFolder.Text}.{resourceBaseName}\", GetType().Assembly);";
 
                 LoaderGuideText.Text = loaderGuide.Replace("..", ".");
-                //元リソース削除
+                Clipboard.SetText(LoaderGuideText.Text);
 
             }
             catch (Exception ex)

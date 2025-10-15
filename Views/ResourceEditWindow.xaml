@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:ResourceMaker.UI"
         WindowStartupLocation="CenterOwner"
         mc:Ignorable="d"
-        Title="ResourceEditWindow" Height="480" Width="800">
+        Name="ResourceEditorWindow" Title="aa" Height="500" Width="800">
     <Grid>
         <StackPanel Margin="20">
             <StackPanel x:Name="CodeTextArea" >
@@ -76,15 +76,15 @@
                     Click="ResourceClearButton_Click"/>
                 
                 <StackPanel x:Name="Getters" Orientation="Horizontal">
-                    <Button x:Name="ResourceGetterExpression"
-                        Content="取得式"
+                    
+                    <Button x:Name="BtnResourceGetter" 
                         VerticalAlignment="Center"
                         Margin="0,5,0,5"
                         IsTabStop="False"
                         MaxWidth="100"
                         MinWidth="100"
                         Width="100"
-                        ToolTipService.ToolTip="ResourceGetterExpressionToolTip"
+                        ToolTipService.ToolTip="BtnResourceGetterToolTip"
                         MouseEnter="Button_MouseEnter" MouseLeave="Button_MouseLeave"
                         Click="ResourceGetterExpression_Click"/>
                 
@@ -149,6 +149,11 @@
                 <!-- 下部固定ボタン群 -->
                 <StackPanel Grid.Row="1" HorizontalAlignment="Center">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button x:Name="CsvOutEdit" Margin="10,0,30,0" 
+                                ToolTipService.ToolTip="CsvOutEditToolTip"
+                                Click="CsvOutEdit_Click"
+                                Content="CSV出力" />
+                        
                         <Button x:Name="SaveResource" Content="反映" 
                                 ToolTipService.ToolTip="SaveResourceToolTip"
                                 Click="SaveResource_Click" Margin="5,0,0,0"/>
@@ -161,7 +166,7 @@
                                 Click="AddResource" Margin="25,0,0,0"/>
                         
                         <Button x:Name="ManageLanguage" Content="リソースの管理" Visibility="Collapsed"
-                                ToolTipService.ToolTip="ファイル出力や移動などを行います"
+                                ToolTipService.ToolTip="ManageLanguageToolTip"
                                 Click="AddResource" Margin="25,0,0,0"/>
                         
                         <Button x:Name="ClearCache" Content="言語のクリア" 
@@ -170,7 +175,7 @@
                         <Button x:Name="BtnMakeLoaderCode" Content="ローダーテキストの出力" 
                                 ToolTipService.ToolTip="BtnMakeLoaderCodeToolTip"
                                 Click="MakeLoaderText_Click" Margin="25,0,0,0" 
-                                IsEnabled="False"
+                                IsEnabled="True"
                                 Visibility="Collapsed"/>
                     </StackPanel>
 
@@ -180,6 +185,12 @@
                     </StackPanel>
                 </StackPanel>
             </Grid>
+            <TextBlock HorizontalAlignment="Right" Margin="0,0,20,0"
+                       x:Name="HelpLinkEdit" ToolTipService.ToolTip="HelpLinkLangToolTip">
+                <Hyperlink x:Name="HelpUrlEdit" NavigateUri="https://note.com/alert_zephyr9426/n/n2f492a7c18b4" RequestNavigate="Hyperlink_RequestNavigate">
+                    <Run x:Name="HelpLinkText" Text="（初期値）" />
+                </Hyperlink>
+            </TextBlock>
         </StackPanel>
     </Grid>
 </Window>

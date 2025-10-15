@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="ResourceMaker.c247936d-a5f2-4c53-a393-5017c1811a99" Version="1.1" Language="en-US" Publisher="Shinsawata" />
+        <Identity Id="ResourceMaker.c247936d-a5f2-4c53-a393-5017c1811a99" Version="1.3.7" Language="en-US" Publisher="Shinsawata" />
         <DisplayName>ResourceMaker – 言語リソース化支援ツール</DisplayName>
         <Description xml:space="preserve">A Global Marketplace, Just a Right-Click Away
 ～　右クリックから始まる世界市場　～ </Description>
@@ -16,7 +16,7 @@
         <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.0,18.0)">
             <ProductArchitecture>amd64</ProductArchitecture>
         </InstallationTarget>
-        <InstallationTarget Id="Microsoft.VisualStudio.Professional" Version="[17.0,18.0)">
+        <InstallationTarget Id="Microsoft.VisualStudio.Pro" Version="[17.0,18.0)">
             <ProductArchitecture>amd64</ProductArchitecture>
         </InstallationTarget>
         <InstallationTarget Id="Microsoft.VisualStudio.Enterprise" Version="[17.0,18.0)">
